@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@title('Danh sách khóa học - SeduAi')
+@section('title', 'Danh sách khóa học - SeduAi')
 
 @section('content')
 

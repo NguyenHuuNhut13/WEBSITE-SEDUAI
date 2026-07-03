@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@title('Liên hệ SeduAi - Hệ điều hành AI cho Giáo dục')
+@section('title', 'Liên hệ SeduAi - Hệ điều hành AI cho Giáo dục')
 
 @section('styles')
 <!-- Maplibre GL CSS -->

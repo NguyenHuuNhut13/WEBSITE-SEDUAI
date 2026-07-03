@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@title($course['title'] . ' - SeduAi')
+@section('title', $course['title'] . ' - SeduAi')
 
 @section('content')
 
