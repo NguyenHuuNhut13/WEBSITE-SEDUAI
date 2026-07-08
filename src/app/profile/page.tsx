@@ -374,7 +374,7 @@ export default function ProfilePage() {
         return;
       }
 
-      // Quét AI Vision & xử lý OCR qua API
+      // Quét AI Vision & xử lý OCR qua API với thời gian chờ tối đa 5s để không bao giờ bị quay vô tận
       try {
         const response = await fetch('/api/ocr/cccd', {
           method: 'POST',
@@ -385,6 +385,7 @@ export default function ProfilePage() {
             imageHeight: img.height,
             documentScore,
           }),
+          signal: AbortSignal.timeout(5000),
         });
 
         const res = await response.json();
@@ -424,7 +425,10 @@ export default function ProfilePage() {
         }
       } catch (err: any) {
         setIsOcrScanning(false);
-        const errMsg = 'Lỗi kết nối khi quét AI OCR. Vui lòng thử lại sau.';
+        const isTimeout = err.name === 'TimeoutError' || err.name === 'AbortError' || err.message?.includes('timeout');
+        const errMsg = isTimeout 
+          ? 'Ảnh tải lên quá phức tạp hoặc không rõ văn bản thẻ Căn cước công dân khiến quá trình nhận diện bị ngắt. Vui lòng thử lại với ảnh thẻ mặt trước rõ nét hơn.'
+          : 'Lỗi xử lý khi quét OCR. Vui lòng kiểm tra lại ảnh tải lên.';
         setOcrError(errMsg);
         showNotification('error', errMsg);
       }

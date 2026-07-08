@@ -44,17 +44,30 @@ export async function POST(req: Request) {
       }
     }
 
-    // 2. Trích xuất OCR thực tế bằng Tesseract.js & Phân tích chuỗi CCCD (Real Standalone OCR Engine)
+    // 2. Trích xuất OCR thực tế bằng Tesseract.js với thời gian chờ tối đa 2.8s để không bao giờ bị treo khi up ảnh sai
     let ocrText = '';
     try {
       const Tesseract = (await import('tesseract.js')).default || (await import('tesseract.js'));
       const cleanBuffer = Buffer.from(imageBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
-      const result = await Tesseract.recognize(cleanBuffer, 'eng', {
+      
+      const recognizePromise = Tesseract.recognize(cleanBuffer, 'eng', {
         logger: () => {},
-      });
-      ocrText = result?.data?.text || '';
+      }).then((res: any) => res?.data?.text || '');
+
+      const timeoutPromise = new Promise<string>((_, reject) =>
+        setTimeout(() => reject(new Error('OCR_TIMEOUT_INVALID_IMAGE')), 2800)
+      );
+
+      ocrText = await Promise.race([recognizePromise, timeoutPromise]);
     } catch (tessErr: any) {
-      console.warn('[Real OCR Engine] Tesseract recognition fallback:', tessErr?.message || tessErr);
+      console.warn('[Real OCR Engine] Tesseract recognition fallback or timeout:', tessErr?.message || tessErr);
+      if (tessErr?.message === 'OCR_TIMEOUT_INVALID_IMAGE') {
+        return NextResponse.json({
+          success: false,
+          isValidCccd: false,
+          error: 'Ảnh tải lên quá phức tạp hoặc không có văn bản rõ ràng của thẻ Căn cước công dân. Vui lòng chọn đúng ảnh mặt trước thẻ rõ nét!',
+        });
+      }
     }
 
     // Phân tích văn bản OCR thực tế (Regex & Heuristics)
