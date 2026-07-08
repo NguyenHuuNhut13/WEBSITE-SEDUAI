@@ -11,6 +11,8 @@
   --color-primary: #0077bb;
   --color-primary-dark: #005f96;
   --color-primary-light: #eaf5fc;
+  --color-accent: #ffb606;
+  --color-accent-dark: #d99a00;
 }
 
 body {

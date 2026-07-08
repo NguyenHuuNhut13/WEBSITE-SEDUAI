@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Brain, MessageSquare } from 'lucide-react';
+import { Menu, X, Brain, MessageSquare, Phone, Mail } from 'lucide-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +22,31 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50 transition-all duration-300">
+    <>
+      {/* Top Utility Bar - Edutech Premium Style */}
+      <div className="bg-slate-950 text-slate-400 text-[11px] py-2.5 border-b border-slate-900 hidden sm:block">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          <div className="flex items-center gap-6">
+            <span className="flex items-center gap-1.5">
+              <Phone className="w-3.5 h-3.5 text-accent" /> 
+              Hotline: <strong className="text-slate-200">1900 1234</strong>
+            </span>
+            <span className="flex items-center gap-1.5">
+              <Mail className="w-3.5 h-3.5 text-accent" /> 
+              Email: <a href="mailto:contact@seduai.edu.vn" className="text-slate-200 hover:text-accent transition duration-150">contact@seduai.edu.vn</a>
+            </span>
+          </div>
+          <div className="flex items-center gap-4 font-medium">
+            <span>Giờ làm việc: 8:00 - 21:00</span>
+            <span className="text-slate-800">|</span>
+            <Link href="/#ai-crm-demo" className="text-accent hover:text-white transition duration-150 font-bold">
+              Tư vấn AI Tuyển sinh 24/7
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
@@ -126,5 +150,6 @@ export default function Navbar() {
         </div>
       )}
     </header>
+    </>
   );
 }

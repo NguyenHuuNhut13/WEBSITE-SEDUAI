@@ -62,7 +62,7 @@ export default function CourseCard({ course }: CourseCardProps) {
           </div>
           <Link
             href={`/courses/${course.slug}`}
-            className="px-4 py-2 bg-slate-900 group-hover:bg-primary text-white font-bold text-xs rounded-xl transition duration-200"
+            className="px-4 py-2 bg-slate-900 group-hover:bg-accent group-hover:text-slate-950 text-white font-bold text-xs rounded-xl transition duration-200"
           >
             Chi tiết
           </Link>
