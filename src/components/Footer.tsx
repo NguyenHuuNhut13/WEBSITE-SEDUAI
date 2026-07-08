@@ -129,27 +129,27 @@ export default function Footer() {
               <h3 className="text-white font-bold text-base mb-5">Hệ thống & Phân hệ</h3>
               <ul className="space-y-2.5 text-sm">
                 <li>
-                  <Link href="#" className="hover:text-primary transition duration-150 flex items-center gap-1.5">
+                  <Link href="#" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
                     <ArrowRight className="w-3 h-3 text-primary" /> Admissions CRM
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-primary transition duration-150 flex items-center gap-1.5">
+                  <Link href="#" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
                     <ArrowRight className="w-3 h-3 text-primary" /> AI Teacher Assistant
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-primary transition duration-150 flex items-center gap-1.5">
+                  <Link href="#" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
                     <ArrowRight className="w-3 h-3 text-primary" /> Học viên & Phụ huynh
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-primary transition duration-150 flex items-center gap-1.5">
+                  <Link href="#" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
                     <ArrowRight className="w-3 h-3 text-primary" /> Workflow Automation
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-primary transition duration-150 flex items-center gap-1.5">
+                  <Link href="#" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
                     <ArrowRight className="w-3 h-3 text-primary" /> AI Marketplace
                   </Link>
                 </li>
@@ -163,6 +163,7 @@ export default function Footer() {
                 <li>
                   <Link
                     href="/courses?category=Tiếng Anh"
+                    prefetch={false}
                     className="hover:text-primary transition duration-150 flex items-center gap-1.5"
                   >
                     <ArrowRight className="w-3 h-3 text-primary" /> Tiếng Anh giao tiếp & IELTS
@@ -171,6 +172,7 @@ export default function Footer() {
                 <li>
                   <Link
                     href="/courses?category=Lập trình"
+                    prefetch={false}
                     className="hover:text-primary transition duration-150 flex items-center gap-1.5"
                   >
                     <ArrowRight className="w-3 h-3 text-primary" /> Lập trình Fullstack & Python
@@ -179,6 +181,7 @@ export default function Footer() {
                 <li>
                   <Link
                     href="/courses?category=AI & Công nghệ"
+                    prefetch={false}
                     className="hover:text-primary transition duration-150 flex items-center gap-1.5"
                   >
                     <ArrowRight className="w-3 h-3 text-primary" /> Ứng dụng AI doanh nghiệp
@@ -187,6 +190,7 @@ export default function Footer() {
                 <li>
                   <Link
                     href="/courses?category=Kỹ năng"
+                    prefetch={false}
                     className="hover:text-primary transition duration-150 flex items-center gap-1.5"
                   >
                     <ArrowRight className="w-3 h-3 text-primary" /> Kỹ năng mềm thế hệ mới
@@ -223,10 +227,10 @@ export default function Footer() {
           <div className="pt-8 border-t border-slate-800 text-center text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-4">
             <p>&copy; 2026 SeduAi. Tất cả quyền được bảo lưu.</p>
             <div className="flex space-x-6">
-              <Link href="#" className="hover:text-slate-300">
+              <Link href="#" prefetch={false} className="hover:text-slate-300">
                 Điều khoản dịch vụ
               </Link>
-              <Link href="#" className="hover:text-slate-300">
+              <Link href="#" prefetch={false} className="hover:text-slate-300">
                 Chính sách bảo mật
               </Link>
             </div>

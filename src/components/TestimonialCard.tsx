@@ -38,7 +38,8 @@ export default function TestimonialCard({ testimonial }: TestimonialCardProps) {
           src={testimonial.avatar}
           alt={testimonial.name}
           className="w-11 h-11 rounded-full object-cover border-2 border-primary/20"
-          loading="lazy"
+          loading="eager"
+          decoding="async"
         />
         <div>
           <h4 className="font-bold text-slate-900 text-sm">{testimonial.name}</h4>

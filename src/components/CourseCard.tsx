@@ -49,7 +49,7 @@ export default function CourseCard({ course }: CourseCardProps) {
 
           {/* Title */}
           <h3 className="font-bold text-slate-950 text-[15px] leading-snug line-clamp-2 group-hover:text-primary transition duration-150">
-            <Link href={`/courses/${course.slug}`}>{course.title}</Link>
+            <Link href={`/courses/${course.slug}`} prefetch={false}>{course.title}</Link>
           </h3>
 
           {/* Metadata */}

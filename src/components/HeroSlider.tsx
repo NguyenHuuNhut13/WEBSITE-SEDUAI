@@ -62,7 +62,7 @@ export default function HeroSlider() {
             src={s.image}
             alt={s.title}
             className="w-full h-full object-cover animate-hero-zoom"
-            loading={index === 0 ? 'eager' : 'lazy'}
+            loading="eager"
             fetchPriority={index === 0 ? 'high' : 'auto'}
             decoding="async"
           />

@@ -13,7 +13,8 @@ export default function InstructorCard({ instructor }: InstructorCardProps) {
           src={instructor.avatar}
           alt={instructor.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          loading="lazy"
+          loading="eager"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent"></div>
 
