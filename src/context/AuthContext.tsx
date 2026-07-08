@@ -61,15 +61,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAccessToken(storedToken);
         setUser(parsedUser);
 
-        // Nâng cấp dữ liệu ngầm từ API (Chỉ cập nhật nếu đúng tài khoản, không ghi đè thành demo_student)
+        // Nâng cấp dữ liệu ngầm từ API (Chỉ cập nhật nếu đúng tài khoản, không ghi đè thành demo_student và không làm mất dữ liệu CCCD/profile local)
         fetchUserInfo(storedToken).then((freshUser) => {
           if (freshUser && (!freshUser.username || freshUser.username === parsedUser.username || parsedUser.username === 'demo_student')) {
-            setUser(freshUser);
-            localStorage.setItem('seduai_user_info', JSON.stringify(freshUser));
+            const mergedUser = { ...parsedUser, ...freshUser };
+            // Bảo toàn các trường chi tiết thành viên đã lưu trên local (CCCD, ngày sinh, tỉnh thành, intro...) nếu API chưa trả về
+            ['dob', 'gender', 'intro', 'province', 'phone', 'id_number', 'id_date', 'id_place', 'cccd_front', 'cccd_back', 'avatar', 'name', 'firstname', 'lastname'].forEach((key) => {
+              const k = key as keyof UserInfo;
+              if (parsedUser[k] !== undefined && parsedUser[k] !== null && parsedUser[k] !== '' && (!freshUser[k] || freshUser[k] === '')) {
+                (mergedUser as any)[k] = parsedUser[k];
+              }
+            });
+
+            setUser(mergedUser);
+            localStorage.setItem('seduai_user_info', JSON.stringify(mergedUser));
             const syncData: LocalSyncData = {
-              name: freshUser.name || `${freshUser.lastname || ''} ${freshUser.firstname || ''}`.trim() || freshUser.username || parsedUser.name || 'Thành viên SeduAi',
-              avatar: freshUser.avatar || parsedUser.avatar || defaultLocalSync.avatar,
-              point: freshUser.point ?? parsedUser.point ?? 300,
+              name: mergedUser.name || `${mergedUser.lastname || ''} ${mergedUser.firstname || ''}`.trim() || mergedUser.username || parsedUser.name || 'Thành viên SeduAi',
+              avatar: mergedUser.avatar || parsedUser.avatar || defaultLocalSync.avatar,
+              point: mergedUser.point ?? parsedUser.point ?? 300,
             };
             setLocalSync(syncData);
             localStorage.setItem('seduai_local_sync', JSON.stringify(syncData));
