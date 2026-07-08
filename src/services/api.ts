@@ -82,7 +82,8 @@ export interface LoginResponse {
 }
 
 // ==========================================
-// 1. CRM & COURSES API (sdata.io.vn)
+// ==========================================
+// 1. CRM & COURSES API
 // ==========================================
 
 /**
@@ -90,19 +91,26 @@ export interface LoginResponse {
  */
 export async function getEduCourses(): Promise<ApiCourse[]> {
   try {
-    const response = await fetch(`${CRM_API_BASE}/educourses`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${CRM_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      next: { revalidate: 300 }, // Cache 5 phút cho Next.js
-    });
+    const isClient = typeof window !== 'undefined';
+    const url = isClient ? '/api/proxy/crm' : `${CRM_API_BASE}/educourses`;
+    const options: RequestInit = isClient
+      ? {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ endpoint: 'educourses' }),
+        }
+      : {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${CRM_TOKEN}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          next: { revalidate: 300 },
+        };
 
-    if (!response.ok) {
-      throw new Error(`HTTP Error ${response.status}`);
-    }
+    const response = await fetch(url, options);
+    if (!response.ok) return [];
 
     const json = await response.json();
     if (json.success && Array.isArray(json.data)) {
@@ -120,16 +128,25 @@ export async function getEduCourses(): Promise<ApiCourse[]> {
  */
 export async function createLead(payload: LeadPayload): Promise<{ success: boolean; id?: number; message?: string }> {
   try {
-    const response = await fetch(`${CRM_API_BASE}/lead/create`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${CRM_TOKEN}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
+    const isClient = typeof window !== 'undefined';
+    const url = isClient ? '/api/proxy/crm' : `${CRM_API_BASE}/lead/create`;
+    const options: RequestInit = isClient
+      ? {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ endpoint: 'lead/create', payload }),
+        }
+      : {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${CRM_TOKEN}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        };
 
+    const response = await fetch(url, options);
     const json = await response.json();
     if (json.success) {
       return { success: true, id: json.id };
@@ -150,17 +167,16 @@ export async function createLead(payload: LeadPayload): Promise<{ success: boole
  */
 export async function loginUser(username: string, password: string): Promise<LoginResponse> {
   try {
-    const response = await fetch(`${ACCOUNT_API_BASE}/login`, {
+    const isClient = typeof window !== 'undefined';
+    const url = isClient ? '/api/proxy/account' : `${ACCOUNT_API_BASE}/login`;
+    const bodyPayload = isClient
+      ? { action: 'login', payload: { username, password, system: 'NKS', device: 'web browser' } }
+      : { username, password, system: 'NKS', device: 'web browser' };
+
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username,
-        password,
-        system: 'NKS',
-        device: 'web browser',
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyPayload),
     });
 
     const json = await response.json();
@@ -176,21 +192,26 @@ export async function loginUser(username: string, password: string): Promise<Log
  */
 export async function fetchUserInfo(access_token: string): Promise<UserInfo | null> {
   try {
-    const response = await fetch(ACCOUNT_API_BASE, {
+    if (!access_token) return null;
+    const isClient = typeof window !== 'undefined';
+    const url = isClient ? '/api/proxy/account' : ACCOUNT_API_BASE;
+    const bodyPayload = isClient
+      ? { action: '', payload: { access_token } }
+      : { access_token };
+
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ access_token }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyPayload),
     });
 
     const json = await response.json();
-    if (json.userInfo || json.data) {
+    if (json && (json.userInfo || json.data)) {
       return json.userInfo || json.data;
     }
     return null;
   } catch (error) {
-    console.error('Lỗi khi lấy thông tin user:', error);
+    // Không log error 500 thành unhandled exception gây ồn ào console
     return null;
   }
 }
@@ -200,15 +221,16 @@ export async function fetchUserInfo(access_token: string): Promise<UserInfo | nu
  */
 export async function updateUserInfoApi(access_token: string, data: Partial<UserInfo>): Promise<boolean> {
   try {
-    const response = await fetch(`${ACCOUNT_API_BASE}/updateInfo`, {
+    const isClient = typeof window !== 'undefined';
+    const url = isClient ? '/api/proxy/account' : `${ACCOUNT_API_BASE}/updateInfo`;
+    const bodyPayload = isClient
+      ? { action: 'updateInfo', payload: { ...data, access_token } }
+      : { ...data, access_token };
+
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        ...data,
-        access_token,
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyPayload),
     });
 
     const json = await response.json();
@@ -224,16 +246,16 @@ export async function updateUserInfoApi(access_token: string, data: Partial<User
  */
 export async function updatePasswordApi(access_token: string, old_password: string, password: string): Promise<{ success: boolean; message?: string }> {
   try {
-    const response = await fetch(`${ACCOUNT_API_BASE}/updatePass`, {
+    const isClient = typeof window !== 'undefined';
+    const url = isClient ? '/api/proxy/account' : `${ACCOUNT_API_BASE}/updatePass`;
+    const bodyPayload = isClient
+      ? { action: 'updatePass', payload: { old_password, password, access_token } }
+      : { old_password, password, access_token };
+
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        old_password,
-        password,
-        access_token,
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyPayload),
     });
 
     const json = await response.json();
@@ -251,15 +273,16 @@ export async function updatePasswordApi(access_token: string, old_password: stri
  */
 export async function updateAvatarApi(access_token: string, avatarBase64: string): Promise<boolean> {
   try {
-    const response = await fetch(`${ACCOUNT_API_BASE}/updateAvatar`, {
+    const isClient = typeof window !== 'undefined';
+    const url = isClient ? '/api/proxy/account' : `${ACCOUNT_API_BASE}/updateAvatar`;
+    const bodyPayload = isClient
+      ? { action: 'updateAvatar', payload: { avatar: avatarBase64, access_token } }
+      : { avatar: avatarBase64, access_token };
+
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        avatar: avatarBase64,
-        access_token,
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyPayload),
     });
 
     const json = await response.json();
@@ -282,19 +305,16 @@ export async function updateCccdApi(
   place: string
 ): Promise<boolean> {
   try {
-    const response = await fetch(`${ACCOUNT_API_BASE}/updateCccd`, {
+    const isClient = typeof window !== 'undefined';
+    const url = isClient ? '/api/proxy/account' : `${ACCOUNT_API_BASE}/updateCccd`;
+    const bodyPayload = isClient
+      ? { action: 'updateCccd', payload: { front: frontBase64, back: backBase64, number, date, place, access_token } }
+      : { front: frontBase64, back: backBase64, number, date, place, access_token };
+
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        front: frontBase64,
-        back: backBase64,
-        number,
-        date,
-        place,
-        access_token,
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyPayload),
     });
 
     const json = await response.json();
@@ -317,24 +337,27 @@ export interface Province {
 
 export async function fetchProvincesApi(): Promise<Province[]> {
   try {
-    const response = await fetch(`${ONLINE_API_BASE}/provinces`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        country_id: 192,
-        slcBox: 1,
-      }),
-    });
+    const isClient = typeof window !== 'undefined';
+    const url = isClient ? '/api/proxy/provinces' : `${ONLINE_API_BASE}/provinces`;
+    const options: RequestInit = isClient
+      ? {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        }
+      : {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ country_id: 192, slcBox: 1 }),
+        };
 
+    const response = await fetch(url, options);
     const json = await response.json();
     if (Array.isArray(json.data || json)) {
       return json.data || json;
     }
     return [];
   } catch (error) {
-    console.error('Lỗi lấy danh sách tỉnh thành:', error);
+    console.warn('Lỗi lấy danh sách tỉnh thành (đã chuyển sang dữ liệu dự phòng):', error);
     return [];
   }
 }
