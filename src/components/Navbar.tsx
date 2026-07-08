@@ -46,18 +46,18 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <div className="flex items-center gap-6">
             <span className="flex items-center gap-1.5">
-              <Phone className="w-3.5 h-3.5 text-accent" /> 
+              <Phone className="w-3.5 h-3.5 text-primary" /> 
               Hotline: <strong className="text-slate-200">1900 1234</strong>
             </span>
             <span className="flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-accent" /> 
-              Email: <a href="mailto:contact@seduai.edu.vn" className="text-slate-200 hover:text-accent transition duration-150">contact@seduai.edu.vn</a>
+              <Mail className="w-3.5 h-3.5 text-primary" /> 
+              Email: <a href="mailto:contact@seduai.edu.vn" className="text-slate-200 hover:text-primary transition duration-150">contact@seduai.edu.vn</a>
             </span>
           </div>
           <div className="flex items-center gap-4 font-medium">
             <span>Giờ làm việc: 8:00 - 21:00</span>
             <span className="text-slate-800">|</span>
-            <Link href="/#ai-crm-demo" className="text-accent hover:text-white transition duration-150 font-bold">
+            <Link href="/#ai-crm-demo" className="text-primary hover:text-white transition duration-150 font-bold">
               Tư vấn AI Tuyển sinh 24/7
             </Link>
           </div>
