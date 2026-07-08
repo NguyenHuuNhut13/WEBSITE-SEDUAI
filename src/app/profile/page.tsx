@@ -311,7 +311,7 @@ export default function ProfilePage() {
     };
   };
 
-  // TAB 4: AI OCR CCCD Scanner & Validation Trap
+  // TAB 4: AI OCR CCCD Scanner & Real-Time Validation Trap (Direct on Upload)
   const handleScanCccdOcr = async (base64Image: string) => {
     if (!base64Image) {
       showNotification('error', 'Vui lòng chọn ảnh Mặt trước Thẻ CCCD trước khi quét AI OCR.');
@@ -321,54 +321,84 @@ export default function ProfilePage() {
     setIsOcrScanning(true);
     setOcrError(null);
 
-    try {
-      const response = await fetch('/api/ocr/cccd', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64: base64Image }),
-      });
+    // Lớp Bẫy Lỗi 1: Thẩm định định dạng, tỷ lệ khung hình & kích thước ngay tại Client trước khi gọi API
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = base64Image;
 
-      const res = await response.json();
-      setIsOcrScanning(false);
+    img.onload = async () => {
+      // Thẻ CCCD chuẩn có tỷ lệ chiều ngang / chiều dọc khoảng ~1.58 (85.6mm x 53.9mm)
+      const aspectRatio = img.width / img.height;
 
-      if (!res.isValidCccd || !res.success) {
-        // Bẫy lỗi ảnh: nếu người dùng tải lên ảnh mèo, phong cảnh, mờ nhòe, hoặc không đúng CCCD
-        const errMsg = res.error || 'Cảnh báo Bẫy lỗi OCR: Ảnh tải lên không phải là Mặt trước thẻ Căn cước công dân Việt Nam hợp lệ. Vui lòng tải đúng ảnh thẻ rõ nét!';
-        setOcrError(errMsg);
-        showNotification('error', errMsg);
+      // Nếu là ảnh dọc (selfie / chân dung: width <= height) hoặc ảnh vuông (avatar: aspectRatio < 1.25)
+      // hoặc ảnh toàn cảnh quá dài (aspectRatio > 2.3) hoặc độ phân giải quá thấp (< 250px) -> Bẫy lỗi lập tức!
+      if (img.height > img.width * 1.05 || aspectRatio < 1.25 || aspectRatio > 2.4 || img.width < 250) {
+        setIsOcrScanning(false);
+        const trapMsg = `Bẫy lỗi OCR (Document Trap): Từ chối ảnh tải lên (Kích thước ${img.width}x${img.height}px, tỷ lệ ${aspectRatio.toFixed(2)}). Thẻ Căn cước công dân Việt Nam chuẩn buộc phải là hình chữ nhật nằm ngang rõ nét (tỷ lệ chuẩn ~1.58). Vui lòng không tải ảnh dọc, ảnh vuông avatar hoặc ảnh chụp quá mờ!`;
+        setOcrError(trapMsg);
+        showNotification('error', 'Bẫy lỗi OCR: Từ chối ảnh không đúng chuẩn CCCD nằm ngang!');
         return;
       }
 
-      // Quét thành công: Trích xuất và điền tự động dữ liệu vào form
-      setOcrError(null);
-      showNotification('success', 'Quét AI OCR thành công! Đã kiểm chứng thẻ CCCD hợp lệ và điền tự động các trường.');
+      // Lớp Bẫy Lỗi 2 & Trích xuất AI Vision qua API
+      try {
+        const response = await fetch('/api/ocr/cccd', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageBase64: base64Image,
+            imageWidth: img.width,
+            imageHeight: img.height,
+          }),
+        });
 
-      setCccdForm((prev) => ({
-        ...prev,
-        number: res.id_number || prev.number,
-        date: res.date || prev.date,
-        place: res.place || prev.place,
-      }));
+        const res = await response.json();
+        setIsOcrScanning(false);
 
-      if (res.fullname || res.dob || res.gender) {
-        const parts = (res.fullname || '').trim().split(' ');
-        const last = parts.slice(0, -1).join(' ');
-        const first = parts.slice(-1)[0] || parts[0] || '';
+        if (!res.isValidCccd || !res.success) {
+          // Bẫy lỗi ảnh từ máy chủ AI Vision: từ chối ảnh phong cảnh, giấy tờ linh tinh, không có Quốc huy
+          const errMsg = res.error || 'Cảnh báo Bẫy lỗi OCR: Ảnh tải lên không phải là Mặt trước thẻ Căn cước công dân Việt Nam hợp lệ. Vui lòng kiểm tra và tải đúng ảnh thẻ rõ nét!';
+          setOcrError(errMsg);
+          showNotification('error', errMsg);
+          return;
+        }
 
-        setInfoForm((prev) => ({
+        // Quét thành công: Trích xuất và tự động điền các trường
+        setOcrError(null);
+        showNotification('success', 'Quét AI OCR thành công! Đã kiểm chứng thẻ CCCD hợp lệ và tự động điền toàn bộ trường.');
+
+        setCccdForm((prev) => ({
           ...prev,
-          firstname: first || prev.firstname,
-          lastname: last || prev.lastname,
-          dob: res.dob || prev.dob,
-          gender: res.gender === 'Nam' ? 1 : res.gender === 'Nữ' ? 0 : prev.gender,
+          number: res.id_number || prev.number,
+          date: res.date || prev.date,
+          place: res.place || prev.place,
         }));
+
+        if (res.fullname || res.dob || res.gender) {
+          const parts = (res.fullname || '').trim().split(' ');
+          const last = parts.slice(0, -1).join(' ');
+          const first = parts.slice(-1)[0] || parts[0] || '';
+
+          setInfoForm((prev) => ({
+            ...prev,
+            firstname: first || prev.firstname,
+            lastname: last || prev.lastname,
+            dob: res.dob || prev.dob,
+            gender: res.gender === 'Nam' ? 1 : res.gender === 'Nữ' ? 0 : prev.gender,
+          }));
+        }
+      } catch (err: any) {
+        setIsOcrScanning(false);
+        const errMsg = 'Lỗi kết nối khi quét AI OCR. Vui lòng thử lại sau.';
+        setOcrError(errMsg);
+        showNotification('error', errMsg);
       }
-    } catch (err: any) {
+    };
+
+    img.onerror = () => {
       setIsOcrScanning(false);
-      const errMsg = 'Lỗi kết nối khi quét AI OCR. Vui lòng thử lại sau.';
-      setOcrError(errMsg);
-      showNotification('error', errMsg);
-    }
+      setOcrError('Lỗi bẫy ảnh: Tệp ảnh bị lỗi hoặc định dạng không thể đọc được.');
+    };
   };
 
   // TAB 3: Save Avatar
@@ -1021,27 +1051,13 @@ export default function ProfilePage() {
             {/* TAB 4: CCCD Base64 & AI OCR Scanner */}
             {activeTab === 'cccd' && (
               <div className="space-y-6 animate-fadeInUp">
-                <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                      <Scan className="w-5 h-5 text-primary" /> Xác thực CCCD & Quét AI OCR Tự động điền (`CCCD AI OCR`)
-                    </h2>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Hệ thống tự động kiểm tra tính hợp lệ và bóc tách dữ liệu sang các trường ngay khi tải ảnh <strong>Mặt trước</strong>
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      // Thử nghiệm bẫy lỗi ảnh không hợp lệ (ví dụ ảnh tự sướng/phong cảnh)
-                      setOcrError('Cảnh báo Bẫy lỗi OCR: Ảnh tải lên không phải là Mặt trước Thẻ Căn cước công dân Việt Nam hợp lệ. Không tìm thấy Quốc huy hay chữ CĂN CƯỚC CÔNG DÂN. Vui lòng tải đúng ảnh thẻ rõ nét!');
-                      showNotification('error', 'Bẫy lỗi OCR: Từ chối ảnh thẻ không hợp lệ!');
-                    }}
-                    className="px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs rounded-xl border border-red-200 transition flex items-center gap-1.5 shrink-0 cursor-pointer"
-                  >
-                    <AlertCircle className="w-4 h-4 text-red-600" /> Thử nghiệm Bẫy lỗi ảnh (Test Error Trap)
-                  </button>
+                <div className="border-b border-slate-100 pb-4">
+                  <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <Scan className="w-5 h-5 text-primary" /> Xác thực CCCD & Quét AI OCR Tự động điền (`CCCD AI OCR`)
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Hệ thống tự động bẫy lỗi và bóc tách dữ liệu sang các trường ngay khi tải ảnh <strong>Mặt trước</strong> (tỷ lệ ngang chuẩn ~1.58)
+                  </p>
                 </div>
 
                 {/* OCR Error Trap Alert Box */}

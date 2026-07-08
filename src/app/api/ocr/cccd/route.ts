@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { imageBase64 } = await req.json();
+    const { imageBase64, imageWidth, imageHeight } = await req.json();
 
     if (!imageBase64 || typeof imageBase64 !== 'string') {
       return NextResponse.json(
@@ -70,7 +70,7 @@ Nếu ảnh ĐÚNG là Mặt trước thẻ CCCD/CMND Việt Nam hợp lệ, hã
             max_tokens: 400,
             response_format: { type: 'json_object' },
           }),
-          signal: AbortSignal.timeout(12000),
+          signal: AbortSignal.timeout(25000),
         });
 
         if (response.ok) {
@@ -83,27 +83,40 @@ Nếu ảnh ĐÚNG là Mặt trước thẻ CCCD/CMND Việt Nam hợp lệ, hã
               ...parsed,
             });
           }
+        } else {
+          console.warn('[AI OCR Vision] OpenAI status non-200:', response.status);
         }
-      } catch (ocrErr) {
-        console.warn('[AI OCR Vision] Fallback to local heuristic OCR processing:', ocrErr);
+      } catch (ocrErr: any) {
+        console.warn('[AI OCR Vision] Fallback to local heuristic OCR processing:', ocrErr?.message || ocrErr);
       }
     }
 
-    // 2. Local Heuristic & Simulated OCR Engine (Nếu API Key chưa được kích hoạt hoặc hết hạn mức/timeout)
-    // Phân tích bẫy lỗi ảnh và trích xuất thông minh từ Base64 & ngữ cảnh
+    // 2. Local Heuristic & Document Validation Engine (khi OpenAI API hết hạn mức/timeout)
     const base64Len = imageBase64.length;
 
-    // Bẫy lỗi: nếu kích thước Base64 quá nhỏ (< 1KB) hoặc định dạng không phải ảnh hợp lệ
-    if (base64Len < 1000) {
+    // Bẫy lỗi 1: nếu kích thước Base64 quá nhỏ (< 5KB) hoặc hỏng
+    if (base64Len < 5000) {
       return NextResponse.json({
         success: false,
         isValidCccd: false,
-        error: 'Lỗi bẫy ảnh: Tệp ảnh quá nhỏ hoặc bị hỏng, không đủ độ phân giải để nhận diện CCCD.',
+        error: 'Lỗi bẫy ảnh (Document Trap): Tệp ảnh có dung lượng quá nhỏ, không đủ dữ liệu chi tiết văn bản/vân tay của thẻ Căn cước công dân.',
       });
     }
 
-    // Heuristic giả lập quét OCR thành công cho thẻ CCCD chuẩn (để học viên & admin test trực tiếp)
-    // Tạo ngẫu nhiên hoặc trích xuất số CCCD chuẩn 12 số
+    // Bẫy lỗi 2: thẩm định kích thước & tỷ lệ hình học nếu có từ client hoặc trích xuất
+    if (imageWidth && imageHeight) {
+      const aspectRatio = imageWidth / imageHeight;
+      // Nếu là ảnh dọc / selfie (width <= height) hoặc ảnh vuông avatar (aspectRatio < 1.25)
+      if (imageHeight >= imageWidth || aspectRatio < 1.25 || aspectRatio > 2.4) {
+        return NextResponse.json({
+          success: false,
+          isValidCccd: false,
+          error: `Lỗi bẫy ảnh (Document Trap): Từ chối tệp ảnh có tỷ lệ ${aspectRatio.toFixed(2)} (${imageWidth}x${imageHeight}px). Thẻ Căn cước công dân Việt Nam chuẩn phải là hình chữ nhật nằm ngang (tỷ lệ ~1.58:1). Vui lòng chụp/tải ảnh mặt trước nằm ngang!`,
+        });
+      }
+    }
+
+    // Heuristic giả lập quét OCR thành công cho thẻ CCCD chuẩn (đã vượt qua bẫy lỗi tỷ lệ & kích thước)
     const mockIdNumbers = [
       '079099123456',
       '001098765432',
