@@ -90,6 +90,9 @@ export default function ProfilePage() {
   const [avatarRotate, setAvatarRotate] = useState<number>(0);
   const [avatarPanX, setAvatarPanX] = useState<number>(0);
   const [avatarPanY, setAvatarPanY] = useState<number>(0);
+  const [isAvatarDragging, setIsAvatarDragging] = useState<boolean>(false);
+  const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isEditingAvatar, setIsEditingAvatar] = useState<boolean>(false);
 
   // AI OCR Scanner & Error Trap State
   const [isOcrScanning, setIsOcrScanning] = useState<boolean>(false);
@@ -238,32 +241,52 @@ export default function ProfilePage() {
     }
   };
 
-  // TAB 3: Interactive Avatar Alignment & Crop Engine
-  const handleApplyAvatarCrop = () => {
+  // TAB 3: Modern Drag & Pan Handlers for Avatar Studio
+  const handleAvatarMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsAvatarDragging(true);
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+    setDragStart({ x: clientX - avatarPanX, y: clientY - avatarPanY });
+  };
+
+  const handleAvatarMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isAvatarDragging) return;
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+    setAvatarPanX(clientX - dragStart.x);
+    setAvatarPanY(clientY - dragStart.y);
+  };
+
+  const handleAvatarMouseUp = () => {
+    setIsAvatarDragging(false);
+  };
+
+  // TAB 3: Combined Crop & Save Studio Action (Modern 1-Click)
+  const handleApplyAndSaveAvatar = async () => {
     if (!avatarPreview) return;
+    setIsLoading(true);
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.src = avatarPreview;
-    img.onload = () => {
+    img.onload = async () => {
       const canvas = document.createElement('canvas');
       canvas.width = 300;
       canvas.height = 300;
       const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      if (!ctx) {
+        setIsLoading(false);
+        return;
+      }
 
       // Nền trắng chuẩn ảnh thẻ
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.save();
-      // Di chuyển đến tâm canvas kết hợp pan căn chỉnh
       ctx.translate(canvas.width / 2 + avatarPanX * 1.5, canvas.height / 2 + avatarPanY * 1.5);
-      // Xoay ảnh theo độ
       ctx.rotate((avatarRotate * Math.PI) / 180);
-      // Thu phóng
       ctx.scale(avatarZoom, avatarZoom);
 
-      // Tính toán tỷ lệ khung hình
       const scaleBase = Math.max(canvas.width / img.width, canvas.height / img.height);
       const drawWidth = img.width * scaleBase;
       const drawHeight = img.height * scaleBase;
@@ -278,7 +301,13 @@ export default function ProfilePage() {
       setAvatarRotate(0);
       setAvatarPanX(0);
       setAvatarPanY(0);
-      showNotification('success', 'Đã áp dụng căn chỉnh và cắt chuẩn ảnh thẻ tròn Avatar!');
+      setIsEditingAvatar(false);
+
+      const token = accessToken || 'mock_token';
+      await updateAvatarApi(token, croppedDataUrl);
+      updateUser({ avatar: croppedDataUrl });
+      setIsLoading(false);
+      showNotification('success', 'Đã căn chỉnh & cập nhật ảnh đại diện mới thành công!');
     };
   };
 
@@ -772,80 +801,54 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* TAB 3: Avatar Base64 & Interactive Alignment Studio */}
+            {/* TAB 3: Modern Avatar Studio (`Interactive Drag & Zoom`) */}
             {activeTab === 'avatar' && (
               <div className="space-y-6 animate-fadeInUp">
-                <div className="border-b border-slate-100 pb-4">
-                  <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                    <Sliders className="w-5 h-5 text-primary" /> Căn chỉnh & Cập nhật ảnh đại diện (`Update & Align Avatar`)
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Hỗ trợ <strong>Thu phóng (Zoom)</strong>, <strong>Xoay (Rotate)</strong> và <strong>Căn chỉnh tâm mặt</strong> trước khi chuyển sang định dạng Base64
-                  </p>
+                <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                      <Sliders className="w-5 h-5 text-primary" /> Cập nhật & Căn chỉnh ảnh đại diện (`Avatar Studio`)
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Giao diện hiện đại cho phép <strong>Kéo thả trực tiếp trên ảnh</strong> để di chuyển tâm mặt và <strong>Thu phóng nhanh</strong>
+                    </p>
+                  </div>
+
+                  {avatarPreview && isEditingAvatar && (
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingAvatar(false)}
+                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0 cursor-pointer"
+                    >
+                      <X className="w-4 h-4" /> Đóng chế độ chỉnh ảnh
+                    </button>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start py-2">
-                  {/* Left: Interactive Circular Preview & Alignment Viewport */}
-                  <div className="lg:col-span-5 bg-slate-900 rounded-3xl p-6 text-center text-white shadow-xl space-y-4 border border-slate-800">
-                    <span className="inline-block px-3 py-1 bg-primary/20 text-primary-light font-bold text-[10px] uppercase tracking-widest rounded-full border border-primary/30">
-                      Khung xem trước căn chỉnh
-                    </span>
-
-                    <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-white/80 shadow-2xl mx-auto relative bg-slate-950 flex items-center justify-center group cursor-move">
-                      <img
-                        src={avatarPreview || localSync.avatar}
-                        alt="Avatar Live Preview"
-                        style={{
-                          transform: `scale(${avatarZoom}) rotate(${avatarRotate}deg) translate(${avatarPanX}px, ${avatarPanY}px)`,
-                          transition: 'transform 0.1s ease-out',
-                        }}
-                        className="w-full h-full object-cover select-none pointer-events-none"
-                      />
-                      {/* Grid crosshair guide overlay */}
-                      <div className="absolute inset-0 border border-white/20 rounded-full pointer-events-none flex items-center justify-center">
-                        <div className="w-full h-[1px] bg-white/20 absolute"></div>
-                        <div className="h-full w-[1px] bg-white/20 absolute"></div>
+                {!isEditingAvatar ? (
+                  /* STATE 1: Display Current Avatar & Upload CTA */
+                  <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-8 text-center space-y-6 shadow-sm max-w-2xl mx-auto">
+                    <div className="relative inline-block group">
+                      <div className="w-44 h-44 rounded-full overflow-hidden border-4 border-white shadow-2xl mx-auto relative bg-slate-900 flex items-center justify-center">
+                        <img
+                          src={localSync.avatar || avatarPreview || '/placeholder-avatar.png'}
+                          alt="Current Avatar"
+                          className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                        />
+                      </div>
+                      <div className="absolute bottom-2 right-2 bg-primary text-white p-2.5 rounded-full shadow-lg border-2 border-white flex items-center justify-center">
+                        <Camera className="w-4 h-4" />
                       </div>
                     </div>
 
-                    <p className="text-[11px] font-medium text-slate-400">
-                      Sử dụng các thanh điều hướng bên dưới để đặt tâm gương mặt vào chính giữa khung tròn
-                    </p>
-
-                    {avatarPreview && (
-                      <div className="pt-2 flex flex-wrap gap-2 justify-center">
-                        <button
-                          type="button"
-                          onClick={handleApplyAvatarCrop}
-                          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <Check className="w-4 h-4" /> Áp dụng căn chỉnh & Cắt tròn
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setAvatarZoom(1);
-                            setAvatarRotate(0);
-                            setAvatarPanX(0);
-                            setAvatarPanY(0);
-                          }}
-                          className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition cursor-pointer"
-                        >
-                          <RefreshCw className="w-3.5 h-3.5" /> Đặt lại
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Right: Upload File & Alignment Controls Studio */}
-                  <div className="lg:col-span-7 space-y-6">
-                    {/* File Uploader */}
-                    <div className="border-2 border-dashed border-slate-200 rounded-2xl p-5 text-center hover:border-primary transition bg-slate-50/70">
-                      <Upload className="w-7 h-7 text-primary mx-auto mb-2" />
-                      <p className="text-xs font-bold text-slate-700">1. Chọn ảnh gốc từ máy tính / điện thoại</p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        PNG, JPG, WEBP độ phân giải cao để căn chỉnh nét nhất
+                    <div className="space-y-1 max-w-md mx-auto">
+                      <h3 className="text-sm font-black text-slate-800">Ảnh đại diện định danh SeduAi</h3>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        Khung ảnh tròn hiển thị trên hệ thống học tập và chứng chỉ. Bạn có thể chọn tệp ảnh mới để mở phòng thu căn chỉnh trực tiếp!
                       </p>
+                    </div>
+
+                    <div className="pt-2">
                       <input
                         type="file"
                         accept="image/*"
@@ -858,149 +861,160 @@ export default function ProfilePage() {
                               setAvatarRotate(0);
                               setAvatarPanX(0);
                               setAvatarPanY(0);
+                              setIsEditingAvatar(true);
                             });
                           }
                         }}
                         className="hidden"
-                        id="avatar-upload"
+                        id="avatar-upload-modern"
                       />
                       <label
-                        htmlFor="avatar-upload"
-                        className="inline-block mt-3 px-5 py-2 bg-white border border-slate-300 hover:border-primary text-slate-700 hover:text-primary font-bold text-xs rounded-xl cursor-pointer shadow-sm transition"
+                        htmlFor="avatar-upload-modern"
+                        className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary hover:bg-primary-dark text-white font-black text-xs rounded-2xl shadow-xl shadow-primary/25 hover:-translate-y-0.5 transition cursor-pointer duration-200"
                       >
-                        Duyệt chọn ảnh mới...
+                        <Upload className="w-4 h-4" /> Tải lên ảnh mới & Căn chỉnh (`Browse & Adjust`)...
                       </label>
                     </div>
+                  </div>
+                ) : (
+                  /* STATE 2: Modern Interactive Studio Card (`Drag to Pan + Zoom Slider`) */
+                  <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 text-white shadow-2xl space-y-8 max-w-2xl mx-auto animate-fadeIn">
+                    <div className="text-center space-y-1">
+                      <span className="inline-block px-3 py-1 bg-primary/20 text-primary-light font-extrabold text-[10px] uppercase tracking-wider rounded-full border border-primary/30">
+                        Chế độ Phòng thu (`Studio Mode`)
+                      </span>
+                      <h3 className="text-base font-black text-white mt-1">Kéo thả trực tiếp trên khung ảnh tròn</h3>
+                      <p className="text-xs text-slate-400">
+                        Dùng chuột/tay nhấn vào ảnh và <strong>kéo nhẹ</strong> để di chuyển tâm mặt, dùng thanh trượt bên dưới để phóng to
+                      </p>
+                    </div>
 
-                    {/* Interactive Alignment Controls Studio */}
-                    {avatarPreview && (
-                      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-                        <h3 className="text-xs font-black text-slate-800 flex items-center gap-1.5 border-b border-slate-100 pb-2">
-                          <Sliders className="w-4 h-4 text-primary" /> 2. Bảng điều hướng căn chỉnh (`Alignment Controls`)
-                        </h3>
-
-                        {/* Zoom Control */}
-                        <div className="space-y-1.5">
-                          <div className="flex justify-between items-center text-xs font-bold text-slate-700">
-                            <span className="flex items-center gap-1">
-                              <ZoomIn className="w-3.5 h-3.5 text-slate-500" /> Thu phóng (Zoom):
-                            </span>
-                            <span className="text-primary font-mono">{avatarZoom.toFixed(1)}x</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <button
-                              type="button"
-                              onClick={() => setAvatarZoom((z) => Math.max(1, +(z - 0.1).toFixed(1)))}
-                              className="p-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition"
-                            >
-                              <ZoomOut className="w-4 h-4" />
-                            </button>
-                            <input
-                              type="range"
-                              min="1"
-                              max="3"
-                              step="0.1"
-                              value={avatarZoom}
-                              onChange={(e) => setAvatarZoom(parseFloat(e.target.value))}
-                              className="w-full accent-primary h-2 bg-slate-200 rounded-lg cursor-pointer"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setAvatarZoom((z) => Math.min(3, +(z + 0.1).toFixed(1)))}
-                              className="p-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition"
-                            >
-                              <ZoomIn className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Rotation Control */}
-                        <div className="space-y-1.5">
-                          <div className="flex justify-between items-center text-xs font-bold text-slate-700">
-                            <span className="flex items-center gap-1">
-                              <RotateCw className="w-3.5 h-3.5 text-slate-500" /> Xoay góc (Rotation):
-                            </span>
-                            <span className="text-primary font-mono">{avatarRotate}°</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <input
-                              type="range"
-                              min="-180"
-                              max="180"
-                              step="5"
-                              value={avatarRotate}
-                              onChange={(e) => setAvatarRotate(parseInt(e.target.value, 10))}
-                              className="w-full accent-primary h-2 bg-slate-200 rounded-lg cursor-pointer"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setAvatarRotate((r) => (r + 90) % 360)}
-                              className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold shrink-0 transition"
-                            >
-                              +90°
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Pan Horizontal (X) */}
-                        <div className="space-y-1">
-                          <div className="flex justify-between items-center text-xs font-bold text-slate-700">
-                            <span>Di chuyển Ngang (Pan X):</span>
-                            <span className="font-mono text-slate-500">{avatarPanX}px</span>
-                          </div>
-                          <input
-                            type="range"
-                            min="-80"
-                            max="80"
-                            step="2"
-                            value={avatarPanX}
-                            onChange={(e) => setAvatarPanX(parseInt(e.target.value, 10))}
-                            className="w-full accent-primary h-2 bg-slate-200 rounded-lg cursor-pointer"
-                          />
-                        </div>
-
-                        {/* Pan Vertical (Y) */}
-                        <div className="space-y-1">
-                          <div className="flex justify-between items-center text-xs font-bold text-slate-700">
-                            <span>Di chuyển Dọc (Pan Y):</span>
-                            <span className="font-mono text-slate-500">{avatarPanY}px</span>
-                          </div>
-                          <input
-                            type="range"
-                            min="-80"
-                            max="80"
-                            step="2"
-                            value={avatarPanY}
-                            onChange={(e) => setAvatarPanY(parseInt(e.target.value, 10))}
-                            className="w-full accent-primary h-2 bg-slate-200 rounded-lg cursor-pointer"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {avatarBase64 && (
-                      <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2 font-bold">
-                          <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
-                          <span>Ảnh đã sẵn sàng (Base64 Encoded Chuẩn NKS API)!</span>
-                        </div>
-                        <span className="text-[10px] font-mono bg-emerald-100 px-2 py-0.5 rounded text-emerald-700">
-                          {Math.round(avatarBase64.length / 1024)} KB
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="pt-2">
-                      <button
-                        onClick={handleSaveAvatar}
-                        disabled={!avatarBase64 || isLoading}
-                        className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-dark disabled:bg-slate-300 text-white font-black text-xs rounded-xl shadow-lg shadow-primary/25 transition flex items-center justify-center gap-2 cursor-pointer"
+                    {/* Interactive Circular Viewport (Drag to Pan) */}
+                    <div className="flex flex-col items-center justify-center relative">
+                      <div
+                        onMouseDown={handleAvatarMouseDown}
+                        onMouseMove={handleAvatarMouseMove}
+                        onMouseUp={handleAvatarMouseUp}
+                        onMouseLeave={handleAvatarMouseUp}
+                        onTouchStart={handleAvatarMouseDown}
+                        onTouchMove={handleAvatarMouseMove}
+                        onTouchEnd={handleAvatarMouseUp}
+                        className={`w-64 h-64 rounded-full overflow-hidden border-4 border-white/90 shadow-[0_0_50px_rgba(0,0,0,0.6)] relative bg-slate-950 flex items-center justify-center select-none ${
+                          isAvatarDragging ? 'cursor-grabbing scale-[1.01]' : 'cursor-grab'
+                        } transition-shadow duration-200`}
                       >
-                        <Save className="w-4 h-4" /> {isLoading ? 'Đang gửi Base64 lên API...' : '3. Hoàn tất & Lưu Avatar chính thức'}
+                        <img
+                          src={avatarPreview}
+                          alt="Avatar Studio Live"
+                          style={{
+                            transform: `scale(${avatarZoom}) rotate(${avatarRotate}deg) translate(${avatarPanX}px, ${avatarPanY}px)`,
+                            transition: isAvatarDragging ? 'none' : 'transform 0.15s ease-out',
+                          }}
+                          className="w-full h-full object-cover select-none pointer-events-none"
+                        />
+                        {/* Elegant Crosshair Grid */}
+                        <div className="absolute inset-0 border border-white/15 rounded-full pointer-events-none flex items-center justify-center">
+                          <div className="w-full h-[1px] bg-white/20 absolute"></div>
+                          <div className="h-full w-[1px] bg-white/20 absolute"></div>
+                          <div className="w-3 h-3 border border-white/40 rounded-full absolute"></div>
+                        </div>
+                      </div>
+
+                      <p className="text-[11px] text-slate-400 font-medium mt-3.5 flex items-center gap-1.5 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700/60">
+                        <Sliders className="w-3.5 h-3.5 text-primary-light" /> Nhấn & Kéo chuột/tay trong hình tròn để chỉnh vị trí (`Click & Drag`)
+                      </p>
+                    </div>
+
+                    {/* Minimalist Controls Bar */}
+                    <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 md:p-5 max-w-lg mx-auto space-y-4">
+                      {/* Zoom Slider */}
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setAvatarZoom((z) => Math.max(1, +(z - 0.1).toFixed(1)))}
+                          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-slate-300 hover:text-white transition cursor-pointer shrink-0"
+                          title="Thu nhỏ (`Zoom Out`)"
+                        >
+                          <ZoomOut className="w-4 h-4" />
+                        </button>
+                        <div className="flex-grow space-y-1">
+                          <div className="flex justify-between items-center text-[11px] font-bold text-slate-300 px-1">
+                            <span>Thu phóng (`Zoom`)</span>
+                            <span className="text-primary-light font-mono font-black">{avatarZoom.toFixed(1)}x</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="1"
+                            max="3"
+                            step="0.05"
+                            value={avatarZoom}
+                            onChange={(e) => setAvatarZoom(parseFloat(e.target.value))}
+                            className="w-full accent-primary h-2 bg-slate-950 rounded-lg cursor-pointer"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setAvatarZoom((z) => Math.min(3, +(z + 0.1).toFixed(1)))}
+                          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-slate-300 hover:text-white transition cursor-pointer shrink-0"
+                          title="Phóng to (`Zoom In`)"
+                        >
+                          <ZoomIn className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Quick Actions Sub-bar */}
+                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-700/60 text-xs">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setAvatarRotate((r) => (r + 90) % 360)}
+                            className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer text-[11px]"
+                          >
+                            <RotateCw className="w-3.5 h-3.5 text-primary-light" /> Xoay ảnh 90°
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAvatarZoom(1);
+                              setAvatarRotate(0);
+                              setAvatarPanX(0);
+                              setAvatarPanY(0);
+                            }}
+                            className="px-3 py-1.5 bg-slate-700/60 hover:bg-slate-600 text-slate-400 hover:text-slate-200 font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer text-[11px]"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5" /> Mặc định
+                          </button>
+                        </div>
+
+                        <label
+                          htmlFor="avatar-upload-modern"
+                          className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition cursor-pointer text-[11px] border border-slate-600 hover:border-primary-light"
+                        >
+                          Chọn tệp khác...
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Single Clean CTA Action */}
+                    <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleApplyAndSaveAvatar}
+                        disabled={isLoading}
+                        className="w-full sm:w-auto min-w-[240px] px-8 py-4 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-light hover:to-primary disabled:from-slate-700 disabled:to-slate-700 text-white font-black text-xs rounded-2xl shadow-xl shadow-primary/30 transition flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02]"
+                      >
+                        <CheckCircle className="w-4 h-4" /> {isLoading ? 'Đang cập nhật Avatar lên API...' : 'Hoàn tất & Cập nhật Avatar ngay (`Save & Apply`)'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingAvatar(false)}
+                        className="w-full sm:w-auto px-6 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-2xl transition cursor-pointer"
+                      >
+                        Hủy bỏ
                       </button>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
