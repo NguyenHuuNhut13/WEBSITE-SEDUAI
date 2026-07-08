@@ -88,7 +88,6 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Trang chủ', href: '/' },
     { name: 'Giới thiệu', href: '/about' },
-    { name: 'Sự kiện', href: '/events' },
     { 
       name: 'Khóa học', 
       href: '/courses',
@@ -101,7 +100,9 @@ export default function Navbar() {
         { name: 'Lập trình Python Trẻ Em', href: '/courses/lap-trinh-python-cho-tre-em' },
       ]
     },
-    { name: 'Tính năng AI', href: '/#ai-crm-demo' },
+    { name: 'AI Assistant 🤖', href: '/ai-assistant', isSpecial: true },
+    { name: 'Tính năng CRM', href: '/#ai-crm-demo' },
+    { name: 'Sự kiện', href: '/events' },
     { name: 'Tin tức', href: '/blog' },
     { name: 'Liên hệ', href: '/contact' },
   ];
@@ -211,6 +212,18 @@ export default function Navbar() {
                   );
                 }
                 const isActive = link.href === '/' ? pathname === '/' : pathname?.startsWith(link.href);
+                if (link.isSpecial) {
+                  return (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      onClick={() => handleLinkClick(link.href)}
+                      className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-3.5 py-2 rounded-xl shadow-md shadow-amber-500/20 transition duration-200 transform hover:scale-105 flex items-center gap-1"
+                    >
+                      {link.name}
+                    </Link>
+                  );
+                }
                 return (
                   <Link
                     key={link.name}
@@ -341,6 +354,18 @@ export default function Navbar() {
                   );
                 }
                 const isActive = link.href === '/' ? pathname === '/' : pathname?.startsWith(link.href);
+                if (link.isSpecial) {
+                  return (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      onClick={() => handleLinkClick(link.href)}
+                      className="block px-4 py-3 rounded-xl text-base font-black bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 shadow-md text-center"
+                    >
+                      {link.name}
+                    </Link>
+                  );
+                }
                 return (
                   <Link
                     key={link.name}

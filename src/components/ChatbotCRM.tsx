@@ -190,9 +190,15 @@ export default function ChatbotCRM() {
             <p className="text-xs text-white/80 mt-1">Tự động hóa CRM - Sync API thật</p>
           </div>
         </div>
-        <span className="text-[10px] bg-white/20 px-2.5 py-1 rounded-full uppercase tracking-wider font-semibold">
-          API Live Mode
-        </span>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/ai-assistant"
+            className="bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-xl shadow transition flex items-center gap-1 cursor-pointer transform hover:scale-105"
+            title="Mở AI Teacher & CRM chuẩn ChatGPT Full Màn Hình"
+          >
+            <Sparkles className="w-3.5 h-3.5" /> Mở ChatGPT Full Mode
+          </Link>
+        </div>
       </div>
 
       {/* Message Area */}
