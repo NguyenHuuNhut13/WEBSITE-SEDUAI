@@ -14,6 +14,14 @@ export default function Navbar() {
     setIsOpen(false);
   }, [pathname]);
 
+  const handleLinkClick = (href: string) => {
+    if (href.includes('#')) return; // Allow hash links to anchor scroll
+    const targetPath = href.split('?')[0];
+    if (pathname === targetPath) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const navLinks = [
     { name: 'Trang chủ', href: '/' },
     { 
@@ -61,7 +69,7 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="flex items-center space-x-2">
+              <Link href="/" onClick={() => handleLinkClick('/')} className="flex items-center space-x-2">
                 <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-md shadow-primary/20">
                   <Brain className="w-6 h-6" />
                 </div>
@@ -86,6 +94,7 @@ export default function Navbar() {
                           <Link
                             key={sub.name}
                             href={sub.href}
+                            onClick={() => handleLinkClick(sub.href)}
                             className="block px-5 py-2.5 text-[11px] font-bold text-slate-700 hover:bg-primary-light hover:text-primary transition"
                           >
                             {sub.name}
@@ -100,6 +109,7 @@ export default function Navbar() {
                   <Link
                     key={link.name}
                     href={link.href}
+                    onClick={() => handleLinkClick(link.href)}
                     className={`transition duration-200 ${
                       isActive ? 'text-primary' : 'text-slate-600 hover:text-primary'
                     }`}
@@ -120,6 +130,7 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/courses"
+                onClick={() => handleLinkClick('/courses')}
                 className="px-5 py-2.5 rounded-full bg-primary text-white font-bold text-sm hover:bg-primary-dark transition-all duration-300 shadow-md shadow-primary/10"
               >
                 Học thử ngay
@@ -153,6 +164,7 @@ export default function Navbar() {
                         <Link
                           key={sub.name}
                           href={sub.href}
+                          onClick={() => handleLinkClick(sub.href)}
                           className="block px-6 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-primary"
                         >
                           {sub.name}
@@ -166,6 +178,7 @@ export default function Navbar() {
                   <Link
                     key={link.name}
                     href={link.href}
+                    onClick={() => handleLinkClick(link.href)}
                     className={`block px-4 py-2.5 rounded-xl text-base font-semibold ${
                       isActive ? 'bg-primary-light text-primary' : 'text-slate-600 hover:bg-slate-50 hover:text-primary'
                     }`}
@@ -184,6 +197,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/courses"
+                  onClick={() => handleLinkClick('/courses')}
                   className="w-full text-center px-5 py-3 rounded-xl bg-primary text-white font-bold text-sm shadow-md shadow-primary/10"
                 >
                   Đăng ký học thử
