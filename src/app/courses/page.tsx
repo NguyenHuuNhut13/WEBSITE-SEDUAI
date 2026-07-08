@@ -2,19 +2,20 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { Search, GraduationCap, Headset, Mail, RefreshCw } from 'lucide-react';
+import { Search, GraduationCap, Headset, Mail, RefreshCw, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import CourseCard from '@/components/CourseCard';
 import { courses } from '@/data/courses';
 
 export default function CourseList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
+  const [sortBy, setSortBy] = useState('default');
   const [, startTransition] = useTransition();
 
   const categories = ['Tất cả', 'Tiếng Anh', 'Lập trình', 'Kỹ năng', 'AI & Công nghệ'];
 
   // Client-side filtering logic
-  const filteredCourses = courses.filter((course) => {
+  let filteredCourses = courses.filter((course) => {
     const matchesSearch =
       course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       course.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -22,6 +23,17 @@ export default function CourseList() {
       selectedCategory === 'Tất cả' || course.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  // Sorting
+  if (sortBy === 'price-asc') {
+    filteredCourses = [...filteredCourses].sort((a, b) => a.discount_price - b.discount_price);
+  } else if (sortBy === 'price-desc') {
+    filteredCourses = [...filteredCourses].sort((a, b) => b.discount_price - a.discount_price);
+  } else if (sortBy === 'rating') {
+    filteredCourses = [...filteredCourses].sort((a, b) => b.rating - a.rating);
+  } else if (sortBy === 'popular') {
+    filteredCourses = [...filteredCourses].sort((a, b) => b.student_count - a.student_count);
+  }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     startTransition(() => {
@@ -32,16 +44,20 @@ export default function CourseList() {
   const handleReset = () => {
     setSearchTerm('');
     setSelectedCategory('Tất cả');
+    setSortBy('default');
   };
 
   return (
     <div className="bg-slate-50 min-h-screen">
       {/* Header Banner */}
-      <section className="bg-slate-900 text-white py-16 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-20"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-3">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Danh Sách Khóa Học SeduAi</h1>
-          <p className="text-slate-400 text-sm max-w-xl mx-auto">
+      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-primary-dark text-white py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-15"></div>
+        <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-primary/15 rounded-full blur-3xl"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-4">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
+            Danh Sách <span className="gradient-text">Khóa Học</span>
+          </h1>
+          <p className="text-slate-300 text-sm max-w-xl mx-auto">
             Học tập thực chiến cùng các giảng viên chất lượng cao kết hợp với Trợ lý ảo AI đắc lực hỗ trợ 24/7.
           </p>
 
@@ -51,7 +67,7 @@ export default function CourseList() {
               Trang chủ
             </Link>
             <span>/</span>
-            <span className="text-primary-light">Khóa học</span>
+            <span className="text-white">Khóa học</span>
           </nav>
         </div>
       </section>
@@ -63,13 +79,14 @@ export default function CourseList() {
           <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-8 shadow-sm">
             <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
               {/* Search bar */}
-              <div className="relative w-full lg:max-w-md">
+              <div className="relative w-full lg:max-w-sm">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                   <Search className="w-5 h-5" />
                 </span>
                 <input
                   type="text"
-                  placeholder="Tìm kiếm tên khóa học, mô tả..."
+                  placeholder="Tìm kiếm tên khóa học..."
+                  value={searchTerm}
                   onChange={handleSearchChange}
                   className="w-full pl-11 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50"
                 />
@@ -92,15 +109,32 @@ export default function CourseList() {
                 ))}
               </div>
 
-              {/* Reset filter button */}
-              {(searchTerm !== '' || selectedCategory !== 'Tất cả') && (
-                <button
-                  onClick={handleReset}
-                  className="w-full lg:w-auto px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <RefreshCw className="w-4 h-4" /> Đặt lại
-                </button>
-              )}
+              {/* Sort + Reset */}
+              <div className="flex items-center gap-2 w-full lg:w-auto">
+                <div className="relative flex-grow lg:flex-grow-0">
+                  <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full lg:w-48 pl-9 pr-4 py-2.5 text-xs font-semibold border border-slate-200 rounded-xl focus:outline-none focus:border-primary bg-slate-50 text-slate-600 cursor-pointer appearance-none"
+                  >
+                    <option value="default">Mặc định</option>
+                    <option value="popular">Phổ biến nhất</option>
+                    <option value="rating">Đánh giá cao</option>
+                    <option value="price-asc">Giá: Thấp → Cao</option>
+                    <option value="price-desc">Giá: Cao → Thấp</option>
+                  </select>
+                </div>
+
+                {(searchTerm !== '' || selectedCategory !== 'Tất cả' || sortBy !== 'default') && (
+                  <button
+                    onClick={handleReset}
+                    className="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer flex-shrink-0"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" /> Đặt lại
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -129,8 +163,8 @@ export default function CourseList() {
                 </h3>
                 <div className="space-y-3.5">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 flex-shrink-0 text-sm">
-                      <Headset className="w-4.5 h-4.5" />
+                    <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-primary flex-shrink-0">
+                      <Headset className="w-4 h-4" />
                     </div>
                     <div>
                       <h4 className="text-xs font-bold text-slate-700">Điện thoại Hotline</h4>
@@ -138,8 +172,8 @@ export default function CourseList() {
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 flex-shrink-0 text-sm">
-                      <Mail className="w-4.5 h-4.5" />
+                    <div className="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center text-primary flex-shrink-0">
+                      <Mail className="w-4 h-4" />
                     </div>
                     <div>
                       <h4 className="text-xs font-bold text-slate-700">Hỗ trợ Email</h4>
@@ -148,10 +182,32 @@ export default function CourseList() {
                   </div>
                 </div>
               </div>
+
+              {/* Level filter */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
+                <h3 className="font-bold text-slate-900 text-sm pb-2 border-b border-slate-100 flex items-center gap-2">
+                  <SlidersHorizontal className="w-4 h-4 text-primary" /> Trình độ
+                </h3>
+                <div className="space-y-2">
+                  {['Mọi trình độ', 'Cơ bản', 'Trung cấp', 'Nâng cao'].map((level) => (
+                    <label key={level} className="flex items-center gap-2.5 text-xs text-slate-600 cursor-pointer hover:text-primary transition">
+                      <input type="checkbox" className="rounded border-slate-300 text-primary focus:ring-primary" />
+                      {level}
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Courses grid */}
             <div className="lg:col-span-9">
+              {/* Results count */}
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs text-slate-500">
+                  Hiển thị <strong className="text-slate-900">{filteredCourses.length}</strong> khóa học
+                </p>
+              </div>
+
               {filteredCourses.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredCourses.map((course) => (
