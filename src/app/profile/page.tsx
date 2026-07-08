@@ -321,26 +321,22 @@ export default function ProfilePage() {
     setIsOcrScanning(true);
     setOcrError(null);
 
-    // Lớp Bẫy Lỗi 1: Thẩm định định dạng, tỷ lệ khung hình & kích thước ngay tại Client trước khi gọi API
+    // Kiểm tra độ phân giải ảnh trước khi gửi (đảm bảo ảnh đủ rõ nét để nhận diện văn bản)
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.src = base64Image;
 
     img.onload = async () => {
-      // Thẻ CCCD chuẩn có tỷ lệ chiều ngang / chiều dọc khoảng ~1.58 (85.6mm x 53.9mm)
-      const aspectRatio = img.width / img.height;
-
-      // Nếu là ảnh dọc (selfie / chân dung: width <= height) hoặc ảnh vuông (avatar: aspectRatio < 1.25)
-      // hoặc ảnh toàn cảnh quá dài (aspectRatio > 2.3) hoặc độ phân giải quá thấp (< 250px) -> Bẫy lỗi lập tức!
-      if (img.height > img.width * 1.05 || aspectRatio < 1.25 || aspectRatio > 2.4 || img.width < 250) {
+      // Nếu ảnh có độ phân giải quá thấp (< 200px) thì chữ trên thẻ sẽ không thể đọc được
+      if (img.width < 200 || img.height < 150) {
         setIsOcrScanning(false);
-        const trapMsg = `Bẫy lỗi OCR (Document Trap): Từ chối ảnh tải lên (Kích thước ${img.width}x${img.height}px, tỷ lệ ${aspectRatio.toFixed(2)}). Thẻ Căn cước công dân Việt Nam chuẩn buộc phải là hình chữ nhật nằm ngang rõ nét (tỷ lệ chuẩn ~1.58). Vui lòng không tải ảnh dọc, ảnh vuông avatar hoặc ảnh chụp quá mờ!`;
-        setOcrError(trapMsg);
-        showNotification('error', 'Bẫy lỗi OCR: Từ chối ảnh không đúng chuẩn CCCD nằm ngang!');
+        const lowResMsg = 'Ảnh tải lên có độ phân giải quá thấp, hệ thống không thể đọc được các ký tự trên thẻ Căn cước công dân. Vui lòng chọn ảnh có độ rõ nét cao hơn.';
+        setOcrError(lowResMsg);
+        showNotification('error', lowResMsg);
         return;
       }
 
-      // Lớp Bẫy Lỗi 2 & Trích xuất AI Vision qua API
+      // Quét AI Vision & xử lý OCR qua API
       try {
         const response = await fetch('/api/ocr/cccd', {
           method: 'POST',
@@ -356,8 +352,8 @@ export default function ProfilePage() {
         setIsOcrScanning(false);
 
         if (!res.isValidCccd || !res.success) {
-          // Bẫy lỗi ảnh từ máy chủ AI Vision: từ chối ảnh phong cảnh, giấy tờ linh tinh, không có Quốc huy
-          const errMsg = res.error || 'Cảnh báo Bẫy lỗi OCR: Ảnh tải lên không phải là Mặt trước thẻ Căn cước công dân Việt Nam hợp lệ. Vui lòng kiểm tra và tải đúng ảnh thẻ rõ nét!';
+          // Thông báo lỗi thực tế, thân thiện cho người dùng khi ảnh không phải thẻ hoặc không thể nhận diện
+          const errMsg = res.error || 'Không thể nhận diện thông tin trên thẻ Căn cước công dân. Vui lòng kiểm tra và tải lên ảnh mặt trước thẻ rõ nét, đầy đủ 4 góc, không bị chói sáng hoặc che khuất.';
           setOcrError(errMsg);
           showNotification('error', errMsg);
           return;
@@ -365,7 +361,7 @@ export default function ProfilePage() {
 
         // Quét thành công: Trích xuất và tự động điền các trường
         setOcrError(null);
-        showNotification('success', 'Quét AI OCR thành công! Đã kiểm chứng thẻ CCCD hợp lệ và tự động điền toàn bộ trường.');
+        showNotification('success', 'Quét OCR thành công! Đã trích xuất và điền tự động thông tin trên thẻ Căn cước.');
 
         setCccdForm((prev) => ({
           ...prev,
@@ -1056,16 +1052,16 @@ export default function ProfilePage() {
                     <Scan className="w-5 h-5 text-primary" /> Xác thực CCCD & Quét AI OCR Tự động điền (`CCCD AI OCR`)
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Hệ thống tự động bẫy lỗi và bóc tách dữ liệu sang các trường ngay khi tải ảnh <strong>Mặt trước</strong> (tỷ lệ ngang chuẩn ~1.58)
+                    Hệ thống tự động phân tích và trích xuất thông tin sang các trường ngay khi tải ảnh <strong>Mặt trước</strong>
                   </p>
                 </div>
 
-                {/* OCR Error Trap Alert Box */}
+                {/* OCR Error Alert Box */}
                 {ocrError && (
                   <div className="p-4 bg-red-50 border-2 border-red-300 rounded-2xl flex items-start gap-3.5 animate-shake shadow-sm">
                     <AlertCircle className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
                     <div className="flex-grow text-xs text-red-900 space-y-1">
-                      <p className="font-black text-sm text-red-700">Hệ thống thẩm định từ chối ảnh (`Document Trap Alert`):</p>
+                      <p className="font-black text-sm text-red-700">Không thể nhận diện thông tin trên thẻ:</p>
                       <p className="font-semibold leading-relaxed">{ocrError}</p>
                     </div>
                     <button
