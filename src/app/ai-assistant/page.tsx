@@ -53,9 +53,16 @@ export default function AiAssistantPage() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Tự động mở sidebar nếu ở màn hình lớn (Desktop >= 1024px)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+      setIsSidebarOpen(true);
+    }
+  }, []);
 
   // Load threads from localStorage on initial render
   useEffect(() => {
@@ -251,12 +258,22 @@ export default function AiAssistantPage() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-900 text-slate-100 overflow-hidden font-sans">
-      {/* LEFT SIDEBAR (ChatGPT Style) */}
+    <div className="flex h-screen bg-slate-900 text-slate-100 overflow-hidden font-sans relative">
+      {/* Backdrop overlay cho Mobile khi mở Sidebar */}
+      {isSidebarOpen && (
+        <div
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
+        />
+      )}
+
+      {/* LEFT SIDEBAR (ChatGPT Style - True Responsive Drawer on Mobile & Column on Desktop) */}
       <div
         className={`${
-          isSidebarOpen ? 'w-72 sm:w-80 translate-x-0' : 'w-0 -translate-x-full'
-        } bg-slate-950 border-r border-slate-800/80 flex flex-col transition-all duration-300 z-40 fixed lg:relative h-full`}
+          isSidebarOpen
+            ? 'translate-x-0 w-[280px] sm:w-[320px] lg:w-72 xl:w-80'
+            : '-translate-x-full lg:translate-x-0 w-[280px] sm:w-[320px] lg:w-0'
+        } bg-slate-950 border-r border-slate-800/80 flex flex-col transition-all duration-300 z-50 fixed inset-y-0 left-0 lg:relative lg:inset-auto lg:h-full lg:z-auto flex-shrink-0 overflow-hidden`}
       >
         {/* Top Header inside Sidebar */}
         <div className="p-4 border-b border-slate-800 flex items-center justify-between gap-2">
@@ -392,30 +409,42 @@ export default function AiAssistantPage() {
       {/* MAIN CHAT AREA */}
       <div className="flex-grow flex flex-col h-full bg-slate-900 relative">
         {/* Top Bar of Main Chat Area */}
-        <div className="h-16 border-b border-slate-800 px-4 sm:px-6 flex items-center justify-between bg-slate-950/80 backdrop-blur-md sticky top-0 z-30">
-          <div className="flex items-center gap-3">
+        <div className="min-h-[60px] sm:h-16 border-b border-slate-800 px-3 sm:px-6 py-2 sm:py-0 flex items-center justify-between bg-slate-950/80 backdrop-blur-md sticky top-0 z-30 gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 overflow-hidden">
+            {/* Nút Hamburger luôn hiện ở màn hình Mobile để mở Drawer */}
+            <button
+              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 text-slate-300 hover:text-white rounded-xl hover:bg-slate-800 transition lg:hidden flex-shrink-0"
+              title="Mở menu & lịch sử chat"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            {/* Nút Hamburger cho Desktop khi đóng Sidebar */}
             {!isSidebarOpen && (
               <button
                 onClick={() => setIsSidebarOpen(true)}
-                className="p-2 text-slate-300 hover:text-white rounded-xl hover:bg-slate-800 transition"
+                className="hidden lg:block p-2 text-slate-300 hover:text-white rounded-xl hover:bg-slate-800 transition flex-shrink-0"
+                title="Mở thanh bên"
               >
                 <Menu className="w-5 h-5" />
               </button>
             )}
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <h2 className="font-extrabold text-sm sm:text-base text-white flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-hidden">
+              <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0"></span>
+              <h2 className="font-extrabold text-xs sm:text-base text-white flex items-center gap-1.5 sm:gap-2 truncate">
                 {mode === 'teacher_assistant' ? (
                   <>
-                    <GraduationCap className="w-5 h-5 text-amber-400" /> AI Teacher Assistant
-                    <span className="hidden sm:inline-block text-[11px] font-normal text-slate-400 bg-slate-800 px-2.5 py-0.5 rounded-full">
+                    <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 flex-shrink-0" />
+                    <span className="truncate">AI Teacher Assistant</span>
+                    <span className="hidden sm:inline-block text-[11px] font-normal text-slate-400 bg-slate-800 px-2.5 py-0.5 rounded-full flex-shrink-0">
                       Học tập 1-1 & Lập trình chuẩn Edu2Review
                     </span>
                   </>
                 ) : (
                   <>
-                    <Target className="w-5 h-5 text-emerald-400" /> AI Admissions CRM
-                    <span className="hidden sm:inline-block text-[11px] font-normal text-slate-400 bg-slate-800 px-2.5 py-0.5 rounded-full">
+                    <Target className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 flex-shrink-0" />
+                    <span className="truncate">AI Admissions CRM</span>
+                    <span className="hidden sm:inline-block text-[11px] font-normal text-slate-400 bg-slate-800 px-2.5 py-0.5 rounded-full flex-shrink-0">
                       Tư vấn khóa học & Sync NKS Lead API
                     </span>
                   </>
@@ -424,15 +453,15 @@ export default function AiAssistantPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="text-xs bg-primary/20 text-primary border border-primary/40 px-3 py-1 rounded-full font-bold flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" /> GPT-4o Engine
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <span className="hidden xs:flex text-[10px] sm:text-xs bg-primary/20 text-primary border border-primary/40 px-2 sm:px-3 py-1 rounded-full font-bold items-center gap-1">
+              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300" /> <span className="hidden sm:inline">GPT-4o</span> Engine
             </span>
             <Link
               href="/"
-              className="text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-xl transition"
+              className="text-[11px] sm:text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition whitespace-nowrap"
             >
-              Về Trang Chủ
+              Trang Chủ
             </Link>
           </div>
         </div>
