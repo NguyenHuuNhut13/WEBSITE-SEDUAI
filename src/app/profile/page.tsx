@@ -356,20 +356,19 @@ export default function ProfilePage() {
             if (brightness > 175) lightPixels++;
           }
           const avgBrightness = totalBrightness / (data.length / 4);
-          // Thẻ CCCD in chữ đen trên nền sáng có tỷ lệ vùng sáng/vùng tối hài hòa cùng độ sáng trung bình ~120-210
-          // Nếu ảnh quá tối (< 60), quá chói (> 245), hoặc thiếu cấu trúc tương phản (ít vùng sáng nền thẻ & ít vùng tối chữ)
-          if (avgBrightness < 60 || avgBrightness > 245 || (darkPixels < 300 && lightPixels < 800)) {
-            documentScore = 40; // Điểm cấu trúc thấp (ảnh selfie, phong cảnh, đồ vật, hoặc màn hình tối màu)
+          // Chỉ chặn ảnh quá đen hoặc trắng bóc hoàn toàn (< 20 hoặc > 252) để tránh từ chối nhầm ảnh chụp thẻ hơi tối màu
+          if (avgBrightness < 20 || avgBrightness > 252) {
+            documentScore = 15;
           }
         }
       } catch (canvasErr) {
         console.warn('Canvas analysis error:', canvasErr);
       }
 
-      // Nếu chỉ số cấu trúc văn bản quá thấp, từ chối ngay ảnh không phải thẻ giấy tờ
-      if (documentScore < 50) {
+      // Nếu ảnh quá tối mịt hoặc trắng bóc không thể có chữ
+      if (documentScore < 20) {
         setIsOcrScanning(false);
-        const notIdCardMsg = 'Không thể nhận diện thông tin trên thẻ Căn cước công dân từ ảnh tải lên. Vui lòng kiểm tra và tải lên đúng ảnh mặt trước thẻ rõ nét, không tải ảnh chân dung, ảnh chụp màn hình hoặc phong cảnh.';
+        const notIdCardMsg = 'Ảnh tải lên quá tối hoặc quá chói sáng, hệ thống không thể đọc được thông tin trên thẻ. Vui lòng chọn ảnh có ánh sáng tốt và rõ nét hơn.';
         setOcrError(notIdCardMsg);
         showNotification('error', notIdCardMsg);
         return;
