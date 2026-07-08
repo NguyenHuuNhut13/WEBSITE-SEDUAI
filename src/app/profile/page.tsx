@@ -336,6 +336,45 @@ export default function ProfilePage() {
         return;
       }
 
+      // Thẩm định cấu trúc văn bản/giấy tờ CCCD qua mật độ tương phản điểm ảnh (Document Feature Analysis)
+      let documentScore = 100;
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 150;
+        canvas.height = 150;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, 150, 150);
+          const data = ctx.getImageData(0, 0, 150, 150).data;
+          let darkPixels = 0;
+          let lightPixels = 0;
+          let totalBrightness = 0;
+          for (let i = 0; i < data.length; i += 4) {
+            const brightness = (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000;
+            totalBrightness += brightness;
+            if (brightness < 80) darkPixels++;
+            if (brightness > 175) lightPixels++;
+          }
+          const avgBrightness = totalBrightness / (data.length / 4);
+          // Thẻ CCCD in chữ đen trên nền sáng có tỷ lệ vùng sáng/vùng tối hài hòa cùng độ sáng trung bình ~120-210
+          // Nếu ảnh quá tối (< 60), quá chói (> 245), hoặc thiếu cấu trúc tương phản (ít vùng sáng nền thẻ & ít vùng tối chữ)
+          if (avgBrightness < 60 || avgBrightness > 245 || (darkPixels < 300 && lightPixels < 800)) {
+            documentScore = 40; // Điểm cấu trúc thấp (ảnh selfie, phong cảnh, đồ vật, hoặc màn hình tối màu)
+          }
+        }
+      } catch (canvasErr) {
+        console.warn('Canvas analysis error:', canvasErr);
+      }
+
+      // Nếu chỉ số cấu trúc văn bản quá thấp, từ chối ngay ảnh không phải thẻ giấy tờ
+      if (documentScore < 50) {
+        setIsOcrScanning(false);
+        const notIdCardMsg = 'Không thể nhận diện thông tin trên thẻ Căn cước công dân từ ảnh tải lên. Vui lòng kiểm tra và tải lên đúng ảnh mặt trước thẻ rõ nét, không tải ảnh chân dung, ảnh chụp màn hình hoặc phong cảnh.';
+        setOcrError(notIdCardMsg);
+        showNotification('error', notIdCardMsg);
+        return;
+      }
+
       // Quét AI Vision & xử lý OCR qua API
       try {
         const response = await fetch('/api/ocr/cccd', {
@@ -345,6 +384,7 @@ export default function ProfilePage() {
             imageBase64: base64Image,
             imageWidth: img.width,
             imageHeight: img.height,
+            documentScore,
           }),
         });
 

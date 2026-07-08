@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { imageBase64, imageWidth, imageHeight } = await req.json();
+    const { imageBase64, imageWidth, imageHeight, documentScore } = await req.json();
 
     if (!imageBase64 || typeof imageBase64 !== 'string') {
       return NextResponse.json(
@@ -94,24 +94,32 @@ Nếu ảnh ĐÚNG là Mặt trước thẻ CCCD/CMND Việt Nam hợp lệ, hã
     // 2. Local Heuristic & Document Validation Engine (khi OpenAI API hết hạn mức/timeout)
     const base64Len = imageBase64.length;
 
-    // Bẫy lỗi 1: nếu kích thước Base64 quá nhỏ (< 5KB) hoặc hỏng
-    if (base64Len < 5000) {
+    // Kiểm tra kích thước / độ phân giải tệp tối thiểu
+    if (base64Len < 8000 || (imageWidth && imageWidth < 200)) {
       return NextResponse.json({
         success: false,
         isValidCccd: false,
-        error: 'Lỗi bẫy ảnh (Document Trap): Tệp ảnh có dung lượng quá nhỏ, không đủ dữ liệu chi tiết văn bản/vân tay của thẻ Căn cước công dân.',
+        error: 'Ảnh tải lên có độ phân giải hoặc dung lượng quá thấp, hệ thống không thể đọc được văn bản và chi tiết trên thẻ Căn cước công dân.',
       });
     }
 
-    // Bẫy lỗi 2: thẩm định kích thước & tỷ lệ hình học nếu có từ client hoặc trích xuất
-    if (imageWidth && imageHeight) {
-      const aspectRatio = imageWidth / imageHeight;
-      // Nếu là ảnh dọc / selfie (width <= height) hoặc ảnh vuông avatar (aspectRatio < 1.25)
-      if (imageHeight >= imageWidth || aspectRatio < 1.25 || aspectRatio > 2.4) {
+    // Thẩm định chỉ số cấu trúc văn bản/giấy tờ (documentScore) từ bộ phân tích điểm ảnh Canvas
+    if (documentScore !== undefined && documentScore < 60) {
+      return NextResponse.json({
+        success: false,
+        isValidCccd: false,
+        error: 'Không thể nhận diện cấu trúc và thông tin trên thẻ Căn cước công dân từ ảnh tải lên. Vui lòng kiểm tra và tải lên đúng ảnh mặt trước thẻ rõ nét, đầy đủ 4 góc, không tải ảnh chân dung, phong cảnh hoặc ảnh chụp màn hình.',
+      });
+    }
+
+    // Nếu gọi trực tiếp API không có documentScore, phân tích kích thước Buffer để chặn ảnh linh tinh/quá nhỏ
+    if (documentScore === undefined) {
+      const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+      if (cleanBase64.length < 15000) {
         return NextResponse.json({
           success: false,
           isValidCccd: false,
-          error: `Lỗi bẫy ảnh (Document Trap): Từ chối tệp ảnh có tỷ lệ ${aspectRatio.toFixed(2)} (${imageWidth}x${imageHeight}px). Thẻ Căn cước công dân Việt Nam chuẩn phải là hình chữ nhật nằm ngang (tỷ lệ ~1.58:1). Vui lòng chụp/tải ảnh mặt trước nằm ngang!`,
+          error: 'Không thể nhận diện cấu trúc thẻ Căn cước công dân. Vui lòng chọn ảnh chụp rõ nét mặt trước của thẻ.',
         });
       }
     }
