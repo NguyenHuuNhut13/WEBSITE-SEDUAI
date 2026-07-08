@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Bot, Users, GraduationCap, Award, CheckCircle2, Flame } from 'lucide-react';
+import { ArrowRight, Bot, Users, GraduationCap, Award, CheckCircle2 } from 'lucide-react';
 import ChatbotCRM from '@/components/ChatbotCRM';
 import TeacherConsole from '@/components/TeacherConsole';
 import CourseCard from '@/components/CourseCard';
@@ -7,16 +7,6 @@ import { courses } from '@/data/courses';
 
 export default function Home() {
   const featuredCourses = courses.slice(0, 4);
-
-  const steps = [
-    { icon: Bot, title: 'AI CRM', desc: 'Thu hút & Tư vấn' },
-    { icon: Flame, title: 'Chăm sóc', desc: 'Tự động gửi tin' },
-    { icon: Award, title: 'Đăng ký', desc: 'Xếp lớp tự động' },
-    { icon: GraduationCap, title: 'Đào tạo', desc: 'Học cùng AI Tutor' },
-    { icon: CheckCircle2, title: 'Đánh giá', desc: 'Chấm điểm bằng AI' },
-    { icon: Users, title: 'Gia hạn', desc: 'Phân tích nhu cầu' },
-    { icon: ArrowRight, title: 'Giới thiệu', desc: 'Lan tỏa học viên' }
-  ];
 
   return (
     <div className="overflow-hidden">
@@ -113,44 +103,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* AI Systems Cycle Flow */}
-      <section id="features" className="py-16 bg-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-3xl font-extrabold text-slate-900">
-              Chu trình Vận hành Đào tạo bằng AI
-            </h2>
-            <p className="text-slate-500 mt-3 text-base">
-              Từ lúc tiếp cận học viên mới cho đến khi đào tạo thành tài và giới thiệu học viên mới, AI tự động hóa hoàn toàn.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 text-center">
-            {steps.map((step, index) => {
-              const Icon = step.icon;
-              return (
-                <div
-                  key={step.title}
-                  className="bg-slate-50 border border-slate-100 p-4 rounded-2xl relative shadow-sm hover:border-primary/50 transition duration-300 col-span-1 group"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3 text-xl group-hover:scale-110 transition-transform">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <h4 className="text-sm font-bold text-slate-800">{step.title}</h4>
-                  <p className="text-[10px] text-slate-500 mt-1 leading-tight">{step.desc}</p>
-
-                  {index < steps.length - 1 && (
-                    <div className="hidden lg:block absolute top-1/2 -right-3 -translate-y-1/2 z-10 text-slate-300">
-                      <ArrowRight className="w-4 h-4" />
-                    </div>
-                  )}
-                </div>
-              );
-            })}
           </div>
         </div>
       </section>

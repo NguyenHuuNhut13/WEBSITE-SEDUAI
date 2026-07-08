@@ -17,7 +17,7 @@ export default function Navbar() {
   const navLinks = [
     { name: 'Trang chủ', href: '/' },
     { name: 'Khóa học', href: '/courses' },
-    { name: 'Hệ sinh thái AI', href: '/#features' },
+    { name: 'Hệ sinh thái AI', href: '/#ai-crm-demo' },
     { name: 'Liên hệ', href: '/contact' },
   ];
 
@@ -43,7 +43,7 @@ export default function Navbar() {
               const isActive = 
                 link.href === '/' 
                   ? pathname === '/' 
-                  : pathname?.startsWith(link.href) && link.href !== '/#features';
+                  : pathname?.startsWith(link.href) && link.href !== '/#ai-crm-demo';
               return (
                 <Link
                   key={link.name}
@@ -94,7 +94,7 @@ export default function Navbar() {
               const isActive = 
                 link.href === '/' 
                   ? pathname === '/' 
-                  : pathname?.startsWith(link.href) && link.href !== '/#features';
+                  : pathname?.startsWith(link.href) && link.href !== '/#ai-crm-demo';
               return (
                 <Link
                   key={link.name}
