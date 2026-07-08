@@ -83,6 +83,8 @@ export default function Navbar() {
 
   const navLinks = [
     { name: 'Trang chủ', href: '/' },
+    { name: 'Giới thiệu', href: '/about' },
+    { name: 'Sự kiện', href: '/events' },
     { 
       name: 'Khóa học', 
       href: '/courses',
@@ -95,6 +97,8 @@ export default function Navbar() {
         { name: 'Lập trình Python Trẻ Em', href: '/courses/lap-trinh-python-cho-tre-em' },
       ]
     },
+    { name: 'Tính năng AI', href: '/#ai-crm-demo' },
+    { name: 'Tin tức', href: '/blog' },
     { name: 'Liên hệ', href: '/contact' },
   ];
 
