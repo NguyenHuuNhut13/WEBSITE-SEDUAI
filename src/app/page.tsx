@@ -108,7 +108,7 @@ export default function Home() {
       </section>
 
       {/* AI Admissions CRM (Interactive Chat) */}
-      <section id="ai-crm-demo" className="py-20 bg-slate-50">
+      <section id="ai-crm-demo" className="py-20 bg-slate-50 scroll-mt-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Info */}
