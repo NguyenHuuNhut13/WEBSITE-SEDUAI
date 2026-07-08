@@ -19,7 +19,8 @@ export default function CourseCard({ course }: CourseCardProps) {
           src={course.image}
           alt={course.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          loading="lazy"
+          loading="eager"
+          decoding="async"
         />
         {/* Category badge */}
         <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-primary text-white font-bold text-[10px] tracking-wider uppercase shadow-md">

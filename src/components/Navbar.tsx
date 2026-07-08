@@ -260,6 +260,8 @@ export default function Navbar() {
                       src={localSync.avatar}
                       alt={localSync.name}
                       className="w-6 h-6 rounded-full object-cover border border-white/60"
+                      loading="eager"
+                      decoding="async"
                     />
                     <span className="max-w-[90px] truncate font-bold">{localSync.name}</span>
                     <div className="flex items-center gap-0.5 bg-amber-400 text-slate-950 font-extrabold px-1.5 py-0.5 rounded text-[10px] shadow-sm">
@@ -331,7 +333,7 @@ export default function Navbar() {
                   href="/profile"
                   className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white px-2.5 py-1.5 rounded-xl text-xs font-bold transition border border-white/20"
                 >
-                  <img src={localSync.avatar} className="w-5 h-5 rounded-full object-cover border border-white" />
+                  <img src={localSync.avatar} className="w-5 h-5 rounded-full object-cover border border-white" loading="eager" decoding="async" />
                   <span className="text-amber-300 font-extrabold">{localSync.point}p</span>
                 </Link>
               ) : (
@@ -451,6 +453,8 @@ export default function Navbar() {
                           src={localSync.avatar}
                           alt={localSync.name}
                           className="w-10 h-10 rounded-full object-cover border-2 border-primary shadow"
+                          loading="eager"
+                          decoding="async"
                         />
                         <div>
                           <p className="text-xs font-black text-white">{localSync.name}</p>
