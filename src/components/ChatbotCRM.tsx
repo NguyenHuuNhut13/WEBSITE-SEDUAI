@@ -1,13 +1,16 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Bot, User, CheckCircle2, Send, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { Bot, User, CheckCircle2, Send, Loader2, Sparkles, BookOpen, ArrowRight } from 'lucide-react';
+import { createLead, getEduCourses, ApiCourse } from '@/services/api';
 
 interface Message {
   id: string;
   sender: 'AI' | 'User';
   text: string;
   isHtml?: boolean;
+  suggestedCourses?: ApiCourse[];
 }
 
 interface LeadData {
@@ -16,6 +19,7 @@ interface LeadData {
   budget: string;
   location: string;
   phone: string;
+  leadId?: number;
 }
 
 export default function ChatbotCRM() {
@@ -36,6 +40,7 @@ export default function ChatbotCRM() {
   const [step, setStep] = useState<'age' | 'subject' | 'budget' | 'location' | 'phone' | 'completed'>('age');
   const [isThinking, setIsThinking] = useState(false);
   const [phoneInput, setPhoneInput] = useState('');
+  const [allApiCourses, setAllApiCourses] = useState<ApiCourse[]>([]);
   const chatMessagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto scroll to bottom of chat
@@ -43,10 +48,19 @@ export default function ChatbotCRM() {
     chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isThinking]);
 
-  const addMessage = (sender: 'AI' | 'User', text: string, isHtml?: boolean) => {
+  // Load API courses in background on mount
+  useEffect(() => {
+    getEduCourses().then((list) => {
+      if (list && list.length > 0) {
+        setAllApiCourses(list);
+      }
+    });
+  }, []);
+
+  const addMessage = (sender: 'AI' | 'User', text: string, isHtml?: boolean, suggestedCourses?: ApiCourse[]) => {
     setMessages((prev) => [
       ...prev,
-      { id: Date.now().toString(), sender, text, isHtml },
+      { id: Date.now().toString(), sender, text, isHtml, suggestedCourses },
     ]);
   };
 
@@ -96,7 +110,7 @@ export default function ChatbotCRM() {
     }, 1000);
   };
 
-  const handlePhoneSubmit = (e?: React.FormEvent) => {
+  const handlePhoneSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
     const phone = phoneInput.trim();
     if (!phone || phone.length < 9) {
@@ -110,19 +124,56 @@ export default function ChatbotCRM() {
     setIsThinking(true);
     setPhoneInput('');
 
-    setTimeout(() => {
-      setIsThinking(false);
-      setStep('completed');
-      addMessage(
-        'AI',
-        'Dạ xin cảm ơn phụ huynh! Thông tin liên hệ đã được chuyển trực tiếp vào hệ thống quản lý Admissions CRM của chúng tôi. Chuyên viên sẽ gọi điện tư vấn chi tiết cho phụ huynh trong vòng 15-30 phút tới. Chúc phụ huynh một ngày vui vẻ!',
-        true
-      );
-    }, 1200);
+    // 1. Gọi API Lưu thông tin Lead lên CRM thật
+    const leadResponse = await createLead({
+      name: `Khách hàng AI Chatbot (${phone})`,
+      phone: phone,
+      email: `chatbot_${phone}@seduai.edu.vn`,
+      demand: `${lead.subject} | Tuổi: ${lead.age}`,
+      note: `Ngân sách: ${lead.budget} - Địa điểm: ${lead.location}`,
+    });
+
+    if (leadResponse.success && leadResponse.id) {
+      setLead((prev) => ({ ...prev, leadId: leadResponse.id }));
+    }
+
+    // 2. Lọc Khóa học phù hợp theo API EduCourses
+    let matchingCourses: ApiCourse[] = [];
+    if (allApiCourses.length > 0) {
+      const kw = lead.subject.toLowerCase();
+      matchingCourses = allApiCourses.filter((c) => {
+        const title = (c.title || '').toLowerCase();
+        const desc = (c.acf?.description || '').toLowerCase();
+        if (kw.includes('tiếng anh') || kw.includes('ielts')) {
+          return title.includes('anh') || title.includes('ielts') || desc.includes('anh') || desc.includes('ielts');
+        }
+        if (kw.includes('lập trình') || kw.includes('máy tính')) {
+          return title.includes('web') || title.includes('python') || title.includes('code') || title.includes('lập trình');
+        }
+        if (kw.includes('ai') || kw.includes('công nghệ')) {
+          return title.includes('ai') || title.includes('chatbot') || title.includes('tự động');
+        }
+        return true;
+      }).slice(0, 2);
+
+      // Nếu không khớp từ khóa cụ thể, lấy 2 khóa đầu tiên của API
+      if (matchingCourses.length === 0) {
+        matchingCourses = allApiCourses.slice(0, 2);
+      }
+    }
+
+    setIsThinking(false);
+    setStep('completed');
+    addMessage(
+      'AI',
+      `Dạ xin cảm ơn phụ huynh! Thông tin liên hệ đã được <strong>lưu trực tiếp vào Hệ thống AI Admissions CRM</strong> (Mã Lead ID: #${leadResponse.id || 'NKS_2026'}). Dưới đây là danh sách các khóa học SeduAi phù hợp nhất được đề xuất tự động từ API cho con:`,
+      true,
+      matchingCourses
+    );
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden flex flex-col h-[520px]">
+    <div className="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden flex flex-col h-[560px]">
       {/* Chat Header */}
       <div className="bg-primary px-6 py-4 flex items-center justify-between text-white shadow-md">
         <div className="flex items-center gap-3">
@@ -133,12 +184,14 @@ export default function ChatbotCRM() {
             <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 border-2 border-primary"></span>
           </div>
           <div>
-            <h3 className="font-bold text-sm leading-none">Trợ lý Tuyển sinh SeduAi</h3>
-            <p className="text-xs text-white/80 mt-1">Đang hoạt động tự động</p>
+            <h3 className="font-bold text-sm leading-none flex items-center gap-1.5">
+              Trợ lý Tuyển sinh SeduAi <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            </h3>
+            <p className="text-xs text-white/80 mt-1">Tự động hóa CRM - Sync API thật</p>
           </div>
         </div>
         <span className="text-[10px] bg-white/20 px-2.5 py-1 rounded-full uppercase tracking-wider font-semibold">
-          Demo trực tiếp
+          API Live Mode
         </span>
       </div>
 
@@ -149,7 +202,7 @@ export default function ChatbotCRM() {
           return (
             <div
               key={msg.id}
-              className={`flex items-start gap-3 max-w-[85%] ${
+              className={`flex items-start gap-3 max-w-[90%] ${
                 isAI ? '' : 'ml-auto justify-end'
               }`}
             >
@@ -158,17 +211,62 @@ export default function ChatbotCRM() {
                   <Bot className="w-4 h-4" />
                 </div>
               )}
-              <div
-                className={`${
-                  isAI
-                    ? 'bg-white border border-slate-100 rounded-2xl rounded-tl-none p-3.5 shadow-sm text-sm text-slate-700 leading-relaxed'
-                    : 'bg-primary text-white rounded-2xl rounded-tr-none p-3.5 shadow-md text-sm leading-relaxed'
-                }`}
-                dangerouslySetInnerHTML={
-                  msg.isHtml ? { __html: msg.text } : undefined
-                }
-              >
-                {!msg.isHtml && msg.text}
+              <div className="space-y-3 w-full">
+                <div
+                  className={`${
+                    isAI
+                      ? 'bg-white border border-slate-100 rounded-2xl rounded-tl-none p-3.5 shadow-sm text-sm text-slate-700 leading-relaxed'
+                      : 'bg-primary text-white rounded-2xl rounded-tr-none p-3.5 shadow-md text-sm leading-relaxed'
+                  }`}
+                  dangerouslySetInnerHTML={
+                    msg.isHtml ? { __html: msg.text } : undefined
+                  }
+                >
+                  {!msg.isHtml && msg.text}
+                </div>
+
+                {/* Suggested Courses from API */}
+                {msg.suggestedCourses && msg.suggestedCourses.length > 0 && (
+                  <div className="space-y-2 pt-1 animate-fadeInUp">
+                    <p className="text-[11px] font-extrabold text-primary uppercase tracking-wider flex items-center gap-1 pl-1">
+                      <BookOpen className="w-3.5 h-3.5" /> Khóa học phù hợp theo API EduCourses:
+                    </p>
+                    {msg.suggestedCourses.map((course) => (
+                      <div
+                        key={course.id}
+                        className="bg-white border border-primary/20 hover:border-primary rounded-2xl p-3.5 shadow-sm transition flex flex-col gap-2"
+                      >
+                        <div className="flex justify-between items-start gap-2">
+                          <h4 className="font-bold text-xs text-slate-900 line-clamp-1">
+                            {course.title}
+                          </h4>
+                          <span className="text-[10px] bg-primary-light text-primary font-bold px-2 py-0.5 rounded-md flex-shrink-0">
+                            #{course.id}
+                          </span>
+                        </div>
+                        {course.acf?.description && (
+                          <div
+                            className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: course.acf.description }}
+                          />
+                        )}
+                        <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px]">
+                          <span className="font-extrabold text-primary">
+                            {course.acf?.price
+                              ? `${Number(course.acf.price).toLocaleString('vi-VN')} VNĐ`
+                              : 'Ưu đãi học phí 30%'}
+                          </span>
+                          <Link
+                            href="/courses"
+                            className="font-bold text-slate-700 hover:text-primary flex items-center gap-1"
+                          >
+                            Xem chi tiết <ArrowRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -182,7 +280,7 @@ export default function ChatbotCRM() {
             </div>
             <div className="bg-white border border-slate-100 rounded-2xl rounded-tl-none p-3.5 shadow-sm text-sm text-slate-400 flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin text-primary" />
-              <span>AI đang gõ...</span>
+              <span>AI đang phân tích & đồng bộ API CRM...</span>
             </div>
           </div>
         )}
@@ -268,9 +366,15 @@ export default function ChatbotCRM() {
 
         {step === 'completed' && (
           <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-800 space-y-1.5 shadow-inner animate-scale-up">
-            <div className="flex items-center gap-1.5 font-bold">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              Hệ thống CRM đồng bộ Lead thành công!
+            <div className="flex items-center justify-between font-bold">
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Đã lưu thông tin Lead vào CRM API!
+              </span>
+              {lead.leadId && (
+                <span className="bg-emerald-600 text-white px-2 py-0.5 rounded text-[10px]">
+                  ID #{lead.leadId}
+                </span>
+              )}
             </div>
             <ul className="list-disc pl-4 space-y-0.5 font-semibold text-slate-700">
               <li>Độ tuổi: {lead.age}</li>

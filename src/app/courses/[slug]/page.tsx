@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { courses } from '@/data/courses';
 import CourseCard from '@/components/CourseCard';
+import { createLead } from '@/services/api';
 
 type TabKey = 'overview' | 'syllabus' | 'reviews' | 'instructor';
 
@@ -49,12 +50,21 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
     }));
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.email) {
       alert('Vui lòng điền đầy đủ thông tin!');
       return;
     }
+
+    // Call NKS SCRMAI createLead API
+    await createLead({
+      name: formData.name,
+      phone: formData.phone,
+      email: formData.email,
+      demand: `Đăng ký khóa học: ${course.title}`,
+      note: `Khoá học ID/Slug: ${course.slug} | Giá: ${course.discount_price} VNĐ`,
+    });
 
     setIsModalOpen(false);
     setShowToast(true);

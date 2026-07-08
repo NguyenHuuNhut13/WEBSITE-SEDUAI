@@ -4,6 +4,7 @@ import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
+import Providers from '@/components/Providers';
 
 const inter = Inter({
   subsets: ['latin', 'vietnamese'],
@@ -24,10 +25,12 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${inter.variable} h-full scroll-smooth`}>
       <body className="font-sans antialiased text-slate-800 bg-slate-50 min-h-full flex flex-col">
-        <ScrollToTop />
-        <Navbar />
-        <main className="flex-grow">{children}</main>
-        <Footer />
+        <Providers>
+          <ScrollToTop />
+          <Navbar />
+          <main className="flex-grow">{children}</main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );
