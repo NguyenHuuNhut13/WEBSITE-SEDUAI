@@ -20,6 +20,14 @@ import {
   Calendar,
   Phone,
   Mail,
+  ZoomIn,
+  ZoomOut,
+  RotateCw,
+  Scan,
+  Eye,
+  Check,
+  X,
+  Sliders,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import {
@@ -76,6 +84,16 @@ export default function ProfilePage() {
   });
   const [frontBase64, setFrontBase64] = useState<string>('');
   const [backBase64, setBackBase64] = useState<string>('');
+
+  // Avatar Alignment & Cropping Studio State
+  const [avatarZoom, setAvatarZoom] = useState<number>(1);
+  const [avatarRotate, setAvatarRotate] = useState<number>(0);
+  const [avatarPanX, setAvatarPanX] = useState<number>(0);
+  const [avatarPanY, setAvatarPanY] = useState<number>(0);
+
+  // AI OCR Scanner & Error Trap State
+  const [isOcrScanning, setIsOcrScanning] = useState<boolean>(false);
+  const [ocrError, setOcrError] = useState<string | null>(null);
 
   useEffect(() => {
     // Load Provinces
@@ -217,6 +235,110 @@ export default function ProfilePage() {
       showNotification('success', 'Đã cập nhật mật khẩu mới cho tài khoản thành viên SeduAi!');
     } else {
       showNotification('error', res.message || 'Lỗi khi cập nhật mật khẩu.');
+    }
+  };
+
+  // TAB 3: Interactive Avatar Alignment & Crop Engine
+  const handleApplyAvatarCrop = () => {
+    if (!avatarPreview) return;
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = avatarPreview;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 300;
+      canvas.height = 300;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Nền trắng chuẩn ảnh thẻ
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+      // Di chuyển đến tâm canvas kết hợp pan căn chỉnh
+      ctx.translate(canvas.width / 2 + avatarPanX * 1.5, canvas.height / 2 + avatarPanY * 1.5);
+      // Xoay ảnh theo độ
+      ctx.rotate((avatarRotate * Math.PI) / 180);
+      // Thu phóng
+      ctx.scale(avatarZoom, avatarZoom);
+
+      // Tính toán tỷ lệ khung hình
+      const scaleBase = Math.max(canvas.width / img.width, canvas.height / img.height);
+      const drawWidth = img.width * scaleBase;
+      const drawHeight = img.height * scaleBase;
+
+      ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+      ctx.restore();
+
+      const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      setAvatarBase64(croppedDataUrl);
+      setAvatarPreview(croppedDataUrl);
+      setAvatarZoom(1);
+      setAvatarRotate(0);
+      setAvatarPanX(0);
+      setAvatarPanY(0);
+      showNotification('success', 'Đã áp dụng căn chỉnh và cắt chuẩn ảnh thẻ tròn Avatar!');
+    };
+  };
+
+  // TAB 4: AI OCR CCCD Scanner & Validation Trap
+  const handleScanCccdOcr = async (base64Image: string) => {
+    if (!base64Image) {
+      showNotification('error', 'Vui lòng chọn ảnh Mặt trước Thẻ CCCD trước khi quét AI OCR.');
+      return;
+    }
+
+    setIsOcrScanning(true);
+    setOcrError(null);
+
+    try {
+      const response = await fetch('/api/ocr/cccd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: base64Image }),
+      });
+
+      const res = await response.json();
+      setIsOcrScanning(false);
+
+      if (!res.isValidCccd || !res.success) {
+        // Bẫy lỗi ảnh: nếu người dùng tải lên ảnh mèo, phong cảnh, mờ nhòe, hoặc không đúng CCCD
+        const errMsg = res.error || 'Cảnh báo Bẫy lỗi OCR: Ảnh tải lên không phải là Mặt trước thẻ Căn cước công dân Việt Nam hợp lệ. Vui lòng tải đúng ảnh thẻ rõ nét!';
+        setOcrError(errMsg);
+        showNotification('error', errMsg);
+        return;
+      }
+
+      // Quét thành công: Trích xuất và điền tự động dữ liệu vào form
+      setOcrError(null);
+      showNotification('success', 'Quét AI OCR thành công! Đã kiểm chứng thẻ CCCD hợp lệ và điền tự động các trường.');
+
+      setCccdForm((prev) => ({
+        ...prev,
+        number: res.id_number || prev.number,
+        date: res.date || prev.date,
+        place: res.place || prev.place,
+      }));
+
+      if (res.fullname || res.dob || res.gender) {
+        const parts = (res.fullname || '').trim().split(' ');
+        const last = parts.slice(0, -1).join(' ');
+        const first = parts.slice(-1)[0] || parts[0] || '';
+
+        setInfoForm((prev) => ({
+          ...prev,
+          firstname: first || prev.firstname,
+          lastname: last || prev.lastname,
+          dob: res.dob || prev.dob,
+          gender: res.gender === 'Nam' ? 1 : res.gender === 'Nữ' ? 0 : prev.gender,
+        }));
+      }
+    } catch (err: any) {
+      setIsOcrScanning(false);
+      const errMsg = 'Lỗi kết nối khi quét AI OCR. Vui lòng thử lại sau.';
+      setOcrError(errMsg);
+      showNotification('error', errMsg);
     }
   };
 
@@ -650,34 +772,79 @@ export default function ProfilePage() {
               </div>
             )}
 
-            {/* TAB 3: Avatar Base64 */}
+            {/* TAB 3: Avatar Base64 & Interactive Alignment Studio */}
             {activeTab === 'avatar' && (
               <div className="space-y-6 animate-fadeInUp">
                 <div className="border-b border-slate-100 pb-4">
-                  <h2 className="text-lg font-black text-slate-900">Cập nhật ảnh đại diện (`User Update Avatar`)</h2>
+                  <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <Sliders className="w-5 h-5 text-primary" /> Căn chỉnh & Cập nhật ảnh đại diện (`Update & Align Avatar`)
+                  </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Tự động chuyển đổi sang định dạng <strong>Base64</strong> chuẩn theo yêu cầu NKS API
+                    Hỗ trợ <strong>Thu phóng (Zoom)</strong>, <strong>Xoay (Rotate)</strong> và <strong>Căn chỉnh tâm mặt</strong> trước khi chuyển sang định dạng Base64
                   </p>
                 </div>
 
-                <div className="flex flex-col md:flex-row items-center gap-8 py-4">
-                  <div className="text-center space-y-2">
-                    <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-primary/20 shadow-xl mx-auto relative group">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start py-2">
+                  {/* Left: Interactive Circular Preview & Alignment Viewport */}
+                  <div className="lg:col-span-5 bg-slate-900 rounded-3xl p-6 text-center text-white shadow-xl space-y-4 border border-slate-800">
+                    <span className="inline-block px-3 py-1 bg-primary/20 text-primary-light font-bold text-[10px] uppercase tracking-widest rounded-full border border-primary/30">
+                      Khung xem trước căn chỉnh
+                    </span>
+
+                    <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-white/80 shadow-2xl mx-auto relative bg-slate-950 flex items-center justify-center group cursor-move">
                       <img
                         src={avatarPreview || localSync.avatar}
-                        alt="Avatar Preview"
-                        className="w-full h-full object-cover"
+                        alt="Avatar Live Preview"
+                        style={{
+                          transform: `scale(${avatarZoom}) rotate(${avatarRotate}deg) translate(${avatarPanX}px, ${avatarPanY}px)`,
+                          transition: 'transform 0.1s ease-out',
+                        }}
+                        className="w-full h-full object-cover select-none pointer-events-none"
                       />
+                      {/* Grid crosshair guide overlay */}
+                      <div className="absolute inset-0 border border-white/20 rounded-full pointer-events-none flex items-center justify-center">
+                        <div className="w-full h-[1px] bg-white/20 absolute"></div>
+                        <div className="h-full w-[1px] bg-white/20 absolute"></div>
+                      </div>
                     </div>
-                    <p className="text-[11px] font-bold text-slate-500">Ảnh đại diện hiện tại / Xem trước</p>
+
+                    <p className="text-[11px] font-medium text-slate-400">
+                      Sử dụng các thanh điều hướng bên dưới để đặt tâm gương mặt vào chính giữa khung tròn
+                    </p>
+
+                    {avatarPreview && (
+                      <div className="pt-2 flex flex-wrap gap-2 justify-center">
+                        <button
+                          type="button"
+                          onClick={handleApplyAvatarCrop}
+                          className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl shadow-md transition flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Check className="w-4 h-4" /> Áp dụng căn chỉnh & Cắt tròn
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAvatarZoom(1);
+                            setAvatarRotate(0);
+                            setAvatarPanX(0);
+                            setAvatarPanY(0);
+                          }}
+                          className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition cursor-pointer"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" /> Đặt lại
+                        </button>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex-grow space-y-4 w-full">
-                    <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:border-primary transition bg-slate-50/50">
-                      <Upload className="w-8 h-8 text-primary mx-auto mb-2" />
-                      <p className="text-xs font-bold text-slate-700">Chọn ảnh mới từ thiết bị</p>
+                  {/* Right: Upload File & Alignment Controls Studio */}
+                  <div className="lg:col-span-7 space-y-6">
+                    {/* File Uploader */}
+                    <div className="border-2 border-dashed border-slate-200 rounded-2xl p-5 text-center hover:border-primary transition bg-slate-50/70">
+                      <Upload className="w-7 h-7 text-primary mx-auto mb-2" />
+                      <p className="text-xs font-bold text-slate-700">1. Chọn ảnh gốc từ máy tính / điện thoại</p>
                       <p className="text-[11px] text-slate-400 mt-0.5">
-                        Hỗ trợ PNG, JPG, WEBP. Ảnh sẽ được chuyển đổi tự động sang chuỗi Base64.
+                        PNG, JPG, WEBP độ phân giải cao để căn chỉnh nét nhất
                       </p>
                       <input
                         type="file"
@@ -687,6 +854,10 @@ export default function ProfilePage() {
                             handleFileToBase64(e.target.files[0], (base64) => {
                               setAvatarBase64(base64);
                               setAvatarPreview(base64);
+                              setAvatarZoom(1);
+                              setAvatarRotate(0);
+                              setAvatarPanX(0);
+                              setAvatarPanY(0);
                             });
                           }
                         }}
@@ -697,75 +868,235 @@ export default function ProfilePage() {
                         htmlFor="avatar-upload"
                         className="inline-block mt-3 px-5 py-2 bg-white border border-slate-300 hover:border-primary text-slate-700 hover:text-primary font-bold text-xs rounded-xl cursor-pointer shadow-sm transition"
                       >
-                        Duyệt tệp ảnh...
+                        Duyệt chọn ảnh mới...
                       </label>
                     </div>
 
-                    {avatarBase64 && (
-                      <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 space-y-1">
-                        <p className="font-bold flex items-center gap-1.5">
-                          <CheckCircle className="w-4 h-4 text-emerald-600" /> Đã chuyển đổi sang chuỗi Base64!
-                        </p>
-                        <p className="font-mono text-[10px] text-slate-500 truncate">
-                          {avatarBase64.slice(0, 80)}... [Base64 Encoded]
-                        </p>
+                    {/* Interactive Alignment Controls Studio */}
+                    {avatarPreview && (
+                      <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                        <h3 className="text-xs font-black text-slate-800 flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                          <Sliders className="w-4 h-4 text-primary" /> 2. Bảng điều hướng căn chỉnh (`Alignment Controls`)
+                        </h3>
+
+                        {/* Zoom Control */}
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between items-center text-xs font-bold text-slate-700">
+                            <span className="flex items-center gap-1">
+                              <ZoomIn className="w-3.5 h-3.5 text-slate-500" /> Thu phóng (Zoom):
+                            </span>
+                            <span className="text-primary font-mono">{avatarZoom.toFixed(1)}x</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              onClick={() => setAvatarZoom((z) => Math.max(1, +(z - 0.1).toFixed(1)))}
+                              className="p-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition"
+                            >
+                              <ZoomOut className="w-4 h-4" />
+                            </button>
+                            <input
+                              type="range"
+                              min="1"
+                              max="3"
+                              step="0.1"
+                              value={avatarZoom}
+                              onChange={(e) => setAvatarZoom(parseFloat(e.target.value))}
+                              className="w-full accent-primary h-2 bg-slate-200 rounded-lg cursor-pointer"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setAvatarZoom((z) => Math.min(3, +(z + 0.1).toFixed(1)))}
+                              className="p-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700 transition"
+                            >
+                              <ZoomIn className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Rotation Control */}
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between items-center text-xs font-bold text-slate-700">
+                            <span className="flex items-center gap-1">
+                              <RotateCw className="w-3.5 h-3.5 text-slate-500" /> Xoay góc (Rotation):
+                            </span>
+                            <span className="text-primary font-mono">{avatarRotate}°</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="range"
+                              min="-180"
+                              max="180"
+                              step="5"
+                              value={avatarRotate}
+                              onChange={(e) => setAvatarRotate(parseInt(e.target.value, 10))}
+                              className="w-full accent-primary h-2 bg-slate-200 rounded-lg cursor-pointer"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setAvatarRotate((r) => (r + 90) % 360)}
+                              className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold shrink-0 transition"
+                            >
+                              +90°
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Pan Horizontal (X) */}
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center text-xs font-bold text-slate-700">
+                            <span>Di chuyển Ngang (Pan X):</span>
+                            <span className="font-mono text-slate-500">{avatarPanX}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="-80"
+                            max="80"
+                            step="2"
+                            value={avatarPanX}
+                            onChange={(e) => setAvatarPanX(parseInt(e.target.value, 10))}
+                            className="w-full accent-primary h-2 bg-slate-200 rounded-lg cursor-pointer"
+                          />
+                        </div>
+
+                        {/* Pan Vertical (Y) */}
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center text-xs font-bold text-slate-700">
+                            <span>Di chuyển Dọc (Pan Y):</span>
+                            <span className="font-mono text-slate-500">{avatarPanY}px</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="-80"
+                            max="80"
+                            step="2"
+                            value={avatarPanY}
+                            onChange={(e) => setAvatarPanY(parseInt(e.target.value, 10))}
+                            className="w-full accent-primary h-2 bg-slate-200 rounded-lg cursor-pointer"
+                          />
+                        </div>
                       </div>
                     )}
 
-                    <button
-                      onClick={handleSaveAvatar}
-                      disabled={!avatarBase64 || isLoading}
-                      className="px-6 py-3 bg-primary hover:bg-primary-dark disabled:bg-slate-300 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer"
-                    >
-                      <Save className="w-4 h-4" /> {isLoading ? 'Đang gửi Base64 lên API...' : 'Lưu Avatar (Base64)'}
-                    </button>
+                    {avatarBase64 && (
+                      <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-800 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 font-bold">
+                          <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
+                          <span>Ảnh đã sẵn sàng (Base64 Encoded Chuẩn NKS API)!</span>
+                        </div>
+                        <span className="text-[10px] font-mono bg-emerald-100 px-2 py-0.5 rounded text-emerald-700">
+                          {Math.round(avatarBase64.length / 1024)} KB
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="pt-2">
+                      <button
+                        onClick={handleSaveAvatar}
+                        disabled={!avatarBase64 || isLoading}
+                        className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-dark disabled:bg-slate-300 text-white font-black text-xs rounded-xl shadow-lg shadow-primary/25 transition flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <Save className="w-4 h-4" /> {isLoading ? 'Đang gửi Base64 lên API...' : '3. Hoàn tất & Lưu Avatar chính thức'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* TAB 4: CCCD Base64 */}
+            {/* TAB 4: CCCD Base64 & AI OCR Scanner */}
             {activeTab === 'cccd' && (
               <div className="space-y-6 animate-fadeInUp">
-                <div className="border-b border-slate-100 pb-4">
-                  <h2 className="text-lg font-black text-slate-900">Xác thực CCCD (`User Update CCCD`)</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Cập nhật mặt trước (`front`), mặt sau (`back`) dưới dạng Base64 và thông tin định danh
-                  </p>
+                <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                      <Scan className="w-5 h-5 text-primary" /> Xác thực CCCD & Quét AI OCR Tự động điền (`CCCD AI OCR`)
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Hệ thống tự động kiểm tra tính hợp lệ và bóc tách dữ liệu sang các trường ngay khi tải ảnh <strong>Mặt trước</strong>
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Thử nghiệm bẫy lỗi ảnh không hợp lệ (ví dụ ảnh tự sướng/phong cảnh)
+                      setOcrError('Cảnh báo Bẫy lỗi OCR: Ảnh tải lên không phải là Mặt trước Thẻ Căn cước công dân Việt Nam hợp lệ. Không tìm thấy Quốc huy hay chữ CĂN CƯỚC CÔNG DÂN. Vui lòng tải đúng ảnh thẻ rõ nét!');
+                      showNotification('error', 'Bẫy lỗi OCR: Từ chối ảnh thẻ không hợp lệ!');
+                    }}
+                    className="px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs rounded-xl border border-red-200 transition flex items-center gap-1.5 shrink-0 cursor-pointer"
+                  >
+                    <AlertCircle className="w-4 h-4 text-red-600" /> Thử nghiệm Bẫy lỗi ảnh (Test Error Trap)
+                  </button>
                 </div>
 
+                {/* OCR Error Trap Alert Box */}
+                {ocrError && (
+                  <div className="p-4 bg-red-50 border-2 border-red-300 rounded-2xl flex items-start gap-3.5 animate-shake shadow-sm">
+                    <AlertCircle className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
+                    <div className="flex-grow text-xs text-red-900 space-y-1">
+                      <p className="font-black text-sm text-red-700">Hệ thống thẩm định từ chối ảnh (`Document Trap Alert`):</p>
+                      <p className="font-semibold leading-relaxed">{ocrError}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setOcrError(null)}
+                      className="p-1 text-red-500 hover:text-red-700 font-bold"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+
+                {/* OCR Scanning Banner */}
+                {isOcrScanning && (
+                  <div className="p-4 bg-primary/10 border border-primary/30 rounded-2xl flex items-center gap-3 animate-pulse text-xs font-bold text-primary-dark">
+                    <RefreshCw className="w-5 h-5 animate-spin text-primary shrink-0" />
+                    <span>Hệ thống AI Vision đang bóc tách OCR và thẩm định tính hợp lệ của thẻ Căn cước...</span>
+                  </div>
+                )}
+
                 <form onSubmit={handleSaveCccd} className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700">Số CCCD (`number`) *</label>
+                      <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                        <span>Số CCCD (`number`) *</span>
+                        {cccdForm.number && <span className="text-[10px] text-emerald-600 font-extrabold flex items-center gap-0.5"><Check className="w-3 h-3" /> OCR Auto-filled</span>}
+                      </label>
                       <input
                         type="text"
                         required
                         value={cccdForm.number}
                         onChange={(e) => setCccdForm({ ...cccdForm, number: e.target.value })}
                         placeholder="079099123456"
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary font-mono bg-slate-50"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-primary font-mono bg-white shadow-sm font-bold text-slate-900"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700">Ngày cấp (`date`) *</label>
+                      <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                        <span>Ngày cấp (`date`) *</span>
+                        {cccdForm.date && <span className="text-[10px] text-emerald-600 font-extrabold flex items-center gap-0.5"><Check className="w-3 h-3" /> OCR Auto-filled</span>}
+                      </label>
                       <input
                         type="date"
                         required
                         value={cccdForm.date}
                         onChange={(e) => setCccdForm({ ...cccdForm, date: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary bg-slate-50"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-primary bg-white shadow-sm font-bold text-slate-900"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700">Nơi cấp (`place`) *</label>
+                      <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
+                        <span>Nơi cấp (`place`) *</span>
+                        {cccdForm.place && <span className="text-[10px] text-emerald-600 font-extrabold flex items-center gap-0.5"><Check className="w-3 h-3" /> OCR Auto-filled</span>}
+                      </label>
                       <input
                         type="text"
                         required
                         value={cccdForm.place}
                         onChange={(e) => setCccdForm({ ...cccdForm, place: e.target.value })}
                         placeholder="Cục Cảnh sát QLHC về TTXH"
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary bg-slate-50"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-primary bg-white shadow-sm font-bold text-slate-900"
                       />
                     </div>
                   </div>
@@ -773,17 +1104,31 @@ export default function ProfilePage() {
                   {/* Upload Front & Back */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
                     {/* Front card */}
-                    <div className="border border-slate-200 rounded-2xl p-4 space-y-3 bg-slate-50/50">
-                      <p className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                        <CreditCard className="w-4 h-4 text-primary" /> Ảnh Mặt Trước (`front` Base64) *
-                      </p>
-                      <div className="h-44 rounded-xl bg-slate-100 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center overflow-hidden relative">
+                    <div className="border border-slate-200 rounded-2xl p-4 space-y-3 bg-slate-50/50 hover:border-primary/50 transition">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                          <CreditCard className="w-4 h-4 text-primary" /> Ảnh Mặt Trước (`front` Base64) *
+                        </p>
+                        {frontBase64 && (
+                          <button
+                            type="button"
+                            onClick={() => handleScanCccdOcr(frontBase64)}
+                            disabled={isOcrScanning}
+                            className="px-2.5 py-1 bg-primary hover:bg-primary-dark text-white font-bold text-[10px] rounded-lg shadow-sm transition flex items-center gap-1 cursor-pointer"
+                          >
+                            <Scan className="w-3 h-3" /> Quét lại OCR
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="h-44 rounded-xl bg-slate-100 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center overflow-hidden relative group">
                         {frontBase64 ? (
                           <img src={frontBase64} alt="CCCD Front" className="w-full h-full object-cover" />
                         ) : (
                           <div className="text-center p-4">
-                            <Upload className="w-6 h-6 text-slate-400 mx-auto mb-1" />
-                            <span className="text-[11px] text-slate-500 font-semibold">Chưa có ảnh mặt trước</span>
+                            <Upload className="w-6 h-6 text-slate-400 mx-auto mb-1 group-hover:scale-110 transition" />
+                            <span className="text-[11px] text-slate-500 font-semibold block">Chưa có ảnh mặt trước</span>
+                            <span className="text-[9px] text-primary font-bold mt-0.5 block">Tải lên sẽ tự động quét AI OCR</span>
                           </div>
                         )}
                       </div>
@@ -794,29 +1139,33 @@ export default function ProfilePage() {
                         className="hidden"
                         onChange={(e) => {
                           if (e.target.files && e.target.files[0]) {
-                            handleFileToBase64(e.target.files[0], (base64) => setFrontBase64(base64));
+                            handleFileToBase64(e.target.files[0], (base64) => {
+                              setFrontBase64(base64);
+                              // Tự động quét OCR ngay khi vừa tải ảnh mặt trước
+                              handleScanCccdOcr(base64);
+                            });
                           }
                         }}
                       />
                       <label
                         htmlFor="cccd-front"
-                        className="block text-center py-2 bg-white border border-slate-300 hover:border-primary rounded-xl text-xs font-bold text-slate-700 cursor-pointer shadow-sm transition"
+                        className="block text-center py-2.5 bg-white border border-slate-300 hover:border-primary rounded-xl text-xs font-bold text-slate-700 hover:text-primary cursor-pointer shadow-sm transition"
                       >
-                        {frontBase64 ? 'Chọn lại mặt trước...' : 'Tải lên mặt trước (Base64)...'}
+                        {frontBase64 ? 'Chọn lại mặt trước & Quét OCR...' : 'Tải lên mặt trước (Base64 + Auto OCR)...'}
                       </label>
                     </div>
 
                     {/* Back card */}
-                    <div className="border border-slate-200 rounded-2xl p-4 space-y-3 bg-slate-50/50">
+                    <div className="border border-slate-200 rounded-2xl p-4 space-y-3 bg-slate-50/50 hover:border-primary/50 transition">
                       <p className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                         <CreditCard className="w-4 h-4 text-primary" /> Ảnh Mặt Sau (`back` Base64) *
                       </p>
-                      <div className="h-44 rounded-xl bg-slate-100 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center overflow-hidden relative">
+                      <div className="h-44 rounded-xl bg-slate-100 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center overflow-hidden relative group">
                         {backBase64 ? (
                           <img src={backBase64} alt="CCCD Back" className="w-full h-full object-cover" />
                         ) : (
                           <div className="text-center p-4">
-                            <Upload className="w-6 h-6 text-slate-400 mx-auto mb-1" />
+                            <Upload className="w-6 h-6 text-slate-400 mx-auto mb-1 group-hover:scale-110 transition" />
                             <span className="text-[11px] text-slate-500 font-semibold">Chưa có ảnh mặt sau</span>
                           </div>
                         )}
@@ -834,7 +1183,7 @@ export default function ProfilePage() {
                       />
                       <label
                         htmlFor="cccd-back"
-                        className="block text-center py-2 bg-white border border-slate-300 hover:border-primary rounded-xl text-xs font-bold text-slate-700 cursor-pointer shadow-sm transition"
+                        className="block text-center py-2.5 bg-white border border-slate-300 hover:border-primary rounded-xl text-xs font-bold text-slate-700 hover:text-primary cursor-pointer shadow-sm transition"
                       >
                         {backBase64 ? 'Chọn lại mặt sau...' : 'Tải lên mặt sau (Base64)...'}
                       </label>
@@ -844,10 +1193,10 @@ export default function ProfilePage() {
                   <div className="pt-2">
                     <button
                       type="submit"
-                      disabled={isLoading}
-                      className="px-6 py-3 bg-primary hover:bg-primary-dark disabled:bg-slate-300 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer"
+                      disabled={isLoading || isOcrScanning}
+                      className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-dark disabled:bg-slate-300 text-white font-black text-xs rounded-xl shadow-lg shadow-primary/25 transition flex items-center justify-center gap-2 cursor-pointer"
                     >
-                      <Save className="w-4 h-4" /> {isLoading ? 'Đang gửi CCCD Base64 lên API...' : 'Lưu thông tin & CCCD Base64'}
+                      <Save className="w-4 h-4" /> {isLoading ? 'Đang gửi CCCD Base64 lên API...' : '4. Hoàn tất & Lưu hồ sơ định danh CCCD'}
                     </button>
                   </div>
                 </form>
