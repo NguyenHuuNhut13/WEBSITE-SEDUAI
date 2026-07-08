@@ -3,7 +3,66 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Brain, MessageSquare, Phone, Mail, ChevronDown } from 'lucide-react';
+import { Menu, X, Brain, Phone, Mail, MapPin, ChevronDown, Search } from 'lucide-react';
+
+const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+  </svg>
+);
+
+const TwitterIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+  </svg>
+);
+
+const LinkedinIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+    <rect x="2" y="9" width="4" height="12" />
+    <circle cx="4" cy="4" r="2" />
+  </svg>
+);
+
+const YoutubeIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
+    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
+    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
+  </svg>
+);
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,61 +100,100 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Top Utility Bar - Edutech Premium Style */}
-      <div className="bg-slate-950 text-slate-400 text-[11px] py-2.5 border-b border-slate-900 hidden sm:block">
+      {/* Top Utility Bar - Edutech Exact Layout */}
+      <div className="bg-slate-900 text-slate-300 py-3 border-b border-slate-800 hidden lg:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          {/* Left info with circular outline icons */}
           <div className="flex items-center gap-6">
-            <span className="flex items-center gap-1.5">
-              <Phone className="w-3.5 h-3.5 text-primary" /> 
-              Hotline: <strong className="text-slate-200">1900 1234</strong>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-primary" /> 
-              Email: <a href="mailto:contact@seduai.edu.vn" className="text-slate-200 hover:text-primary transition duration-150">contact@seduai.edu.vn</a>
-            </span>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full border border-primary bg-white flex items-center justify-center text-primary shadow-sm">
+                <MapPin className="w-4 h-4" />
+              </div>
+              <span className="text-[11px]">
+                <span className="text-slate-500 block leading-none">Địa chỉ</span>
+                <strong className="text-slate-300 font-semibold">Quận 10, TP. Hồ Chí Minh</strong>
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full border border-primary bg-white flex items-center justify-center text-primary shadow-sm">
+                <Mail className="w-4 h-4" />
+              </div>
+              <span className="text-[11px]">
+                <span className="text-slate-500 block leading-none">Email</span>
+                <a href="mailto:contact@seduai.edu.vn" className="text-slate-300 font-semibold hover:text-primary transition">
+                  contact@seduai.edu.vn
+                </a>
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-full border border-primary bg-white flex items-center justify-center text-primary shadow-sm">
+                <Phone className="w-4 h-4" />
+              </div>
+              <span className="text-[11px]">
+                <span className="text-slate-500 block leading-none">Hotline</span>
+                <strong className="text-slate-300 font-semibold">1900 1234</strong>
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-4 font-medium">
-            <span>Giờ làm việc: 8:00 - 21:00</span>
-            <span className="text-slate-800">|</span>
-            <Link href="/#ai-crm-demo" className="text-primary hover:text-white transition duration-150 font-bold">
-              Tư vấn AI Tuyển sinh 24/7
-            </Link>
+
+          {/* Right Social icons */}
+          <div className="flex items-center gap-2">
+            <a href="#" className="w-7 h-7 rounded-full border border-slate-700 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white hover:border-primary transition duration-150">
+              <FacebookIcon className="w-3.5 h-3.5" />
+            </a>
+            <a href="#" className="w-7 h-7 rounded-full border border-slate-700 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white hover:border-primary transition duration-150">
+              <TwitterIcon className="w-3.5 h-3.5" />
+            </a>
+            <a href="#" className="w-7 h-7 rounded-full border border-slate-700 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white hover:border-primary transition duration-150">
+              <LinkedinIcon className="w-3.5 h-3.5" />
+            </a>
+            <a href="#" className="w-7 h-7 rounded-full border border-slate-700 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white hover:border-primary transition duration-150">
+              <YoutubeIcon className="w-3.5 h-3.5" />
+            </a>
           </div>
         </div>
       </div>
 
-      <header className="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50 transition-all duration-300">
+      {/* Main Header Navbar - Edutech Blue Layout */}
+      <header className="bg-primary sticky top-0 z-50 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            {/* Logo */}
-            <div className="flex-shrink-0 flex items-center">
+            {/* Left: White Logo block */}
+            <div className="h-full bg-white px-8 flex items-center border-b-4 border-primary-dark">
               <Link href="/" onClick={() => handleLinkClick('/')} className="flex items-center space-x-2">
-                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-md shadow-primary/20">
-                  <Brain className="w-6 h-6" />
+                <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-md shadow-primary/20">
+                  <Brain className="w-5 h-5" />
                 </div>
-                <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
-                  Sedu<span className="text-primary">Ai</span>
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-xl font-black tracking-tight text-slate-900 leading-none">
+                    Sedu<span className="text-primary">Ai</span>
+                  </span>
+                  <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                    Education
+                  </span>
+                </div>
               </Link>
             </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex space-x-8 text-sm font-semibold items-center h-full">
+            {/* Center: Desktop Navigation Links */}
+            <nav className="hidden md:flex space-x-8 text-xs font-bold uppercase tracking-wider items-center h-full text-white/90">
               {navLinks.map((link) => {
                 if (link.submenu) {
                   return (
                     <div key={link.name} className="relative group flex items-center h-full cursor-pointer py-7">
-                      <span className="text-slate-600 hover:text-primary transition duration-200 flex items-center gap-1">
-                        {link.name} <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-primary transition duration-200" />
+                      <span className="hover:text-white transition duration-150 flex items-center gap-1">
+                        {link.name} <ChevronDown className="w-3.5 h-3.5 text-white/60 group-hover:text-white transition duration-150" />
                       </span>
                       {/* Dropdown Menu - Edutech Style */}
-                      <div className="absolute top-full left-0 w-64 bg-white border border-slate-100 rounded-2xl shadow-xl py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                      <div className="absolute top-full left-0 w-64 bg-white border border-slate-100 rounded-b-2xl shadow-xl py-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                         {link.submenu.map((sub) => (
                           <Link
                             key={sub.name}
                             href={sub.href}
                             onClick={() => handleLinkClick(sub.href)}
-                            className="block px-5 py-2.5 text-[11px] font-bold text-slate-700 hover:bg-primary-light hover:text-primary transition"
+                            className="block px-5 py-2.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50 hover:text-primary border-b border-slate-50 last:border-0 transition"
                           >
                             {sub.name}
                           </Link>
@@ -110,8 +208,8 @@ export default function Navbar() {
                     key={link.name}
                     href={link.href}
                     onClick={() => handleLinkClick(link.href)}
-                    className={`transition duration-200 ${
-                      isActive ? 'text-primary' : 'text-slate-600 hover:text-primary'
+                    className={`transition duration-150 ${
+                      isActive ? 'text-white font-extrabold border-b-2 border-white py-7' : 'hover:text-white'
                     }`}
                   >
                     {link.name}
@@ -120,28 +218,23 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* Desktop CTA Buttons */}
-            <div className="hidden md:flex items-center space-x-4">
-              <Link
-                href="/#ai-crm-demo"
-                className="px-5 py-2.5 rounded-full bg-primary-light text-primary font-bold text-sm hover:bg-primary hover:text-white transition-all duration-300 shadow-sm flex items-center gap-2"
-              >
-                <MessageSquare className="w-4 h-4" /> Chat với AI
-              </Link>
-              <Link
-                href="/courses"
-                onClick={() => handleLinkClick('/courses')}
-                className="px-5 py-2.5 rounded-full bg-primary text-white font-bold text-sm hover:bg-primary-dark transition-all duration-300 shadow-md shadow-primary/10"
-              >
-                Học thử ngay
-              </Link>
+            {/* Right: Search box in Navbar */}
+            <div className="hidden lg:flex items-center max-w-[200px]">
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  placeholder="Tìm khóa học..."
+                  className="w-full bg-white/10 hover:bg-white/15 focus:bg-white/20 border border-white/20 rounded-md pl-4 pr-10 py-1.5 text-xs text-white placeholder-white/60 focus:outline-none transition"
+                />
+                <Search className="w-4 h-4 text-white/60 absolute right-3 top-1/2 -translate-y-1/2" />
+              </div>
             </div>
 
             {/* Mobile Menu Button */}
             <div className="flex items-center md:hidden">
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-xl text-slate-500 hover:text-primary hover:bg-slate-100 focus:outline-none transition duration-200"
+                className="inline-flex items-center justify-center p-2 rounded-xl text-white hover:bg-white/10 focus:outline-none transition duration-200"
               >
                 {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
@@ -187,22 +280,6 @@ export default function Navbar() {
                   </Link>
                 );
               })}
-              
-              <div className="pt-4 border-t border-slate-100 flex flex-col gap-3">
-                <Link
-                  href="/#ai-crm-demo"
-                  className="w-full text-center px-5 py-3 rounded-xl bg-primary-light text-primary font-bold text-sm flex items-center justify-center gap-2"
-                >
-                  <MessageSquare className="w-4 h-4" /> Chat với AI Tuyển sinh
-                </Link>
-                <Link
-                  href="/courses"
-                  onClick={() => handleLinkClick('/courses')}
-                  className="w-full text-center px-5 py-3 rounded-xl bg-primary text-white font-bold text-sm shadow-md shadow-primary/10"
-                >
-                  Đăng ký học thử
-                </Link>
-              </div>
             </div>
           </div>
         )}
