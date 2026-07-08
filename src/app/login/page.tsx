@@ -42,10 +42,21 @@ export default function LoginPage() {
     try {
       const res = await loginUser(username, password);
 
-      // 1. Kiểm tra nếu máy chủ NKS trả về thành công hoặc có thông tin tài khoản NKS
-      if (res.access_token || res.userInfo || res.success) {
-        const token = res.access_token || `seduai_token_${Date.now()}`;
-        const info = res.userInfo || res.data || {
+      // 1. Kiểm tra nếu máy chủ NKS trả về thành công (200 OK / success: true / có token hoặc userInfo)
+      const isApiSuccess =
+        res.success === true ||
+        res.code === 200 ||
+        res.status === 200 ||
+        Boolean(res.access_token) ||
+        Boolean(res.token) ||
+        (Boolean(res.userInfo) && !res.error) ||
+        (Boolean(res.user) && !res.error) ||
+        (Boolean(res.data) && (res.data.access_token || res.data.token || res.data.userInfo || res.data.user || res.data.id));
+
+      if (isApiSuccess) {
+        const token = res.access_token || res.token || res.data?.access_token || res.data?.token || `seduai_nks_token_${Date.now()}`;
+        const rawUser = res.userInfo || res.user || res.data?.userInfo || res.data?.user || (res.data?.id || res.data?.username ? res.data : null);
+        const info = rawUser || {
           username,
           name: username === 'demo_student' ? 'Học viên Demo SeduAi' : username,
           point: 500,
@@ -58,33 +69,26 @@ export default function LoginPage() {
         localStorage.setItem('seduai_remembered_user', username);
         router.push('/profile');
       } else {
-        // 2. CƠ CHẾ HYBRID AUTH (Hệ thống SeduAi Local Account):
-        // Nếu API NKS báo "Tài khoản không tồn tại" hoặc lỗi 500 (do đây là tài khoản mới của học viên SeduAi),
-        // chúng ta xác thực ngay cho học viên trên hệ thống SeduAi mà KHÔNG bắt buộc phải dùng tài khoản demo_student!
-        const isDemo = username.toLowerCase() === 'demo_student';
-        const displayName = isDemo
-          ? 'Học viên Demo SeduAi'
-          : username.includes('@')
-          ? username.split('@')[0]
-          : username;
-
-        const token = `seduai_token_${Date.now()}`;
-        const customInfo = {
-          username: username,
-          name: displayName,
-          firstname: displayName.split(' ').slice(-1)[0] || displayName,
-          lastname: displayName.split(' ').slice(0, -1).join(' ') || 'Thành viên',
-          point: isDemo ? 500 : 350,
-          email: username.includes('@') ? username : `${username}@seduai.edu.vn`,
-          phone: '0901234567',
-          avatar: isDemo
-            ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80'
-            : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(username)}`,
-        };
-
-        login(token, customInfo);
-        localStorage.setItem('seduai_remembered_user', username);
-        router.push('/profile');
+        // Nếu API NKS báo lỗi (Sai mật khẩu, tài khoản không đúng...), hiển thị chính xác thông báo từ API NKS
+        // Riêng tài khoản demo_student (khi bấm nút dùng thử Demo), hỗ trợ đăng nhập ngay nếu API NKS chưa có sẵn
+        if (username.toLowerCase() === 'demo_student') {
+          const token = `seduai_demo_token_${Date.now()}`;
+          const customInfo = {
+            username: 'demo_student',
+            name: 'Học viên Demo SeduAi',
+            firstname: 'Demo',
+            lastname: 'Học viên',
+            point: 500,
+            email: 'demo@seduai.edu.vn',
+            phone: '0901234567',
+            avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80',
+          };
+          login(token, customInfo);
+          localStorage.setItem('seduai_remembered_user', 'demo_student');
+          router.push('/profile');
+        } else {
+          setError(res.error || res.message || 'Tài khoản hoặc mật khẩu API không chính xác.');
+        }
       }
     } catch (err: any) {
       setError('Đã xảy ra lỗi kết nối. Vui lòng thử lại sau.');

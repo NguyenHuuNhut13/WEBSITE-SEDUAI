@@ -16,23 +16,25 @@ export async function POST(req: Request) {
       signal: AbortSignal.timeout(8000),
     });
 
-    // Nếu server NKS trả về lỗi 500 hoặc 4xx, chúng ta đọc text/json hoặc trả lại kết quả an toàn thay vì crash CORS/network
-    if (!res.ok) {
+    const text = await res.text();
+    let json: any = null;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      json = { success: res.ok, raw: text };
+    }
+
+    if (!res.ok && !json.error && !json.message) {
       console.warn(`[Proxy Account] NKS server responded with status ${res.status} for action: ${action || 'root'}`);
       return NextResponse.json({
         success: false,
         code: res.status,
         error: `Máy chủ NKS trả về mã ${res.status}`,
+        ...json,
       });
     }
 
-    const text = await res.text();
-    try {
-      const json = JSON.parse(text);
-      return NextResponse.json(json);
-    } catch {
-      return NextResponse.json({ success: true, raw: text });
-    }
+    return NextResponse.json(json);
   } catch (error: any) {
     console.error('[Proxy Account] Error:', error.message);
     return NextResponse.json({

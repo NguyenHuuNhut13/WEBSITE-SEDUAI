@@ -74,9 +74,12 @@ export interface UserInfo {
 export interface LoginResponse {
   success?: boolean;
   code?: number;
+  status?: number | string;
   message?: string;
   access_token?: string;
+  token?: string;
   userInfo?: UserInfo;
+  user?: UserInfo;
   data?: any;
   error?: string;
 }
