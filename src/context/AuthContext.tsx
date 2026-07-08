@@ -61,15 +61,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAccessToken(storedToken);
         setUser(parsedUser);
 
-        // Nâng cấp dữ liệu ngầm từ API
+        // Nâng cấp dữ liệu ngầm từ API (Chỉ cập nhật nếu đúng tài khoản, không ghi đè thành demo_student)
         fetchUserInfo(storedToken).then((freshUser) => {
-          if (freshUser) {
+          if (freshUser && (!freshUser.username || freshUser.username === parsedUser.username || parsedUser.username === 'demo_student')) {
             setUser(freshUser);
             localStorage.setItem('seduai_user_info', JSON.stringify(freshUser));
             const syncData: LocalSyncData = {
-              name: freshUser.name || `${freshUser.lastname || ''} ${freshUser.firstname || ''}`.trim() || freshUser.username || 'Thành viên SeduAi',
-              avatar: freshUser.avatar || defaultLocalSync.avatar,
-              point: freshUser.point ?? 250,
+              name: freshUser.name || `${freshUser.lastname || ''} ${freshUser.firstname || ''}`.trim() || freshUser.username || parsedUser.name || 'Thành viên SeduAi',
+              avatar: freshUser.avatar || parsedUser.avatar || defaultLocalSync.avatar,
+              point: freshUser.point ?? parsedUser.point ?? 300,
             };
             setLocalSync(syncData);
             localStorage.setItem('seduai_local_sync', JSON.stringify(syncData));
@@ -104,6 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('seduai_access_token');
     localStorage.removeItem('seduai_user_info');
     localStorage.removeItem('seduai_local_sync');
+    localStorage.removeItem('seduai_remembered_user');
   };
 
   const updateUser = (data: Partial<UserInfo>) => {
