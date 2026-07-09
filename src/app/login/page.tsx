@@ -69,54 +69,13 @@ export default function LoginPage() {
         localStorage.setItem('seduai_remembered_user', username);
         router.push('/profile');
       } else {
-        // Nếu API NKS báo lỗi (Sai mật khẩu, tài khoản không đúng...), hiển thị chính xác thông báo từ API NKS
-        // Riêng tài khoản demo_student (khi bấm nút dùng thử Demo), hỗ trợ đăng nhập ngay nếu API NKS chưa có sẵn
-        if (username.toLowerCase() === 'demo_student') {
-          const token = `seduai_demo_token_${Date.now()}`;
-          const customInfo = {
-            username: 'demo_student',
-            name: 'Học viên Demo SeduAi',
-            firstname: 'Demo',
-            lastname: 'Học viên',
-            point: 500,
-            email: 'demo@seduai.edu.vn',
-            phone: '0901234567',
-            avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80',
-          };
-          login(token, customInfo);
-          localStorage.setItem('seduai_remembered_user', 'demo_student');
-          router.push('/profile');
-        } else if (username.toLowerCase() === 'demo_teacher') {
-          const token = `seduai_demo_token_${Date.now()}`;
-          const customInfo = {
-            username: 'demo_teacher',
-            name: 'Giảng viên Demo SeduAi',
-            firstname: 'Demo',
-            lastname: 'Giảng viên',
-            point: 999,
-            email: 'teacher@seduai.edu.vn',
-            phone: '0907654321',
-            avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
-            role: 'teacher'
-          };
-          login(token, customInfo);
-          localStorage.setItem('seduai_remembered_user', 'demo_teacher');
-          router.push('/profile');
-        } else {
-          setError(res.error || res.message || 'Tài khoản hoặc mật khẩu API không chính xác.');
-        }
+        setError(res.error || res.message || 'Tài khoản hoặc mật khẩu API không chính xác.');
       }
     } catch (err: any) {
       setError('Đã xảy ra lỗi kết nối. Vui lòng thử lại sau.');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleUseDemoAccount = () => {
-    setUsername('demo_student');
-    setPassword('SeduAi@2026');
-    setError(null);
   };
 
   const handleSwitchAccount = () => {
@@ -230,29 +189,8 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Demo trigger & Security note */}
-        <div className="mt-6 pt-6 border-t border-slate-100 text-center space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={handleUseDemoAccount}
-              className="py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <User className="w-3.5 h-3.5 text-slate-500" /> Học Viên Demo
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setUsername('demo_teacher');
-                setPassword('SeduAi@2026');
-                setError(null);
-              }}
-              className="py-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-600" /> Giáo Viên Demo
-            </button>
-          </div>
-
+        {/* Security note */}
+        <div className="mt-6 pt-6 border-t border-slate-100 text-center">
           <p className="text-[11px] text-slate-400">
             Dữ liệu tài khoản được bảo mật và đồng bộ từ hệ thống quản trị NKS Account API.
           </p>
