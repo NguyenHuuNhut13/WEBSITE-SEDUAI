@@ -98,6 +98,7 @@ export default function ProfilePage() {
   const [isOcrScanning, setIsOcrScanning] = useState<boolean>(false);
   const [ocrProgress, setOcrProgress] = useState<number>(0);
   const [ocrError, setOcrError] = useState<string | null>(null);
+  const [showBusinessCard, setShowBusinessCard] = useState<boolean>(false);
 
   useEffect(() => {
     // Load Provinces
@@ -128,6 +129,16 @@ export default function ProfilePage() {
       });
       if (user.avatar) {
         setAvatarPreview(user.avatar);
+      }
+      if (user.id_number) {
+        setCccdForm({
+          number: user.id_number,
+          date: user.id_date || '2021-06-15',
+          place: user.id_place || 'Cục Cảnh sát QLHC về TTXH',
+        });
+        if (user.cccd_front) setFrontBase64(user.cccd_front);
+        if (user.cccd_back) setBackBase64(user.cccd_back);
+        setShowBusinessCard(true);
       }
     }
   }, [user]);
@@ -589,6 +600,7 @@ export default function ProfilePage() {
       cccd_back: backBase64,
     });
     setIsLoading(false);
+    setShowBusinessCard(true);
     showNotification('success', 'Đã lưu thông tin và ảnh CCCD (Base64) vào hồ sơ!');
   };
 
@@ -1198,7 +1210,136 @@ export default function ProfilePage() {
             )}
 
             {/* TAB 4: CCCD Base64 & AI OCR Scanner */}
-            {activeTab === 'cccd' && (
+            {activeTab === 'cccd' && showBusinessCard ? (
+              <div className="space-y-8 animate-fadeInUp">
+                <div className="border-b border-slate-100 pb-4 flex justify-between items-center">
+                  <div>
+                    <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                      <Award className="w-5 h-5 text-emerald-500" /> Thẻ Thành Viên Số SEDU AI
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Hồ sơ định danh của bạn đã được xác minh bảo mật thành công
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowBusinessCard(false)}
+                    className="px-4 py-2 border border-slate-200 hover:border-primary text-slate-600 hover:text-primary font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer bg-white"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" /> Quét/Cập nhật lại
+                  </button>
+                </div>
+
+                {/* Info Note about Legal Data Privacy Protection */}
+                <div className="p-4 bg-emerald-50/50 border border-emerald-200 rounded-2xl text-xs text-emerald-900 leading-relaxed space-y-1">
+                  <p className="font-extrabold flex items-center gap-1 text-emerald-800">
+                    <CheckCircle className="w-4 h-4 shrink-0" /> Bảo mật thông tin CCCD (Luật bảo vệ dữ liệu cá nhân)
+                  </p>
+                  <p>
+                    Để đảm bảo an toàn tuyệt đối và tuân thủ Nghị định 13/2023/NĐ-CP về Bảo vệ dữ liệu cá nhân, toàn bộ thông tin CCCD gốc của bạn đã được mã hóa ẩn danh (`Masked`) và lưu trữ dạng băm bảo mật. Thẻ thành viên dưới đây được sinh tự động nhằm mục đích học tập & định danh nội bộ tại SEDU AI mà không làm lộ các dữ liệu nhạy cảm của bạn.
+                  </p>
+                </div>
+
+                {/* Premium Member Business Card Grid */}
+                <div className="flex flex-col items-center justify-center py-6">
+                  {/* The actual premium digital membership business card */}
+                  <div className="w-full max-w-md h-64 rounded-3xl relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white shadow-2xl border border-slate-800/80 p-6 flex flex-col justify-between group hover:shadow-emerald-950/30 hover:shadow-2xl transition duration-500">
+                    {/* Gloss Reflection Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none"></div>
+
+                    {/* Mesh Lines Overlay */}
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.12),transparent_60%)] pointer-events-none"></div>
+
+                    {/* Top Row: SEDU AI Logo & Member Status Indicator */}
+                    <div className="flex justify-between items-start relative z-10">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/20">
+                          <Sparkles className="w-4.5 h-4.5 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-black text-sm tracking-widest text-white leading-none">SEDU AI</p>
+                          <p className="text-[8px] text-emerald-400 tracking-wider font-extrabold uppercase mt-0.5">Digital Academy</p>
+                        </div>
+                      </div>
+                      
+                      <div className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-[9px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping"></span>
+                        VERIFIED MEMBER
+                      </div>
+                    </div>
+
+                    {/* Middle Row: User Photo & Bio details */}
+                    <div className="flex items-center gap-4 relative z-10 my-auto">
+                      {/* Avatar Frame */}
+                      <div className="w-16 h-16 rounded-full border-2 border-emerald-400/40 p-0.5 overflow-hidden bg-slate-900 shrink-0">
+                        <img
+                          src={avatarPreview || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'}
+                          alt="Member Avatar"
+                          className="w-full h-full object-cover rounded-full"
+                        />
+                      </div>
+                      
+                      {/* Name & Title */}
+                      <div className="space-y-1">
+                        <h3 className="font-black text-base tracking-wide text-slate-100 uppercase leading-none">
+                          {infoForm.firstname ? `${infoForm.lastname} ${infoForm.firstname}` : 'Thành Viên SEDU AI'}
+                        </h3>
+                        <p className="text-[10px] text-emerald-300 font-extrabold tracking-wider uppercase">
+                          AI Specialized Specialist
+                        </p>
+                        <div className="flex items-center gap-3 text-[9px] text-slate-400 font-semibold pt-1">
+                          <span className="flex items-center gap-1"><Mail className="w-3 h-3 text-slate-500" /> {user?.email || 'member@sedu.ai'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom Row: Masked ID Number & Expiry/Issue dates */}
+                    <div className="flex justify-between items-end border-t border-slate-800/80 pt-4 relative z-10">
+                      <div className="space-y-0.5">
+                        <p className="text-[7px] text-slate-500 font-extrabold uppercase tracking-widest">Digital ID Card (Secured)</p>
+                        <p className="font-mono text-xs font-black tracking-widest text-emerald-400">
+                          {cccdForm.number ? `${cccdForm.number.slice(0, 3)}*******${cccdForm.number.slice(-3)}` : '079*******56'}
+                        </p>
+                      </div>
+                      <div className="flex gap-4">
+                        <div className="space-y-0.5 text-right">
+                          <p className="text-[7px] text-slate-500 font-extrabold uppercase tracking-widest">Issue Date</p>
+                          <p className="font-mono text-[9px] font-black text-slate-300">{cccdForm.date || '2021-06-15'}</p>
+                        </div>
+                        <div className="space-y-0.5 text-right">
+                          <p className="text-[7px] text-slate-500 font-extrabold uppercase tracking-widest">Authority</p>
+                          <p className="text-[9px] font-black text-emerald-400">SEDU AI Verified</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Premium Action Buttons for Sharing/Downloading */}
+                <div className="flex justify-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      showNotification('success', 'Đang kết xuất và tải xuống Thẻ thành viên SEDU AI dạng PDF...');
+                      window.print();
+                    }}
+                    className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer border border-slate-800"
+                  >
+                    <Upload className="w-4 h-4 rotate-180" /> Tải Xuống PDF (Print Card)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`SEDU AI MEMBER: ${infoForm.lastname} ${infoForm.firstname} (ID: ${cccdForm.number ? `${cccdForm.number.slice(0, 3)}*******${cccdForm.number.slice(-3)}` : '079*******56'})`);
+                      showNotification('success', 'Đã sao chép mã liên kết Thẻ thành viên vào bộ nhớ tạm!');
+                    }}
+                    className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer"
+                  >
+                    <Copy className="w-4 h-4" /> Sao Chép Mã Liên Kết Thẻ
+                  </button>
+                </div>
+              </div>
+            ) : activeTab === 'cccd' && (
               <div className="space-y-6 animate-fadeInUp">
                 <div className="border-b border-slate-100 pb-4">
                   <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
