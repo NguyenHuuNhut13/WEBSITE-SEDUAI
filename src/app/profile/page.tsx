@@ -295,7 +295,8 @@ export default function ProfilePage() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       ctx.save();
-      ctx.translate(canvas.width / 2 + avatarPanX * 1.5, canvas.height / 2 + avatarPanY * 1.5);
+      const scaleMultiplier = canvas.width / 256;
+      ctx.translate(canvas.width / 2 + avatarPanX * scaleMultiplier, canvas.height / 2 + avatarPanY * scaleMultiplier);
       ctx.rotate((avatarRotate * Math.PI) / 180);
       ctx.scale(avatarZoom, avatarZoom);
 
@@ -1098,7 +1099,7 @@ export default function ProfilePage() {
                           src={avatarPreview}
                           alt="Avatar Studio Live"
                           style={{
-                            transform: `scale(${avatarZoom}) rotate(${avatarRotate}deg) translate(${avatarPanX}px, ${avatarPanY}px)`,
+                            transform: `translate(${avatarPanX}px, ${avatarPanY}px) rotate(${avatarRotate}deg) scale(${avatarZoom})`,
                             transition: isAvatarDragging ? 'none' : 'transform 0.15s ease-out',
                           }}
                           className="w-full h-full object-cover select-none pointer-events-none"
@@ -1117,12 +1118,12 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Minimalist Controls Bar */}
-                    <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 md:p-5 max-w-lg mx-auto space-y-4">
+                    <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 md:p-5 max-w-lg mx-auto space-y-5">
                       {/* Zoom Slider */}
                       <div className="flex items-center gap-3">
                         <button
                           type="button"
-                          onClick={() => setAvatarZoom((z) => Math.max(1, +(z - 0.1).toFixed(1)))}
+                          onClick={() => setAvatarZoom((z) => Math.max(0.2, +(z - 0.1).toFixed(2)))}
                           className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-slate-300 hover:text-white transition cursor-pointer shrink-0"
                           title="Thu nhỏ (`Zoom Out`)"
                         >
@@ -1131,13 +1132,13 @@ export default function ProfilePage() {
                         <div className="flex-grow space-y-1">
                           <div className="flex justify-between items-center text-[11px] font-bold text-slate-300 px-1">
                             <span>Thu phóng (`Zoom`)</span>
-                            <span className="text-primary-light font-mono font-black">{avatarZoom.toFixed(1)}x</span>
+                            <span className="text-primary-light font-mono font-black">{avatarZoom.toFixed(2)}x</span>
                           </div>
                           <input
                             type="range"
-                            min="1"
-                            max="3"
-                            step="0.05"
+                            min="0.2"
+                            max="5"
+                            step="0.01"
                             value={avatarZoom}
                             onChange={(e) => setAvatarZoom(parseFloat(e.target.value))}
                             className="w-full accent-primary h-2 bg-slate-950 rounded-lg cursor-pointer"
@@ -1145,11 +1146,46 @@ export default function ProfilePage() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => setAvatarZoom((z) => Math.min(3, +(z + 0.1).toFixed(1)))}
+                          onClick={() => setAvatarZoom((z) => Math.min(5, +(z + 0.1).toFixed(2)))}
                           className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-slate-300 hover:text-white transition cursor-pointer shrink-0"
                           title="Phóng to (`Zoom In`)"
                         >
                           <ZoomIn className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Continuous Rotation Slider */}
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setAvatarRotate((r) => Math.max(-180, r - 5))}
+                          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-slate-300 hover:text-white transition cursor-pointer shrink-0"
+                          title="Xoay trái"
+                        >
+                          <RotateCw className="w-4 h-4 -scale-x-100" />
+                        </button>
+                        <div className="flex-grow space-y-1">
+                          <div className="flex justify-between items-center text-[11px] font-bold text-slate-300 px-1">
+                            <span>Góc xoay (`Rotation`)</span>
+                            <span className="text-primary-light font-mono font-black">{avatarRotate}°</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="-180"
+                            max="180"
+                            step="1"
+                            value={avatarRotate}
+                            onChange={(e) => setAvatarRotate(parseInt(e.target.value))}
+                            className="w-full accent-primary h-2 bg-slate-950 rounded-lg cursor-pointer"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setAvatarRotate((r) => Math.min(180, r + 5))}
+                          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-slate-300 hover:text-white transition cursor-pointer shrink-0"
+                          title="Xoay phải"
+                        >
+                          <RotateCw className="w-4 h-4" />
                         </button>
                       </div>
 
@@ -1161,7 +1197,7 @@ export default function ProfilePage() {
                             onClick={() => setAvatarRotate((r) => (r + 90) % 360)}
                             className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer text-[11px]"
                           >
-                            <RotateCw className="w-3.5 h-3.5 text-primary-light" /> Xoay ảnh 90°
+                            <RotateCw className="w-3.5 h-3.5 text-primary-light" /> Xoay nhanh 90°
                           </button>
                           <button
                             type="button"
