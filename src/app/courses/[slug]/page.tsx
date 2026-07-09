@@ -56,7 +56,7 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
           if (found) {
             const mapped: Course = {
               slug: `api-course-${found.id}`,
-              title: found.title,
+              title: typeof found.title === 'object' && found.title !== null && 'rendered' in found.title ? (found.title as any).rendered : String(found.title || ''),
               description: found.acf?.description?.replace(/<[^>]*>/g, '') || 'Khóa học chính thức từ hệ thống SeduAi EduCenter.',
               instructor: found.acf?.expactteacher || 'Giảng viên SeduAi',
               level: (found.acf?.type as any) || 'Mọi trình độ',

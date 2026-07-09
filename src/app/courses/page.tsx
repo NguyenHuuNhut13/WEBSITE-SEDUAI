@@ -21,7 +21,7 @@ export default function CourseList() {
       if (list && list.length > 0) {
         const mapped: Course[] = list.map((c: ApiCourse) => ({
           slug: `api-course-${c.id}`,
-          title: c.title,
+          title: typeof c.title === 'object' && c.title !== null && 'rendered' in c.title ? (c.title as any).rendered : String(c.title || ''),
           description: c.acf?.description?.replace(/<[^>]*>/g, '') || 'Khóa học chính thức từ hệ thống SeduAi EduCenter.',
           instructor: c.acf?.expactteacher || 'Giảng viên SeduAi',
           level: (c.acf?.type as any) || 'Mọi trình độ',
