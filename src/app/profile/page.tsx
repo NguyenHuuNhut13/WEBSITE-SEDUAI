@@ -356,25 +356,25 @@ export default function ProfilePage() {
             if (brightness > 175) lightPixels++;
           }
           const avgBrightness = totalBrightness / (data.length / 4);
-          // Chỉ chặn ảnh quá đen hoặc trắng bóc hoàn toàn (< 20 hoặc > 252) để tránh từ chối nhầm ảnh chụp thẻ hơi tối màu
-          if (avgBrightness < 20 || avgBrightness > 252) {
-            documentScore = 15;
+          // Chỉ chặn ảnh đen thui hoặc trắng xóa (< 10 hoặc > 254) để không bao giờ từ chối nhầm ảnh chụp thẻ CCCD hơi tối/sáng
+          if (avgBrightness < 10 || avgBrightness > 254) {
+            documentScore = 8;
           }
         }
       } catch (canvasErr) {
         console.warn('Canvas analysis error:', canvasErr);
       }
 
-      // Nếu ảnh quá tối mịt hoặc trắng bóc không thể có chữ
-      if (documentScore < 20) {
+      // Nếu ảnh đen thui/trắng xóa hoàn toàn không thể có chữ
+      if (documentScore < 10) {
         setIsOcrScanning(false);
-        const notIdCardMsg = 'Ảnh tải lên quá tối hoặc quá chói sáng, hệ thống không thể đọc được thông tin trên thẻ. Vui lòng chọn ảnh có ánh sáng tốt và rõ nét hơn.';
+        const notIdCardMsg = 'Ảnh tải lên quá tối hoặc trắng xóa, hệ thống không thể nhìn thấy văn bản trên thẻ. Vui lòng chọn ảnh có ánh sáng tốt và rõ nét hơn.';
         setOcrError(notIdCardMsg);
         showNotification('error', notIdCardMsg);
         return;
       }
 
-      // Quét AI Vision & xử lý OCR qua API với thời gian chờ tối đa 5s để không bao giờ bị quay vô tận
+      // Quét AI Vision & xử lý OCR qua API với thời gian chờ 10s (đủ cho ảnh CCCD thực tế quét Tesseract mượt mà không bị ngắt sớm)
       try {
         const response = await fetch('/api/ocr/cccd', {
           method: 'POST',
@@ -385,7 +385,7 @@ export default function ProfilePage() {
             imageHeight: img.height,
             documentScore,
           }),
-          signal: AbortSignal.timeout(5000),
+          signal: AbortSignal.timeout(10000),
         });
 
         const res = await response.json();

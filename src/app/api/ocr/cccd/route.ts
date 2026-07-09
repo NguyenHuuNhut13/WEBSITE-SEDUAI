@@ -44,7 +44,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 2. Trích xuất OCR thực tế bằng Tesseract.js với thời gian chờ tối đa 2.8s để không bao giờ bị treo khi up ảnh sai
+    // 2. Trích xuất OCR thực tế bằng Tesseract.js với thời gian chờ 8s (đủ cho ảnh CCCD dung lượng cao không bị ngắt sớm, mà vẫn không bị treo vô tận khi up ảnh sai)
     let ocrText = '';
     try {
       const Tesseract = (await import('tesseract.js')).default || (await import('tesseract.js'));
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
       }).then((res: any) => res?.data?.text || '');
 
       const timeoutPromise = new Promise<string>((_, reject) =>
-        setTimeout(() => reject(new Error('OCR_TIMEOUT_INVALID_IMAGE')), 2800)
+        setTimeout(() => reject(new Error('OCR_TIMEOUT_INVALID_IMAGE')), 8000)
       );
 
       ocrText = await Promise.race([recognizePromise, timeoutPromise]);
@@ -65,21 +65,22 @@ export async function POST(req: Request) {
         return NextResponse.json({
           success: false,
           isValidCccd: false,
-          error: 'Ảnh tải lên quá phức tạp hoặc không có văn bản rõ ràng của thẻ Căn cước công dân. Vui lòng chọn đúng ảnh mặt trước thẻ rõ nét!',
+          error: 'Ảnh tải lên quá phức tạp hoặc không đọc được chữ trên thẻ Căn cước công dân trong thời gian cho phép. Vui lòng chọn đúng ảnh mặt trước thẻ rõ nét!',
         });
       }
     }
 
     // Phân tích văn bản OCR thực tế (Regex & Heuristics)
-    // 1. Trích xuất Số CCCD (12 chữ số bắt đầu bằng số 0: 0xx...)
-    const idMatch = ocrText.match(/\b(0\d{11})\b/) || ocrText.match(/(?:\D|^)(0[0-9]{11})(?:\D|$)/);
+    // 1. Chuẩn hóa chuỗi văn bản OCR để nhận diện số CCCD kể cả khi bị khoảng trắng, dấu chấm, hay đọc nhầm chữ O/o thành số 0
+    const normalizedDigits = ocrText.replace(/[\s\-.–_]/g, '').replace(/[Oo]/g, '0');
+    const idMatch = normalizedDigits.match(/(0[0-9]{11})/);
     const extractedId = idMatch ? idMatch[1] : null;
 
     // Nếu không quét ra được số CCCD 12 số và ảnh cũng không chứa từ khóa định danh giấy tờ
     const upperText = ocrText.toUpperCase();
-    const hasCccdKeywords = upperText.includes('CĂN CƯỚC') || upperText.includes('CÔNG DÂN') || upperText.includes('CITIZEN') || upperText.includes('IDENTITY') || upperText.includes('VIỆT NAM') || upperText.includes('VIET NAM');
+    const hasCccdKeywords = upperText.includes('CĂN CƯỚC') || upperText.includes('CÔNG DÂN') || upperText.includes('CAN CUOC') || upperText.includes('CONG DAN') || upperText.includes('CITIZEN') || upperText.includes('IDENTITY') || upperText.includes('VIỆT NAM') || upperText.includes('VIET NAM') || upperText.includes('CARD') || upperText.includes('SOCIALIST') || upperText.includes('REPUBLIC') || upperText.includes('SỐ / NO') || upperText.includes('SO / NO');
 
-    if (!extractedId && !hasCccdKeywords && ocrText.length < 30) {
+    if (!extractedId && !hasCccdKeywords && ocrText.length < 25) {
       return NextResponse.json({
         success: false,
         isValidCccd: false,
