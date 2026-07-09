@@ -58,12 +58,28 @@ export default function Navbar() {
   const pathname = usePathname();
   const { accessToken, localSync, logout } = useAuth();
 
+  const [isSticky, setIsSticky] = useState(false);
+
   // Close mobile menu & reset dropdowns on path changes
   useEffect(() => {
     setIsOpen(false);
     setShowUserMenu(false);
     setMobileCourseOpen(false);
   }, [pathname]);
+
+  // Listen to scroll events to trigger sticky header class
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 80) {
+        setIsSticky(true);
+      } else {
+        setIsSticky(false);
+      }
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLinkClick = (href: string) => {
     if (href.includes('#')) return; // Allow hash links to anchor scroll
@@ -74,7 +90,6 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { name: 'Trang chủ', href: '/' },
     { name: 'Giới thiệu', href: '/about' },
     {
       name: 'Khóa học',
@@ -159,34 +174,55 @@ export default function Navbar() {
       </div>
 
       {/* Main Header Navbar - Dynamic Gradient & Glassmorphism */}
-      <header className="bg-gradient-to-r from-primary via-blue-700 to-primary-dark sticky top-0 z-50 shadow-xl border-b border-white/10 backdrop-blur-md">
+      <header className={`sticky top-0 z-50 transition-all duration-300 ${
+        isSticky 
+          ? 'stricky-fixed bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-lg' 
+          : 'bg-gradient-to-r from-primary via-blue-700 to-primary-dark border-b border-white/10 backdrop-blur-md'
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-18 sm:h-20">
-            {/* Left: White Logo block */}
-            <div className="h-full bg-white px-5 sm:px-8 flex items-center border-b-4 border-primary-dark rounded-br-2xl sm:rounded-br-none shadow-md">
-              <Link href="/" onClick={() => handleLinkClick('/')} className="flex items-center space-x-2.5 group">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-md shadow-primary/30 group-hover:scale-105 transition duration-300">
-                  <Brain className="w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-lg sm:text-xl font-black tracking-tight text-slate-900 leading-none">
-                    Sedu<span className="text-primary">Ai</span>
-                  </span>
-                  <span className="text-[8px] sm:text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-0.5 group-hover:text-primary transition">
-                    EduCenter
-                  </span>
-                </div>
-              </Link>
-            </div>
+          <div className={`flex items-center justify-between transition-all duration-300 ${
+            isSticky ? 'h-16' : 'h-18 sm:h-20'
+          }`}>
+            {/* Left: Premium Logo Link */}
+            <Link href="/" onClick={() => handleLinkClick('/')} className="flex items-center space-x-2.5 group cursor-pointer py-2">
+              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-md transition duration-300 group-hover:scale-105 ${
+                isSticky 
+                  ? 'bg-primary text-white shadow-primary/20' 
+                  : 'bg-white text-primary shadow-black/10'
+              }`}>
+                <Brain className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div className="flex flex-col">
+                <span className={`text-lg sm:text-xl font-black tracking-tight leading-none transition duration-300 ${
+                  isSticky ? 'text-slate-900' : 'text-white'
+                }`}>
+                  Sedu<span className={isSticky ? 'text-primary' : 'text-amber-400'}>Ai</span>
+                </span>
+                <span className={`text-[8px] sm:text-[9px] font-bold uppercase tracking-widest mt-0.5 transition duration-300 ${
+                  isSticky ? 'text-slate-500' : 'text-white/60'
+                }`}>
+                  EduCenter
+                </span>
+              </div>
+            </Link>
 
             {/* Center: Desktop Navigation Links */}
-            <nav className="hidden lg:flex space-x-4 xl:space-x-6 text-xs font-bold uppercase tracking-wider items-center h-full text-white/90">
+            <nav className={`hidden lg:flex space-x-2.5 xl:space-x-4 text-xs font-bold uppercase tracking-wider items-center h-full transition duration-300 ${
+              isSticky ? 'text-slate-700' : 'text-white/90'
+            }`}>
               {navLinks.map((link) => {
                 if (link.submenu) {
                   return (
-                    <div key={link.name} className="relative group flex items-center h-full cursor-pointer py-6">
-                      <span className="hover:text-white transition duration-150 flex items-center gap-1 py-1 px-2 rounded-lg hover:bg-white/10">
-                        {link.name} <ChevronDown className="w-3.5 h-3.5 text-white/70 group-hover:text-white group-hover:rotate-180 transition duration-200" />
+                    <div key={link.name} className="relative group flex items-center h-full cursor-pointer py-4">
+                      <span className={`transition duration-150 flex items-center gap-1 py-1 px-2 rounded-lg ${
+                        isSticky 
+                          ? 'hover:text-primary hover:bg-slate-100 text-slate-700' 
+                          : 'hover:text-white hover:bg-white/10 text-white/90'
+                      }`}>
+                        {link.name}{' '}
+                        <ChevronDown className={`w-3.5 h-3.5 transition duration-200 group-hover:rotate-180 ${
+                          isSticky ? 'text-slate-400 group-hover:text-primary' : 'text-white/70 group-hover:text-white'
+                        }`} />
                       </span>
                       {/* Dropdown Menu - Sleek Glassmorphic Style */}
                       <div className="absolute top-full left-0 w-64 bg-white/95 backdrop-blur-xl border border-slate-100 rounded-2xl shadow-2xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 transform translate-y-2 group-hover:translate-y-0">
@@ -205,7 +241,7 @@ export default function Navbar() {
                   );
                 }
 
-                const isActive = link.href === '/' ? pathname === '/' : pathname?.startsWith(link.href);
+                const isActive = pathname?.startsWith(link.href);
 
                 if (link.isSpecial) {
                   return (
@@ -228,8 +264,12 @@ export default function Navbar() {
                     onClick={() => handleLinkClick(link.href)}
                     className={`px-2.5 py-1.5 rounded-lg transition duration-150 ${
                       isActive
-                        ? 'text-white font-black bg-white/15 border-b-2 border-white'
-                        : 'hover:text-white hover:bg-white/10'
+                        ? isSticky
+                          ? 'text-primary font-black bg-primary/10 border-b-2 border-primary'
+                          : 'text-white font-black bg-white/15 border-b-2 border-white'
+                        : isSticky
+                          ? 'hover:text-primary hover:bg-slate-100 text-slate-600'
+                          : 'hover:text-white hover:bg-white/10 text-white/90'
                     }`}
                   >
                     {link.name}
@@ -244,9 +284,15 @@ export default function Navbar() {
                 <input
                   type="text"
                   placeholder="Tìm khóa học..."
-                  className="w-[150px] xl:w-[180px] focus:w-[220px] transition-all duration-300 bg-white/15 hover:bg-white/20 focus:bg-white/25 border border-white/20 rounded-xl pl-3.5 pr-8 py-1.5 text-xs text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30"
+                  className={`w-[150px] xl:w-[180px] focus:w-[220px] transition-all duration-300 border rounded-xl pl-3.5 pr-8 py-1.5 text-xs focus:outline-none focus:ring-2 ${
+                    isSticky 
+                      ? 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-primary/20' 
+                      : 'bg-white/15 hover:bg-white/20 focus:bg-white/25 border-white/20 text-white placeholder-white/70 focus:ring-white/30'
+                  }`}
                 />
-                <Search className="w-3.5 h-3.5 text-white/70 absolute right-2.5 top-1/2 -translate-y-1/2" />
+                <Search className={`w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 transition duration-300 ${
+                  isSticky ? 'text-slate-400' : 'text-white/70'
+                }`} />
               </div>
 
               {/* User Menu / Login Badge */}
@@ -254,7 +300,11 @@ export default function Navbar() {
                 <div className="relative">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center gap-2 bg-white/15 hover:bg-white/25 border border-white/30 px-3 py-1.5 rounded-xl transition text-white text-xs font-semibold cursor-pointer shadow-inner"
+                    className={`flex items-center gap-2 border px-3 py-1.5 rounded-xl transition text-xs font-semibold cursor-pointer shadow-inner ${
+                      isSticky 
+                        ? 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50' 
+                        : 'bg-white/15 hover:bg-white/25 border-white/30 text-white'
+                    }`}
                   >
                     <img
                       src={localSync.avatar}
@@ -308,7 +358,11 @@ export default function Navbar() {
               ) : (
                 <Link
                   href="/login"
-                  className="flex items-center gap-1.5 bg-white text-primary hover:bg-slate-100 font-black px-4 py-2 rounded-xl text-xs shadow-lg shadow-white/10 transition duration-200 transform hover:scale-105"
+                  className={`flex items-center gap-1.5 font-black px-4 py-2 rounded-xl text-xs transition duration-200 transform hover:scale-105 ${
+                    isSticky 
+                      ? 'bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/10' 
+                      : 'bg-white text-primary hover:bg-slate-100 shadow-lg shadow-white/10'
+                  }`}
                 >
                   <LogIn className="w-3.5 h-3.5" /> Đăng nhập
                 </Link>

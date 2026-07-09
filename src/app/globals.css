@@ -255,3 +255,22 @@ body {
   gap: 4rem;
   width: max-content;
 }
+
+/* Sticky Header Slide-down Animation (Themeforest/EduTech Style) */
+@keyframes stricky-slide {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.stricky-fixed {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  animation: stricky-slide 0.35s ease-out forwards;
+}
