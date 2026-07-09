@@ -597,19 +597,19 @@ export default function AiAssistantPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        setInput('Hãy giải thích chi tiết khái niệm React Server Components (RSC) trong Next.js 15 với code minh họa dễ hiểu nhất.');
+                        setInput('Giải thích công thức tính thể tích khối chóp và cho ví dụ minh họa step-by-step.');
                         inputRef.current?.focus();
                       }}
                       className="p-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-primary/60 rounded-2xl transition cursor-pointer group flex flex-col justify-between"
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <Code2 className="w-5 h-5 text-amber-400 group-hover:scale-110 transition" />
+                        <Brain className="w-5 h-5 text-purple-400 group-hover:scale-110 transition" />
                         <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-white transition" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-xs text-slate-200">Lập trình React / Next.js</h4>
+                        <h4 className="font-bold text-xs text-slate-200">Toán Học Phổ Thông</h4>
                         <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
-                          Giải thích React Server Components & Code ví dụ
+                          Giải tích thể tích hình học không gian & ví dụ
                         </p>
                       </div>
                     </button>
@@ -617,7 +617,27 @@ export default function AiAssistantPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        setInput('Tôi muốn luyện thi IELTS Speaking Part 2 chủ đề "Describe an education experience that changed your life". Hãy đưa ra dàn ý và từ vựng band 7.5+.');
+                        setInput('Phân tích giá trị nhân đạo trong tác phẩm "Vợ nhặt" của nhà văn Kim Lân bằng một dàn ý chi tiết.');
+                        inputRef.current?.focus();
+                      }}
+                      className="p-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-primary/60 rounded-2xl transition cursor-pointer group flex flex-col justify-between"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <GraduationCap className="w-5 h-5 text-amber-400 group-hover:scale-110 transition" />
+                        <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-white transition" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-xs text-slate-200">Ngữ Văn & Làm Văn</h4>
+                        <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                          Phân tích tác phẩm văn học & lập dàn ý chi tiết
+                        </p>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setInput('Đưa ra dàn ý chi tiết và từ vựng học thuật Band 7.5+ cho IELTS Writing Task 2 chủ đề Giáo dục & Công nghệ.');
                         inputRef.current?.focus();
                       }}
                       className="p-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-primary/60 rounded-2xl transition cursor-pointer group flex flex-col justify-between"
@@ -627,9 +647,9 @@ export default function AiAssistantPage() {
                         <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-white transition" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-xs text-slate-200">Luyện thi IELTS 6.5+</h4>
+                        <h4 className="font-bold text-xs text-slate-200">Luyện Thi IELTS English</h4>
                         <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
-                          Dàn ý Speaking Part 2 & Từ vựng Academic Band 7.5+
+                          Dàn ý IELTS Writing Task 2 & Từ vựng Academic
                         </p>
                       </div>
                     </button>
@@ -637,39 +657,19 @@ export default function AiAssistantPage() {
                     <button
                       type="button"
                       onClick={() => {
-                        setInput('Hãy ra cho tôi 3 bài tập trắc nghiệm (quiz) về Python cơ bản cho người mới bắt đầu và giải thích đáp án khi tôi trả lời.');
+                        setInput('Giải thích nguyên lý hoạt động của thuật toán tìm kiếm nhị phân (Binary Search) kèm code mẫu bằng Python và C++.');
                         inputRef.current?.focus();
                       }}
                       className="p-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-primary/60 rounded-2xl transition cursor-pointer group flex flex-col justify-between"
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <GraduationCap className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition" />
+                        <Code2 className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition" />
                         <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-white transition" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-xs text-slate-200">Bài tập trắc nghiệm Python</h4>
+                        <h4 className="font-bold text-xs text-slate-200">Lập Trình & Tin Học</h4>
                         <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
-                          Tạo 3 câu hỏi trắc nghiệm Python cơ bản & chấm điểm
-                        </p>
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setInput('Tôi muốn học viết code sạch (Clean Code) trong JavaScript. Hãy chỉ ra 5 nguyên tắc quan trọng nhất kèm code xấu vs code tốt.');
-                        inputRef.current?.focus();
-                      }}
-                      className="p-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-primary/60 rounded-2xl transition cursor-pointer group flex flex-col justify-between"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <HelpCircle className="w-5 h-5 text-purple-400 group-hover:scale-110 transition" />
-                        <ChevronRight className="w-4 h-4 text-slate-500 group-hover:text-white transition" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-xs text-slate-200">Nguyên tắc Clean Code</h4>
-                        <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
-                          5 nguyên tắc viết JavaScript sạch & dễ bảo trì
+                          Giải thích thuật toán tìm kiếm nhị phân & Code mẫu
                         </p>
                       </div>
                     </button>
@@ -897,17 +897,27 @@ export default function AiAssistantPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setInput('Giải bài tập Python: Viết hàm kiểm tra số nguyên tố tối ưu.');
+                  setInput('Giải bài toán hình học hoặc đại số sau đây: ');
                   inputRef.current?.focus();
                 }}
                 className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs font-semibold border border-slate-700/60 flex-shrink-0 transition cursor-pointer"
               >
-                🐍 Bài tập Python
+                📐 Giải Toán Học
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  setInput('Sửa ngữ pháp và từ vựng IELTS cho câu tiếng Anh này: ...');
+                  setInput('Hãy phân tích nghệ thuật hoặc lập dàn ý bài văn sau: ');
+                  inputRef.current?.focus();
+                }}
+                className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs font-semibold border border-slate-700/60 flex-shrink-0 transition cursor-pointer"
+              >
+                ✍️ Lập Dàn Ý Văn Học
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setInput('Sửa ngữ pháp và từ vựng IELTS cho câu tiếng Anh này: ');
                   inputRef.current?.focus();
                 }}
                 className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs font-semibold border border-slate-700/60 flex-shrink-0 transition cursor-pointer"
@@ -917,12 +927,12 @@ export default function AiAssistantPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setInput('Tôi muốn nhận Voucher học phí khóa Lập trình Web Full-Stack.');
+                  setInput('Giải thích lỗi code hoặc thuật toán lập trình sau: ');
                   inputRef.current?.focus();
                 }}
                 className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs font-semibold border border-slate-700/60 flex-shrink-0 transition cursor-pointer"
               >
-                🎁 Nhận Voucher Khóa Học
+                💻 Lập Trình & IT
               </button>
             </div>
 
