@@ -97,6 +97,7 @@ export default function Navbar() {
     isSpecial?: boolean;
     submenu?: { name: string; href: string }[];
   }[] = [
+    { name: 'Trang chủ', href: '/' },
     { name: 'Giới thiệu', href: '/about' },
     {
       name: 'Khóa học',
@@ -247,7 +248,7 @@ export default function Navbar() {
                   );
                 }
 
-                const isActive = pathname?.startsWith(link.href);
+                const isActive = link.href === '/' ? pathname === '/' : pathname?.startsWith(link.href);
 
                 if (link.isSpecial) {
                   return (
