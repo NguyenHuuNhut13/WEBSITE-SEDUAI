@@ -96,6 +96,7 @@ export default function ProfilePage() {
 
   // AI OCR Scanner & Error Trap State
   const [isOcrScanning, setIsOcrScanning] = useState<boolean>(false);
+  const [ocrProgress, setOcrProgress] = useState<number>(0);
   const [ocrError, setOcrError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -311,133 +312,150 @@ export default function ProfilePage() {
     };
   };
 
-  // TAB 4: AI OCR CCCD Scanner & Real-Time Validation Trap (Direct on Upload)
+  // TAB 4: AI OCR CCCD Scanner - chạy Tesseract.js trực tiếp trên trình duyệt (không qua server)
   const handleScanCccdOcr = async (base64Image: string) => {
     if (!base64Image) {
-      showNotification('error', 'Vui lòng chọn ảnh Mặt trước Thẻ CCCD trước khi quét AI OCR.');
+      showNotification('error', 'Vui lòng chọn ảnh Mặt trước Thẻ CCCD trước khi quét.');
       return;
     }
 
     setIsOcrScanning(true);
+    setOcrProgress(0);
     setOcrError(null);
 
-    // Kiểm tra độ phân giải ảnh trước khi gửi (đảm bảo ảnh đủ rõ nét để nhận diện văn bản)
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = base64Image;
+    try {
+      // Import Tesseract.js động (chỉ tải khi cần, giảm bundle size ban đầu)
+      const Tesseract = await import('tesseract.js');
 
-    img.onload = async () => {
-      // Nếu ảnh có độ phân giải quá thấp (< 200px) thì chữ trên thẻ sẽ không thể đọc được
-      if (img.width < 200 || img.height < 150) {
-        setIsOcrScanning(false);
-        const lowResMsg = 'Ảnh tải lên có độ phân giải quá thấp, hệ thống không thể đọc được các ký tự trên thẻ Căn cước công dân. Vui lòng chọn ảnh có độ rõ nét cao hơn.';
-        setOcrError(lowResMsg);
-        showNotification('error', lowResMsg);
-        return;
-      }
-
-      // Thẩm định cấu trúc văn bản/giấy tờ CCCD qua mật độ tương phản điểm ảnh (Document Feature Analysis)
-      let documentScore = 100;
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = 150;
-        canvas.height = 150;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, 150, 150);
-          const data = ctx.getImageData(0, 0, 150, 150).data;
-          let darkPixels = 0;
-          let lightPixels = 0;
-          let totalBrightness = 0;
-          for (let i = 0; i < data.length; i += 4) {
-            const brightness = (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000;
-            totalBrightness += brightness;
-            if (brightness < 80) darkPixels++;
-            if (brightness > 175) lightPixels++;
+      // Quét OCR trực tiếp trên trình duyệt với thanh tiến trình thực tế
+      const result = await Tesseract.recognize(base64Image, 'eng', {
+        logger: (m: { status: string; progress: number }) => {
+          if (m.status === 'recognizing text') {
+            setOcrProgress(Math.round(m.progress * 100));
           }
-          const avgBrightness = totalBrightness / (data.length / 4);
-          // Chỉ chặn ảnh đen thui hoặc trắng xóa (< 10 hoặc > 254) để không bao giờ từ chối nhầm ảnh chụp thẻ CCCD hơi tối/sáng
-          if (avgBrightness < 10 || avgBrightness > 254) {
-            documentScore = 8;
-          }
-        }
-      } catch (canvasErr) {
-        console.warn('Canvas analysis error:', canvasErr);
-      }
+        },
+      });
 
-      // Nếu ảnh đen thui/trắng xóa hoàn toàn không thể có chữ
-      if (documentScore < 10) {
+      const ocrText = result?.data?.text || '';
+
+      // ===== PHÂN TÍCH VĂN BẢN OCR & TRÍCH XUẤT DỮ LIỆU CCCD =====
+
+      // 1. Trích xuất Số CCCD (12 chữ số bắt đầu bằng 0)
+      // Chuẩn hóa: loại khoảng trắng/dấu chấm, sửa chữ O/o bị đọc nhầm thành số 0
+      const normalizedDigits = ocrText.replace(/[\s\-.–_,;:]/g, '').replace(/[Oo]/g, '0');
+      const idMatch = normalizedDigits.match(/(0[0-9]{11})/);
+      const extractedId = idMatch ? idMatch[1] : null;
+
+      // 2. Kiểm tra từ khóa nhận diện thẻ CCCD (cả có dấu và không dấu, cả tiếng Anh)
+      const upperText = ocrText.toUpperCase();
+      const hasCccdKeywords =
+        upperText.includes('CĂN CƯỚC') || upperText.includes('CÔNG DÂN') ||
+        upperText.includes('CAN CUOC') || upperText.includes('CONG DAN') ||
+        upperText.includes('CITIZEN') || upperText.includes('IDENTITY') ||
+        upperText.includes('VIỆT NAM') || upperText.includes('VIET NAM') ||
+        upperText.includes('SOCIALIST') || upperText.includes('REPUBLIC') ||
+        upperText.includes('CARD');
+
+      // 3. BẪY LỖI: Nếu không tìm thấy số CCCD VÀ không có từ khóa thẻ → ảnh sai
+      if (!extractedId && !hasCccdKeywords) {
         setIsOcrScanning(false);
-        const notIdCardMsg = 'Ảnh tải lên quá tối hoặc trắng xóa, hệ thống không thể nhìn thấy văn bản trên thẻ. Vui lòng chọn ảnh có ánh sáng tốt và rõ nét hơn.';
-        setOcrError(notIdCardMsg);
-        showNotification('error', notIdCardMsg);
-        return;
-      }
-
-      // Quét AI Vision & xử lý OCR qua API với thời gian chờ 10s (đủ cho ảnh CCCD thực tế quét Tesseract mượt mà không bị ngắt sớm)
-      try {
-        const response = await fetch('/api/ocr/cccd', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            imageBase64: base64Image,
-            imageWidth: img.width,
-            imageHeight: img.height,
-            documentScore,
-          }),
-          signal: AbortSignal.timeout(10000),
-        });
-
-        const res = await response.json();
-        setIsOcrScanning(false);
-
-        if (!res.isValidCccd || !res.success) {
-          // Thông báo lỗi thực tế, thân thiện cho người dùng khi ảnh không phải thẻ hoặc không thể nhận diện
-          const errMsg = res.error || 'Không thể nhận diện thông tin trên thẻ Căn cước công dân. Vui lòng kiểm tra và tải lên ảnh mặt trước thẻ rõ nét, đầy đủ 4 góc, không bị chói sáng hoặc che khuất.';
-          setOcrError(errMsg);
-          showNotification('error', errMsg);
-          return;
-        }
-
-        // Quét thành công: Trích xuất và tự động điền các trường
-        setOcrError(null);
-        showNotification('success', 'Quét OCR thành công! Đã trích xuất và điền tự động thông tin trên thẻ Căn cước.');
-
-        setCccdForm((prev) => ({
-          ...prev,
-          number: res.id_number || prev.number,
-          date: res.date || prev.date,
-          place: res.place || prev.place,
-        }));
-
-        if (res.fullname || res.dob || res.gender) {
-          const parts = (res.fullname || '').trim().split(' ');
-          const last = parts.slice(0, -1).join(' ');
-          const first = parts.slice(-1)[0] || parts[0] || '';
-
-          setInfoForm((prev) => ({
-            ...prev,
-            firstname: first || prev.firstname,
-            lastname: last || prev.lastname,
-            dob: res.dob || prev.dob,
-            gender: res.gender === 'Nam' ? 1 : res.gender === 'Nữ' ? 0 : prev.gender,
-          }));
-        }
-      } catch (err: any) {
-        setIsOcrScanning(false);
-        const isTimeout = err.name === 'TimeoutError' || err.name === 'AbortError' || err.message?.includes('timeout');
-        const errMsg = isTimeout 
-          ? 'Ảnh tải lên quá phức tạp hoặc không rõ văn bản thẻ Căn cước công dân khiến quá trình nhận diện bị ngắt. Vui lòng thử lại với ảnh thẻ mặt trước rõ nét hơn.'
-          : 'Lỗi xử lý khi quét OCR. Vui lòng kiểm tra lại ảnh tải lên.';
+        setOcrProgress(0);
+        const errMsg = 'Ảnh tải lên không phải là mặt trước thẻ Căn cước công dân hoặc ảnh quá mờ để nhận diện. Vui lòng chụp lại ảnh mặt trước thẻ rõ nét, đủ ánh sáng, đầy đủ 4 góc.';
         setOcrError(errMsg);
         showNotification('error', errMsg);
+        return;
       }
-    };
 
-    img.onerror = () => {
+      // 4. Trích xuất Ngày sinh (dob) & Ngày cấp (date) - định dạng DD/MM/YYYY → YYYY-MM-DD
+      const dateMatches = ocrText.match(/([0-3]?\d[\/.,-][0-1]?\d[\/.,-](?:19|20)\d{2})/g) || [];
+      const formatToYMD = (dateStr: string): string => {
+        const parts = dateStr.split(/[\/.,-]/);
+        if (parts.length === 3) {
+          const d = (parts[0] || '').padStart(2, '0');
+          const m = (parts[1] || '').padStart(2, '0');
+          const y = parts[2] || '';
+          if (y.length === 4 && parseInt(m) >= 1 && parseInt(m) <= 12 && parseInt(d) >= 1 && parseInt(d) <= 31) {
+            return `${y}-${m}-${d}`;
+          }
+        }
+        return '';
+      };
+      let extractedDob = '';
+      let extractedDate = '';
+      if (dateMatches.length > 0) {
+        const first = dateMatches[0];
+        if (first) extractedDob = formatToYMD(first);
+        if (dateMatches.length > 1) {
+          const last = dateMatches[dateMatches.length - 1];
+          if (last) extractedDate = formatToYMD(last);
+        }
+      }
+
+      // 5. Trích xuất Họ và Tên (dòng chữ IN HOA, loại bỏ các tiêu đề thẻ)
+      const lines = ocrText.split('\n').map((l: string) => l.trim()).filter(Boolean);
+      const ignorePatterns = ['CĂN CƯỚC', 'CÔNG DÂN', 'CITIZEN', 'IDENTITY', 'CARD', 'VIỆT NAM', 'VIET NAM', 'SOCIALIST', 'REPUBLIC', 'FULL NAME', 'HỌ VÀ TÊN', 'HỌ TÊN', 'DATE', 'BIRTH', 'NGÀY SINH', 'GIỚI TÍNH', 'SEX', 'NATIONALITY', 'QUỐC TỊCH', 'QUÊ QUÁN', 'PLACE', 'ORIGIN', 'RESIDENCE', 'THƯỜNG TRÚ', 'NƠI CẤP', 'CÓ GIÁ TRỊ', 'SỐ', 'NO.'];
+      let extractedFullname = '';
+      for (const line of lines) {
+        const upper = line.toUpperCase();
+        if (ignorePatterns.some(p => upper.includes(p))) continue;
+        if (line.match(/\d{4,}/)) continue; // Bỏ dòng chứa số dài (số CCCD, ngày tháng)
+        const cleanLine = line.replace(/[^A-ZĂÂĐÊÔƠƯÁÀẢÃẠẮẰẲẴẶẤẦẨẪẬÉÈẺẼẸẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌỐỒỔỖỘỚỜỞỠỢÚÙỦŨỤỨỪỬỮỰÝỲỶỸỴ\s]/gi, '').trim();
+        const words = cleanLine.split(/\s+/);
+        if (words.length >= 2 && cleanLine.length >= 4 && cleanLine === cleanLine.toUpperCase()) {
+          extractedFullname = cleanLine;
+          break;
+        }
+      }
+
+      // 6. Trích xuất Giới tính
+      let extractedGender = 'Nam';
+      if (/\b(Nữ|Nu|Female|NU)\b/i.test(ocrText)) {
+        extractedGender = 'Nữ';
+      }
+
+      // 7. Trích xuất Nơi cấp / Quê quán
+      let extractedPlace = '';
+      for (const line of lines) {
+        if (/Cục Cảnh sát|TP\.|Tỉnh |Quận |Huyện |Phường |thành phố/i.test(line)) {
+          extractedPlace = line.replace(/^(Quê quán|Thường trú|Nơi cấp|Place of origin|Place of residence)[:\s]*/i, '').trim();
+          break;
+        }
+      }
+
+      // ===== HOÀN TẤT: Tự động điền form =====
       setIsOcrScanning(false);
-      setOcrError('Lỗi bẫy ảnh: Tệp ảnh bị lỗi hoặc định dạng không thể đọc được.');
-    };
+      setOcrProgress(100);
+      setOcrError(null);
+      showNotification('success', `Quét OCR thành công!${extractedId ? ` Số CCCD: ${extractedId}` : ''}`);
+
+      setCccdForm((prev) => ({
+        ...prev,
+        number: extractedId || prev.number,
+        date: extractedDate || prev.date,
+        place: extractedPlace || prev.place,
+      }));
+
+      if (extractedFullname || extractedDob || extractedGender) {
+        const parts = (extractedFullname || '').trim().split(' ');
+        const last = parts.slice(0, -1).join(' ');
+        const first = parts.slice(-1)[0] || parts[0] || '';
+
+        setInfoForm((prev) => ({
+          ...prev,
+          firstname: first || prev.firstname,
+          lastname: last || prev.lastname,
+          dob: extractedDob || prev.dob,
+          gender: extractedGender === 'Nam' ? 1 : extractedGender === 'Nữ' ? 0 : prev.gender,
+        }));
+      }
+    } catch (err: any) {
+      setIsOcrScanning(false);
+      setOcrProgress(0);
+      console.error('[Client OCR Error]', err);
+      const errMsg = 'Đã xảy ra lỗi khi xử lý ảnh. Vui lòng thử lại với ảnh mặt trước thẻ CCCD rõ nét hơn.';
+      setOcrError(errMsg);
+      showNotification('error', errMsg);
+    }
   };
 
   // TAB 3: Save Avatar
@@ -1117,11 +1135,19 @@ export default function ProfilePage() {
                   </div>
                 )}
 
-                {/* OCR Scanning Banner */}
+                {/* OCR Scanning Banner with Progress Bar */}
                 {isOcrScanning && (
-                  <div className="p-4 bg-primary/10 border border-primary/30 rounded-2xl flex items-center gap-3 animate-pulse text-xs font-bold text-primary-dark">
-                    <RefreshCw className="w-5 h-5 animate-spin text-primary shrink-0" />
-                    <span>Hệ thống AI Vision đang bóc tách OCR và thẩm định tính hợp lệ của thẻ Căn cước...</span>
+                  <div className="p-4 bg-primary/10 border border-primary/30 rounded-2xl space-y-2">
+                    <div className="flex items-center gap-3 text-xs font-bold text-primary-dark">
+                      <RefreshCw className="w-5 h-5 animate-spin text-primary shrink-0" />
+                      <span>Đang quét và nhận diện văn bản trên thẻ... {ocrProgress > 0 ? `(${ocrProgress}%)` : ''}</span>
+                    </div>
+                    <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-primary to-emerald-500 h-2 rounded-full transition-all duration-300 ease-out"
+                        style={{ width: `${Math.max(ocrProgress, 5)}%` }}
+                      />
+                    </div>
                   </div>
                 )}
 
