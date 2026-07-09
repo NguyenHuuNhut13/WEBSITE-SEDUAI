@@ -450,19 +450,18 @@ export default function ProfilePage() {
 
       // ===== 6. TRÍCH XUẤT NGÀY CẤP (Nằm ở MẶT SAU) =====
       let extractedDate = '';
-      // Phân tích định dạng đặc trưng: "Ngày ... tháng ... năm ..."
-      const issueDatePattern = /ngày\s+(\d{1,2})\s+tháng\s+(\d{1,2})\s+năm\s+(\d{4})/i;
-      const issueDateMatch = backText.match(issueDatePattern);
-      if (issueDateMatch) {
-        const d = issueDateMatch[1].padStart(2, '0');
-        const m = issueDateMatch[2].padStart(2, '0');
-        const y = issueDateMatch[3];
-        extractedDate = `${y}-${m}-${d}`;
-        // Fallback: Quét tất cả ngày tháng có trên mặt sau
-        const allDatesBack = backText.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/g) || [];
-        const firstDateBack = allDatesBack[0];
-        if (firstDateBack) {
-          extractedDate = formatToYMD(firstDateBack);
+      const backTextCleaned = backText.replace(/[\.\,]/g, ' ');
+      
+      // Chấp nhận: "Ngày 15 tháng 06 năm 2021", "Ngay 15 thang 06 nam 2021", "15 tháng 6 năm 2021", "15/06/2021", v.v.
+      const dateMatchBack = backTextCleaned.match(/(?:ngày|ngay)?\s*(\d{1,2})\s*(?:tháng|thang|\/|\-)\s*(\d{1,2})\s*(?:năm|nam|\/|\-)\s*(\d{4})/i) ||
+                            backTextCleaned.match(/(\d{1,2})\D+(\d{1,2})\D+(\d{4})/);
+      
+      if (dateMatchBack) {
+        const d = dateMatchBack[1].padStart(2, '0');
+        const m = dateMatchBack[2].padStart(2, '0');
+        const y = dateMatchBack[3];
+        if (parseInt(m) >= 1 && parseInt(m) <= 12 && parseInt(d) >= 1 && parseInt(d) <= 31) {
+          extractedDate = `${y}-${m}-${d}`;
         }
       }
 
