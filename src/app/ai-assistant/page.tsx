@@ -479,26 +479,13 @@ export default function AiAssistantPage() {
           ))}
         </div>
 
-        {/* User Info Footer inside Sidebar */}
-        <div className="p-4 border-t border-slate-800 bg-slate-900/60 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img
-              src={localSync.avatar}
-              alt={localSync.name}
-              className="w-8 h-8 rounded-full object-cover border border-primary"
-            />
-            <div className="overflow-hidden">
-              <p className="text-xs font-bold text-white truncate max-w-[130px]">{localSync.name}</p>
-              <p className="text-[10px] text-amber-400 font-bold flex items-center gap-1">
-                <Award className="w-3 h-3" /> {localSync.point} điểm Sedu
-              </p>
-            </div>
-          </div>
+        {/* Sidebar Footer Back to Home Button */}
+        <div className="p-4 border-t border-slate-800 bg-slate-900/40">
           <Link
-            href="/profile"
-            className="text-[11px] font-semibold text-slate-400 hover:text-primary transition"
+            href="/"
+            className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2"
           >
-            Hồ sơ
+            <ArrowLeft className="w-4 h-4" /> Quay Lại Trang Chủ
           </Link>
         </div>
       </div>
@@ -550,15 +537,28 @@ export default function AiAssistantPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <span className="hidden xs:flex text-[10px] sm:text-xs bg-primary/20 text-primary border border-primary/40 px-2 sm:px-3 py-1 rounded-full font-bold items-center gap-1">
-              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300" /> <span className="hidden sm:inline">GPT-4o</span> Engine
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <span className="hidden md:flex text-[10px] sm:text-xs bg-primary/20 text-primary border border-primary/40 px-3 py-1 rounded-full font-bold items-center gap-1">
+              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-300" /> GPT-4o Engine
             </span>
+            
+            {/* Teacher profile moved to the top right */}
             <Link
-              href="/"
-              className="text-[11px] sm:text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2.5 sm:px-3 py-1.5 rounded-xl transition whitespace-nowrap"
+              href="/profile"
+              className="flex items-center gap-2.5 p-1 px-2.5 rounded-xl hover:bg-slate-800 border border-transparent hover:border-slate-700/60 transition group cursor-pointer"
+              title="Xem Hồ sơ của bạn"
             >
-              Trang Chủ
+              <img
+                src={localSync.avatar}
+                alt={localSync.name}
+                className="w-7 h-7 rounded-full object-cover border border-primary/80 group-hover:scale-105 transition"
+              />
+              <div className="hidden sm:block text-left overflow-hidden">
+                <p className="text-xs font-bold text-slate-200 group-hover:text-white transition leading-tight truncate max-w-[100px]">{localSync.name}</p>
+                <p className="text-[9px] text-slate-400 group-hover:text-amber-300 transition flex items-center gap-0.5 leading-none mt-0.5">
+                  <Award className="w-2.5 h-2.5 text-amber-400" /> {localSync.point} điểm Sedu
+                </p>
+              </div>
             </Link>
           </div>
         </div>
