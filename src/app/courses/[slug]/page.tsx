@@ -18,10 +18,11 @@ import {
   Users,
   PlayCircle,
   ArrowRight,
+  Loader2,
 } from 'lucide-react';
-import { courses } from '@/data/courses';
+import { courses, Course } from '@/data/courses';
 import CourseCard from '@/components/CourseCard';
-import { createLead } from '@/services/api';
+import { createLead, getEduCourses, ApiCourse } from '@/services/api';
 
 type TabKey = 'overview' | 'syllabus' | 'reviews' | 'instructor';
 
@@ -34,7 +35,83 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
   const [showToast, setShowToast] = useState(false);
   const [formData, setFormData] = useState({ name: '', phone: '', email: '' });
 
-  const course = courses.find((c) => c.slug === slug);
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    // 1. Check local courses first
+    const local = courses.find((c) => c.slug === slug);
+    if (local) {
+      setCourse(local);
+      setLoading(false);
+      return;
+    }
+
+    // 2. Check API courses
+    if (slug.startsWith('api-course-')) {
+      const id = slug.replace('api-course-', '');
+      getEduCourses().then((list) => {
+        if (list && list.length > 0) {
+          const found = list.find((c) => String(c.id) === id);
+          if (found) {
+            const mapped: Course = {
+              slug: `api-course-${found.id}`,
+              title: found.title,
+              description: found.acf?.description?.replace(/<[^>]*>/g, '') || 'Khóa học chính thức từ hệ thống SeduAi EduCenter.',
+              instructor: found.acf?.expactteacher || 'Giảng viên SeduAi',
+              level: (found.acf?.type as any) || 'Mọi trình độ',
+              duration: found.acf?.duration || '12 tuần',
+              student_count: 420 + (found.id % 150),
+              rating: 4.9,
+              price: Number(found.acf?.price || 3500000),
+              discount_price: Number(found.acf?.sale_price || found.acf?.price || 2490000),
+              reviews_count: 24,
+              image: found.acf?.featureimg || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
+              category: found.acf?.category || 'AI & Công nghệ',
+              benefits: [
+                'Lộ trình chuẩn thực chiến SeduAi EduCenter',
+                'Thực hành dự án với sự hướng dẫn của chuyên gia',
+                'Đồng hành cùng Trợ lý AI giải đáp thắc mắc 24/7'
+              ],
+              syllabus: [
+                {
+                  title: 'Chương 1: Khởi động và kiến thức nền tảng',
+                  lessons: ['Bài 1: Giới thiệu khóa học', 'Bài 2: Chuẩn bị môi trường & công cụ']
+                },
+                {
+                  title: 'Chương 2: Thực chiến kỹ năng cốt lõi',
+                  lessons: ['Bài 3: Ứng dụng thực tế và thực hành chuyên sâu']
+                }
+              ],
+              reviews: [
+                {
+                  name: 'Học viên SeduAi',
+                  rating: 5,
+                  date: 'Vừa xong',
+                  comment: 'Khóa học rất chất lượng, giảng viên nhiệt tình, AI hỗ trợ trả lời rất nhanh.'
+                }
+              ]
+            };
+            setCourse(mapped);
+          }
+        }
+        setLoading(false);
+      });
+    } else {
+      setLoading(false);
+    }
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-10 h-10 text-primary animate-spin mx-auto" />
+          <p className="text-slate-400 text-xs font-semibold">Đang tải thông tin khóa học từ hệ thống...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!course) {
     notFound();
