@@ -83,30 +83,80 @@ Nhiệm vụ của bạn:
       let fallbackReply = '';
 
       if (mode === 'teacher_assistant') {
-        if (lastUserMsg.includes('react') || lastUserMsg.includes('code') || lastUserMsg.includes('lập trình')) {
-          fallbackReply = `### 💡 Giảng Viên AI SeduAi Giải Đáp: Lập trình & React
-Chào bạn! Dưới đây là giải thích cốt lõi về chủ đề bạn quan tâm:
+        const lowerMsg = lastUserMsg.toLowerCase();
+        if (lowerMsg.includes('nguyên tố') || lowerMsg.includes('prime')) {
+          fallbackReply = `### 💡 Giảng Viên AI SeduAi Giải Đáp: Kiểm tra số nguyên tố trong Python
+Chào bạn! Đây là hàm kiểm tra số nguyên tố tối ưu bằng ngôn ngữ **Python** (độ phức tạp thời gian là $O(\\sqrt{N})$):
 
-#### 1. Khái niệm chính (Core Concept)
-Trong lập trình hiện đại (như **Next.js 15 / React 19**), các component được chia thành **Server Components** (mặc định) và **Client Components** (\`'use client'\`).
+\`\`\`python
+def is_prime_optimal(n):
+    # Các số nhỏ hơn hoặc bằng 1 không phải số nguyên tố
+    if n <= 1:
+        return False
+    # 2 và 3 là số nguyên tố
+    if n <= 3:
+        return True
+    # Loại bỏ các số chẵn và số chia hết cho 3
+    if n % 2 == 0 or n % 3 == 0:
+        return False
+    
+    # Kiểm tra các ước số từ 5 đến căn bậc hai của n
+    # Bước nhảy i += 6 vì các số nguyên tố lớn hơn 3 đều có dạng 6k +/- 1
+    i = 5
+    while i * i <= n:
+        if n % i == 0 or n % (i + 2) == 0:
+            return False
+        i += 6
+        
+    return True
+
+# Minh họa chạy thử:
+print(is_prime_optimal(29))  # Kết quả: True
+print(is_prime_optimal(15))  # Kết quả: False
+\`\`\`
+
+#### 🔍 Giải thích tính tối ưu:
+1. **Giới hạn căn bậc hai ($\\sqrt{N}$)**: Nếu số $N$ chia hết cho một số $d$, thì ước còn lại là $N/d$. Một trong hai ước chắc chắn phải $\\le \\sqrt{N}$. Do đó ta chỉ cần chạy vòng lặp đến $\\sqrt{N}$.
+2. **Quy luật dạng số $6k \\pm 1$**: Loại bỏ sớm ước chia hết cho 2 và 3, vòng lặp tăng bước nhảy lên 6 giúp giảm số lần kiểm tra đi đáng kể.
+
+Bạn có muốn chạy thử thuật toán này với ngôn ngữ khác (như JavaScript, C++) không?`;
+        } else if (lowerMsg.includes('minh họa') || lowerMsg.includes('ví dụ') || lowerMsg.includes('bài tập')) {
+          fallbackReply = `### 💡 Bài tập Minh Họa Lập Trình (Ví dụ thực tế)
+Chào học viên SeduAi! Dưới đây là bài tập minh họa về cách xây dựng một ứng dụng đếm số đơn giản bằng **React** sử dụng Hooks:
 
 \`\`\`tsx
-// Ví dụ một Component chuẩn trong SeduAi App
-export default function CourseBadge({ title, points }: { title: string; points: number }) {
+import React, { useState } from 'react';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+
   return (
-    <div className="bg-primary/10 border border-primary p-4 rounded-xl">
-      <h4 className="font-bold text-primary">{title}</h4>
-      <p className="text-xs text-slate-600">Điểm thưởng: {points}p</p>
+    <div className="p-6 bg-slate-900 text-white rounded-2xl text-center">
+      <h3 className="text-xl font-bold">Bộ đếm học tập</h3>
+      <p className="text-3xl my-4 font-black text-primary">{count}</p>
+      <div className="flex justify-center gap-3">
+        <button onClick={() => setCount(count - 1)} className="px-4 py-2 bg-red-500 rounded-lg">- Giảm</button>
+        <button onClick={() => setCount(count + 1)} className="px-4 py-2 bg-emerald-500 rounded-lg">+ Tăng</button>
+      </div>
     </div>
   );
 }
 \`\`\`
 
-#### 2. Lời khuyên ôn tập từ Giảng viên AI
-* **Bước 1**: Nắm vững cú pháp TypeScript & Hooks cơ bản (\`useState\`, \`useEffect\`).
-* **Bước 2**: Thực hành clone các giao diện thực tế như Edu2Review hoặc ChatGPT UI.
-* **Bước 3**: Đừng ngần ngại hỏi tôi bất cứ đoạn code nào bạn muốn tối ưu! Bạn có muốn làm một bài tập trắc nghiệm nhanh ngay bây giờ không?`;
-        } else if (lastUserMsg.includes('ielts') || lastUserMsg.includes('tiếng anh')) {
+Bạn có muốn giải thích chi tiết cấu trúc code này không, hay bạn muốn chuyển sang ngôn ngữ lập trình khác?`;
+        } else if (lowerMsg.includes('react') || lowerMsg.includes('code') || lowerMsg.includes('lập trình') || lowerMsg.includes('python') || lowerMsg.includes('javascript') || lowerMsg.includes('thuật toán') || lowerMsg.includes('hàm')) {
+          fallbackReply = `### 💡 Giảng Viên AI SeduAi Giải Đáp: Lập trình & Thuật toán
+Chào học viên! Lập trình hiện đại đòi hỏi khả năng tối ưu hóa cả về mặt logic lẫn cấu trúc ứng dụng. Dưới đây là giải thích cốt lõi về chủ đề bạn quan tâm:
+
+#### 1. Khái niệm chính (Core Concept)
+Trong lập trình ứng dụng (như **React / Next.js**), việc tối ưu hóa hiệu năng render là vô cùng quan trọng:
+* **Server Components** (mặc định): Chạy hoàn toàn trên server để tải trang nhanh nhất.
+* **Client Components** (\`'use client'\`): Được tải và thực thi ở Client để hỗ trợ tương tác người dùng.
+
+#### 2. Lời khuyên học tập từ Giảng viên AI
+* **Bước 1**: Tập trung nắm vững logic giải quyết bài toán cơ bản (thuật toán sắp xếp, lọc, vòng lặp) trước khi làm thư viện.
+* **Bước 2**: Thực hành viết code hàng ngày và hỏi tôi bất cứ đoạn code nào bạn muốn tối ưu! Bạn có cần tôi đưa ra bài tập ví dụ minh họa cụ thể nào cho ngôn ngữ của bạn không?`;
+        } else if (lowerMsg.includes('ielts') || lowerMsg.includes('tiếng anh')) {
           fallbackReply = `### 🎓 Giảng Viên AI SeduAi: Luyện thi IELTS & Tiếng Anh Giao Tiếp
 Rất vui được đồng hành cùng bạn nâng tầm ngoại ngữ! Dưới đây là chiến lược chuẩn từ **Edu2Review Top IELTS Centers**:
 
@@ -126,7 +176,7 @@ Với tư cách là **AI Teacher Assistant**, tôi luôn sẵn sàng hỗ trợ 
 - Hướng dẫn thực làm dự án thực chiến theo tiêu chuẩn **Edu2Review**.
 - Kiểm tra bài tập và đưa ra gợi ý sửa lỗi ngay lập tức.
 
-Bạn có cần tôi phân tích cụ thể hơn hoặc đưa ra ví dụ minh họa từng bước cho chủ đề này không?`;
+Bạn có cần tôi phân tích cụ thể hơn, đưa ra ví dụ minh họa hay bài tập chạy thử cho chủ đề lập trình hay tiếng Anh này không?`;
         }
       } else {
         // Admissions CRM mode fallback
