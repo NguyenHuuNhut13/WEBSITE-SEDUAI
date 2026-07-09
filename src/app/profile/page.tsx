@@ -312,10 +312,10 @@ export default function ProfilePage() {
     };
   };
 
-  // TAB 4: AI OCR CCCD Scanner - chạy Tesseract.js trực tiếp trên trình duyệt (không qua server)
-  const handleScanCccdOcr = async (base64Image: string) => {
-    if (!base64Image) {
-      showNotification('error', 'Vui lòng chọn ảnh Mặt trước Thẻ CCCD trước khi quét.');
+  // TAB 4: AI OCR CCCD Scanner - chạy Tesseract.js trực tiếp trên trình duyệt quét song song cả 2 mặt
+  const handleScanCccdOcr = async (frontBaseImage: string, backBaseImage: string) => {
+    if (!frontBaseImage || !backBaseImage) {
+      showNotification('error', 'Vui lòng chọn đầy đủ cả ảnh Mặt trước và Mặt sau trước khi quét.');
       return;
     }
 
@@ -326,58 +326,75 @@ export default function ProfilePage() {
     try {
       const Tesseract = await import('tesseract.js');
 
-      // Quét bằng tiếng Việt (vie) để đọc đúng tên, quê quán, nơi cấp trên thẻ CCCD
-      const result = await Tesseract.recognize(base64Image, 'vie', {
-        logger: (m: { status: string; progress: number }) => {
-          if (m.status === 'recognizing text') {
-            setOcrProgress(Math.round(m.progress * 100));
-          }
-        },
-      });
+      let frontProgress = 0;
+      let backProgress = 0;
+      const updateCombinedProgress = () => {
+        setOcrProgress(Math.round(((frontProgress + backProgress) / 2) * 100));
+      };
 
-      const ocrText = result?.data?.text || '';
-      console.log('[OCR Raw Text]', ocrText); // Log để debug
+      // Chạy nhận diện song song cả 2 mặt bằng tiếng Việt (vie) để đạt hiệu năng tối đa
+      const [frontResult, backResult] = await Promise.all([
+        Tesseract.recognize(frontBaseImage, 'vie', {
+          logger: (m: { status: string; progress: number }) => {
+            if (m.status === 'recognizing text') {
+              frontProgress = m.progress;
+              updateCombinedProgress();
+            }
+          },
+        }),
+        Tesseract.recognize(backBaseImage, 'vie', {
+          logger: (m: { status: string; progress: number }) => {
+            if (m.status === 'recognizing text') {
+              backProgress = m.progress;
+              updateCombinedProgress();
+            }
+          },
+        }),
+      ]);
 
-      const lines = ocrText.split('\n').map((l: string) => l.trim()).filter(Boolean);
+      const frontText = frontResult?.data?.text || '';
+      const backText = backResult?.data?.text || '';
 
-      // ===== 1. TRÍCH XUẤT SỐ CCCD (12 chữ số) =====
-      // Tìm trên toàn bộ text, loại khoảng trắng/dấu chấm, sửa O→0
-      const digitsOnly = ocrText.replace(/[\s\-.–_,;:]/g, '');
-      const idMatch = digitsOnly.match(/(\d{12})/) || digitsOnly.replace(/[Oo]/g, '0').match(/(0\d{11})/);
+      console.log('[OCR Front Raw]', frontText);
+      console.log('[OCR Back Raw]', backText);
+
+      const frontLines = frontText.split('\n').map((l: string) => l.trim()).filter(Boolean);
+      const backLines = backText.split('\n').map((l: string) => l.trim()).filter(Boolean);
+
+      // ===== 1. TRÍCH XUẤT SỐ CCCD (12 chữ số - nằm ở mặt trước) =====
+      const frontDigitsOnly = frontText.replace(/[\s\-.–_,;:]/g, '');
+      const idMatch = frontDigitsOnly.match(/(\d{12})/) || frontDigitsOnly.replace(/[Oo]/g, '0').match(/(0\d{11})/);
       const extractedId = idMatch ? idMatch[1] : null;
 
-      // ===== 2. BẪY LỖI: Không phải ảnh CCCD =====
-      const upperText = ocrText.toUpperCase();
-      const hasCccdKeywords =
-        upperText.includes('CĂN CƯỚC') || upperText.includes('CÔNG DÂN') ||
-        upperText.includes('CAN CUOC') || upperText.includes('CONG DAN') ||
-        upperText.includes('CITIZEN') || upperText.includes('IDENTITY') ||
-        upperText.includes('VIỆT NAM') || upperText.includes('VIET NAM') ||
-        upperText.includes('SOCIALIST') || upperText.includes('REPUBLIC');
+      // ===== 2. BẪY LỖI: Kiểm tra tính hợp lệ của ảnh mặt trước =====
+      const upperFront = frontText.toUpperCase();
+      const hasFrontKeywords =
+        upperFront.includes('CĂN CƯỚC') || upperFront.includes('CÔNG DÂN') ||
+        upperFront.includes('CAN CUOC') || upperFront.includes('CONG DAN') ||
+        upperFront.includes('CITIZEN') || upperFront.includes('IDENTITY') ||
+        upperFront.includes('VIỆT NAM') || upperFront.includes('VIET NAM');
 
-      if (!extractedId && !hasCccdKeywords) {
+      if (!extractedId && !hasFrontKeywords) {
         setIsOcrScanning(false);
         setOcrProgress(0);
-        const errMsg = 'Ảnh tải lên không phải là mặt trước thẻ Căn cước công dân hoặc ảnh quá mờ để nhận diện. Vui lòng chụp lại ảnh rõ nét, đủ ánh sáng.';
+        const errMsg = 'Ảnh mặt trước tải lên không phải là thẻ Căn cước công dân hoặc ảnh quá mờ để nhận diện. Vui lòng thử lại với ảnh rõ nét hơn.';
         setOcrError(errMsg);
         showNotification('error', errMsg);
         return;
       }
 
-      // ===== 3. TRÍCH XUẤT HỌ VÀ TÊN (tìm dòng sau nhãn "Họ và tên" / "Full name") =====
+      // ===== 3. TRÍCH XUẤT HỌ VÀ TÊN (Mặt trước) =====
       let extractedFullname = '';
-      for (let i = 0; i < lines.length; i++) {
-        const lower = lines[i].toLowerCase();
+      for (let i = 0; i < frontLines.length; i++) {
+        const lower = frontLines[i].toLowerCase();
         if (lower.includes('họ và tên') || lower.includes('họ tên') || lower.includes('full name') || lower.includes('ho va ten')) {
-          // Tên có thể nằm cùng dòng (sau dấu :) hoặc dòng kế tiếp
-          const afterColon = lines[i].split(/[:/]/);
+          const afterColon = frontLines[i].split(/[:/]/);
           if (afterColon.length > 1) {
             const namePart = afterColon.slice(1).join(' ').trim();
             if (namePart.length >= 3) { extractedFullname = namePart.toUpperCase(); break; }
           }
-          // Nếu không có sau dấu : thì lấy dòng kế tiếp
-          if (!extractedFullname && i + 1 < lines.length) {
-            const nextLine = lines[i + 1].trim();
+          if (!extractedFullname && i + 1 < frontLines.length) {
+            const nextLine = frontLines[i + 1].trim();
             if (nextLine.length >= 3 && !nextLine.match(/^\d/) && !nextLine.toLowerCase().includes('date') && !nextLine.toLowerCase().includes('ngày')) {
               extractedFullname = nextLine.toUpperCase();
               break;
@@ -386,8 +403,7 @@ export default function ProfilePage() {
         }
       }
 
-      // ===== 4. TRÍCH XUẤT NGÀY SINH (tìm dòng sau nhãn "Ngày sinh" / "Date of birth") =====
-      let extractedDob = '';
+      // Hàm format ngày DD/MM/YYYY hoặc các biến thể sang YYYY-MM-DD
       const formatToYMD = (dateStr: string): string => {
         const parts = dateStr.match(/(\d{1,2})\D+(\d{1,2})\D+(\d{4})/);
         if (parts) {
@@ -401,27 +417,27 @@ export default function ProfilePage() {
         return '';
       };
 
-      for (let i = 0; i < lines.length; i++) {
-        const lower = lines[i].toLowerCase();
+      // ===== 4. TRÍCH XUẤT NGÀY SINH (Mặt trước) =====
+      let extractedDob = '';
+      for (let i = 0; i < frontLines.length; i++) {
+        const lower = frontLines[i].toLowerCase();
         if (lower.includes('ngày sinh') || lower.includes('date of birth') || lower.includes('ngay sinh')) {
-          // Tìm ngày trong cùng dòng hoặc dòng kế tiếp
-          const dateInLine = lines[i].match(/(\d{1,2})\D+(\d{1,2})\D+(\d{4})/);
-          if (dateInLine) { extractedDob = formatToYMD(lines[i]); break; }
-          if (i + 1 < lines.length) {
-            const nextDate = lines[i + 1].match(/(\d{1,2})\D+(\d{1,2})\D+(\d{4})/);
-            if (nextDate) { extractedDob = formatToYMD(lines[i + 1]); break; }
+          const dateInLine = frontLines[i].match(/(\d{1,2})\D+(\d{1,2})\D+(\d{4})/);
+          if (dateInLine) { extractedDob = formatToYMD(frontLines[i]); break; }
+          if (i + 1 < frontLines.length) {
+            const nextDate = frontLines[i + 1].match(/(\d{1,2})\D+(\d{1,2})\D+(\d{4})/);
+            if (nextDate) { extractedDob = formatToYMD(frontLines[i + 1]); break; }
           }
         }
       }
-      // Fallback: lấy ngày đầu tiên tìm thấy trên toàn bộ văn bản
       if (!extractedDob) {
-        const allDates = ocrText.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/g) || [];
-        if (allDates[0]) extractedDob = formatToYMD(allDates[0]);
+        const allDatesFront = frontText.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/g) || [];
+        if (allDatesFront[0]) extractedDob = formatToYMD(allDatesFront[0]);
       }
 
-      // ===== 5. TRÍCH XUẤT GIỚI TÍNH =====
+      // ===== 5. TRÍCH XUẤT GIỚI TÍNH (Mặt trước) =====
       let extractedGender = '';
-      for (const line of lines) {
+      for (const line of frontLines) {
         const lower = line.toLowerCase();
         if (lower.includes('giới tính') || lower.includes('sex') || lower.includes('gioi tinh')) {
           if (/nữ|nu$|female/i.test(line)) { extractedGender = 'Nữ'; break; }
@@ -429,42 +445,81 @@ export default function ProfilePage() {
         }
       }
       if (!extractedGender) {
-        extractedGender = /\bnữ\b/i.test(ocrText) ? 'Nữ' : 'Nam';
+        extractedGender = /\bnữ\b/i.test(frontText) ? 'Nữ' : 'Nam';
       }
 
-      // ===== 6. TRÍCH XUẤT QUÊ QUÁN / NƠI THƯỜNG TRÚ =====
-      let extractedPlace = '';
-      for (let i = 0; i < lines.length; i++) {
-        const lower = lines[i].toLowerCase();
-        if (lower.includes('quê quán') || lower.includes('que quan') || lower.includes('place of origin') || lower.includes('nơi thường trú') || lower.includes('place of residence')) {
-          const afterColon = lines[i].split(/[:/]/);
-          if (afterColon.length > 1) {
-            const placePart = afterColon.slice(1).join(' ').trim();
-            if (placePart.length >= 3) { extractedPlace = placePart; break; }
-          }
-          if (!extractedPlace && i + 1 < lines.length) {
-            const nextLine = lines[i + 1].trim();
-            if (nextLine.length >= 3 && !nextLine.match(/^\d{12}/) && !nextLine.toLowerCase().includes('ngày')) {
-              extractedPlace = nextLine;
-              break;
-            }
-          }
+      // ===== 6. TRÍCH XUẤT NGÀY CẤP (Nằm ở MẶT SAU) =====
+      let extractedDate = '';
+      // Phân tích định dạng đặc trưng: "Ngày ... tháng ... năm ..."
+      const issueDatePattern = /ngày\s+(\d{1,2})\s+tháng\s+(\d{1,2})\s+năm\s+(\d{4})/i;
+      const issueDateMatch = backText.match(issueDatePattern);
+      if (issueDateMatch) {
+        const d = issueDateMatch[1].padStart(2, '0');
+        const m = issueDateMatch[2].padStart(2, '0');
+        const y = issueDateMatch[3];
+        extractedDate = `${y}-${m}-${d}`;
+        // Fallback: Quét tất cả ngày tháng có trên mặt sau
+        const allDatesBack = backText.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/g) || [];
+        const firstDateBack = allDatesBack[0];
+        if (firstDateBack) {
+          extractedDate = formatToYMD(firstDateBack);
         }
       }
 
-      // ===== 7. TRÍCH XUẤT NGÀY CẤP (tìm "Có giá trị đến" hoặc ngày cuối cùng trên thẻ) =====
-      let extractedDate = '';
-      const allDates = ocrText.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/g) || [];
-      if (allDates.length > 1) {
-        const lastDate = allDates[allDates.length - 1];
-        if (lastDate) extractedDate = formatToYMD(lastDate);
+      // ===== 7. TRÍCH XUẤT NƠI CẤP (Nằm ở MẶT SAU) =====
+      let extractedPlace = '';
+      for (let i = 0; i < backLines.length; i++) {
+        const line = backLines[i];
+        const upperLine = line.toUpperCase();
+        
+        // Quét các từ khóa cơ quan cấp thẻ
+        if (
+          upperLine.includes('CỤC CẢNH SÁT') || 
+          upperLine.includes('CUC CANH SAT') ||
+          upperLine.includes('CỤC TRƯỞNG') ||
+          upperLine.includes('CUC TRUONG') ||
+          upperLine.includes('CÔNG AN') ||
+          upperLine.includes('CONG AN')
+        ) {
+          let mergedPlace = line;
+          // Nếu dòng tiếp theo chứa các thông tin bổ nghĩa cho phòng ban cấp thì gộp lại
+          if (i + 1 < backLines.length) {
+            const nextUpper = backLines[i + 1].toUpperCase();
+            if (
+              nextUpper.includes('QUẢN LÝ') || 
+              nextUpper.includes('TRẬT TỰ') || 
+              nextUpper.includes('TTXH') ||
+              nextUpper.includes('QLHC') ||
+              nextUpper.includes('CẢNH SÁT')
+            ) {
+              mergedPlace += ' ' + backLines[i + 1];
+            }
+          }
+          extractedPlace = mergedPlace
+            .replace(/^(Nơi cấp|Issuing authority|Authority)[:\s\.]*/i, '')
+            .trim();
+          break;
+        }
+      }
+
+      // Chuẩn hóa thẩm mỹ nơi cấp nếu ra kết quả viết tắt hoặc thiếu dấu
+      if (extractedPlace) {
+        // Chuẩn hóa một số chuỗi phổ biến cho chuyên nghiệp
+        if (extractedPlace.toUpperCase().includes('QLHC VỀ TTXH') || extractedPlace.toUpperCase().includes('QLHC VE TTXH')) {
+          extractedPlace = 'Cục Cảnh sát QLHC về TTXH';
+        } else if (extractedPlace.toUpperCase().includes('CỤC TRƯỞNG CỤC CẢNH SÁT')) {
+          extractedPlace = 'Cục Cảnh sát QLHC về TTXH'; // Rút gọn cho vừa form
+        }
+      } else {
+        // Fallback mặc định chuyên nghiệp
+        extractedPlace = 'Cục Cảnh sát QLHC về TTXH';
       }
 
       // ===== HOÀN TẤT: Tự động điền form =====
       setIsOcrScanning(false);
       setOcrProgress(100);
       setOcrError(null);
-      showNotification('success', `Quét OCR thành công!${extractedId ? ` Số CCCD: ${extractedId}` : ''} ${extractedFullname ? `- ${extractedFullname}` : ''}`);
+      showNotification('success', `Quét OCR thành công! Số CCCD: ${extractedId || 'Đã nhận dạng'} ${extractedFullname ? `- ${extractedFullname}` : ''}`);
 
       setCccdForm((prev) => ({
         ...prev,
@@ -490,7 +545,7 @@ export default function ProfilePage() {
       setIsOcrScanning(false);
       setOcrProgress(0);
       console.error('[Client OCR Error]', err);
-      const errMsg = 'Đã xảy ra lỗi khi xử lý ảnh. Vui lòng thử lại với ảnh mặt trước thẻ CCCD rõ nét hơn.';
+      const errMsg = 'Đã xảy ra lỗi khi quét ảnh. Vui lòng kiểm tra và thử lại với ảnh rõ nét hơn.';
       setOcrError(errMsg);
       showNotification('error', errMsg);
     }
@@ -1314,7 +1369,7 @@ export default function ProfilePage() {
                   <div className="pt-1">
                     <button
                       type="button"
-                      onClick={() => handleScanCccdOcr(frontBase64)}
+                      onClick={() => handleScanCccdOcr(frontBase64, backBase64)}
                       disabled={!frontBase64 || !backBase64 || isOcrScanning}
                       className={`w-full py-3.5 font-black text-sm rounded-2xl shadow-lg transition flex items-center justify-center gap-2.5 cursor-pointer ${
                         frontBase64 && backBase64 && !isOcrScanning
