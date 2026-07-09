@@ -59,6 +59,8 @@ export default function Navbar() {
   const { accessToken, localSync, logout } = useAuth();
 
   const [isSticky, setIsSticky] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Close mobile menu & reset dropdowns on path changes
   useEffect(() => {
@@ -89,7 +91,12 @@ export default function Navbar() {
     }
   };
 
-  const navLinks = [
+  const navLinks: {
+    name: string;
+    href: string;
+    isSpecial?: boolean;
+    submenu?: { name: string; href: string }[];
+  }[] = [
     { name: 'Giới thiệu', href: '/about' },
     {
       name: 'Khóa học',
@@ -103,7 +110,6 @@ export default function Navbar() {
         { name: 'Lập trình Python Trẻ Em', href: '/courses/lap-trinh-python-cho-tre-em' },
       ],
     },
-    { name: 'AI Assistant 🤖', href: '/ai-assistant', isSpecial: true },
     { name: 'Tính năng CRM', href: '/#ai-crm-demo' },
     { name: 'Sự kiện', href: '/events' },
     { name: 'Tin tức', href: '/blog' },
@@ -278,22 +284,58 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* Right: Search box and User Profile / Login */}
-            <div className="hidden lg:flex items-center gap-3 xl:gap-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Tìm khóa học..."
-                  className={`w-[150px] xl:w-[180px] focus:w-[220px] transition-all duration-300 border rounded-xl pl-3.5 pr-8 py-1.5 text-xs focus:outline-none focus:ring-2 ${
+            {/* Right: Search box, AI Assistant, and User Profile / Login */}
+            <div className="hidden lg:flex items-center gap-3.5 xl:gap-5">
+              
+              {/* Collapsible Search Icon & Input */}
+              <div className="relative flex items-center">
+                <div className={`overflow-hidden transition-all duration-300 flex items-center ${
+                  isSearchOpen ? 'w-[160px] xl:w-[200px] opacity-100 mr-2' : 'w-0 opacity-0 pointer-events-none'
+                }`}>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Tìm khóa học..."
+                    className={`w-full border rounded-xl pl-3 pr-3 py-1.5 text-xs focus:outline-none focus:ring-2 ${
+                      isSticky 
+                        ? 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-primary/20' 
+                        : 'bg-white/15 hover:bg-white/20 focus:bg-white/25 border-white/20 text-white placeholder-white/70 focus:ring-white/30'
+                    }`}
+                    autoFocus={isSearchOpen}
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsSearchOpen(!isSearchOpen)}
+                  className={`p-2 rounded-xl transition duration-200 flex items-center justify-center cursor-pointer ${
                     isSticky 
-                      ? 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-primary/20' 
-                      : 'bg-white/15 hover:bg-white/20 focus:bg-white/25 border-white/20 text-white placeholder-white/70 focus:ring-white/30'
+                      ? 'hover:bg-slate-100 text-slate-600 hover:text-primary' 
+                      : 'hover:bg-white/10 text-white/95 hover:text-white'
                   }`}
-                />
-                <Search className={`w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 transition duration-300 ${
-                  isSticky ? 'text-slate-400' : 'text-white/70'
-                }`} />
+                  title="Tìm kiếm"
+                >
+                  {isSearchOpen ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
+                </button>
               </div>
+
+              {/* AI Assistant Icon-only Glowy Button */}
+              <Link
+                href="/ai-assistant"
+                onClick={() => handleLinkClick('/ai-assistant')}
+                className={`p-2 rounded-xl transition duration-200 flex items-center justify-center relative cursor-pointer group ${
+                  isSticky 
+                    ? 'hover:bg-slate-100 text-amber-500 hover:text-amber-600' 
+                    : 'hover:bg-white/10 text-amber-400 hover:text-amber-300'
+                }`}
+                title="Mở AI Assistant"
+              >
+                <Sparkles className="w-4 h-4 animate-pulse" />
+                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                </span>
+              </Link>
 
               {/* User Menu / Login Badge */}
               {accessToken ? (
