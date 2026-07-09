@@ -162,16 +162,16 @@ export default function Navbar() {
               <ShieldCheck className="w-3 h-3 text-emerald-400" /> Hệ thống AI EduTech Chuẩn 5 Sao
             </span>
             <div className="flex items-center gap-1.5">
-              <a href="#" className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
+              <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
                 <FacebookIcon className="w-3.5 h-3.5" />
               </a>
-              <a href="#" className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
+              <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
                 <TwitterIcon className="w-3.5 h-3.5" />
               </a>
-              <a href="#" className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
+              <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
                 <LinkedinIcon className="w-3.5 h-3.5" />
               </a>
-              <a href="#" className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
+              <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
                 <YoutubeIcon className="w-3.5 h-3.5" />
               </a>
             </div>

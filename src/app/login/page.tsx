@@ -159,7 +159,7 @@ export default function LoginPage() {
               <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5 text-slate-400" /> Mật khẩu (Password)
               </label>
-              <a href="#" className="text-[11px] font-semibold text-primary hover:underline">
+              <a href="#" onClick={(e) => e.preventDefault()} className="text-[11px] font-semibold text-primary hover:underline">
                 Quên mật khẩu?
               </a>
             </div>

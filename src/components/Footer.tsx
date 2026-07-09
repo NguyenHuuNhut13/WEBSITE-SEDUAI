@@ -105,18 +105,21 @@ export default function Footer() {
               <div className="flex space-x-3 pt-2">
                 <a
                   href="#"
+                  onClick={(e) => e.preventDefault()}
                   className="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition duration-200"
                 >
                   <FacebookIcon className="w-4 h-4" />
                 </a>
                 <a
                   href="#"
+                  onClick={(e) => e.preventDefault()}
                   className="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition duration-200"
                 >
                   <LinkedinIcon className="w-4 h-4" />
                 </a>
                 <a
                   href="#"
+                  onClick={(e) => e.preventDefault()}
                   className="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition duration-200"
                 >
                   <YoutubeIcon className="w-4 h-4" />
@@ -129,27 +132,27 @@ export default function Footer() {
               <h3 className="text-white font-bold text-base mb-5">Hệ thống & Phân hệ</h3>
               <ul className="space-y-2.5 text-sm">
                 <li>
-                  <Link href="#" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
+                  <Link href="/ai-assistant" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
                     <ArrowRight className="w-3 h-3 text-primary" /> Admissions CRM
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
+                  <Link href="/ai-assistant" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
                     <ArrowRight className="w-3 h-3 text-primary" /> AI Teacher Assistant
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
+                  <Link href="/profile" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
                     <ArrowRight className="w-3 h-3 text-primary" /> Học viên & Phụ huynh
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
+                  <Link href="/courses" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
                     <ArrowRight className="w-3 h-3 text-primary" /> Workflow Automation
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
+                  <Link href="/courses" prefetch={false} className="hover:text-primary transition duration-150 flex items-center gap-1.5">
                     <ArrowRight className="w-3 h-3 text-primary" /> AI Marketplace
                   </Link>
                 </li>
@@ -227,10 +230,10 @@ export default function Footer() {
           <div className="pt-8 border-t border-slate-800 text-center text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-4">
             <p>&copy; 2026 SeduAi. Tất cả quyền được bảo lưu.</p>
             <div className="flex space-x-6">
-              <Link href="#" prefetch={false} className="hover:text-slate-300">
+              <Link href="#" onClick={(e) => e.preventDefault()} prefetch={false} className="hover:text-slate-300">
                 Điều khoản dịch vụ
               </Link>
-              <Link href="#" prefetch={false} className="hover:text-slate-300">
+              <Link href="#" onClick={(e) => e.preventDefault()} prefetch={false} className="hover:text-slate-300">
                 Chính sách bảo mật
               </Link>
             </div>
