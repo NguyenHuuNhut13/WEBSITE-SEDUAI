@@ -62,6 +62,7 @@ export default function AiAssistantPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Check role: teacher, giangvien, gv
   const isTeacher = user && (
@@ -354,7 +355,7 @@ export default function AiAssistantPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-72px)] lg:h-[calc(100vh-122px)] bg-slate-900 text-slate-100 overflow-hidden font-sans relative">
+    <div className="flex h-screen bg-slate-900 text-slate-100 overflow-hidden font-sans relative">
       {/* Backdrop overlay cho Mobile khi mở Sidebar */}
       {isSidebarOpen && (
         <div
@@ -478,6 +479,28 @@ export default function AiAssistantPage() {
           ))}
         </div>
 
+        {/* User Info Footer inside Sidebar */}
+        <div className="p-4 border-t border-slate-800 bg-slate-900/60 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img
+              src={localSync.avatar}
+              alt={localSync.name}
+              className="w-8 h-8 rounded-full object-cover border border-primary"
+            />
+            <div className="overflow-hidden">
+              <p className="text-xs font-bold text-white truncate max-w-[130px]">{localSync.name}</p>
+              <p className="text-[10px] text-amber-400 font-bold flex items-center gap-1">
+                <Award className="w-3 h-3" /> {localSync.point} điểm Sedu
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/profile"
+            className="text-[11px] font-semibold text-slate-400 hover:text-primary transition"
+          >
+            Hồ sơ
+          </Link>
+        </div>
       </div>
 
       {/* MAIN CHAT AREA */}
@@ -541,7 +564,7 @@ export default function AiAssistantPage() {
         </div>
 
         {/* Message Feed Container */}
-        <div className="flex-grow overflow-y-auto p-4 sm:p-8 space-y-6">
+        <div className="flex-grow overflow-y-auto p-4 sm:p-8 space-y-6 pb-36 sm:pb-40">
           {messages.length === 0 ? (
             /* WELCOME SCREEN & SUGGESTED PROMPTS */
             <div className="max-w-3xl mx-auto py-8 sm:py-16 text-center space-y-8 animate-fadeInUp">
@@ -572,11 +595,11 @@ export default function AiAssistantPage() {
                 {mode === 'teacher_assistant' ? (
                   <>
                     <button
-                      onClick={() =>
-                        handleSendMessage(
-                          'Hãy giải thích chi tiết khái niệm React Server Components (RSC) trong Next.js 15 với code minh họa dễ hiểu nhất.'
-                        )
-                      }
+                      type="button"
+                      onClick={() => {
+                        setInput('Hãy giải thích chi tiết khái niệm React Server Components (RSC) trong Next.js 15 với code minh họa dễ hiểu nhất.');
+                        inputRef.current?.focus();
+                      }}
                       className="p-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-primary/60 rounded-2xl transition cursor-pointer group flex flex-col justify-between"
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -592,11 +615,11 @@ export default function AiAssistantPage() {
                     </button>
 
                     <button
-                      onClick={() =>
-                        handleSendMessage(
-                          'Tôi muốn luyện thi IELTS Speaking Part 2 chủ đề "Describe an education experience that changed your life". Hãy đưa ra dàn ý và từ vựng band 7.5+.'
-                        )
-                      }
+                      type="button"
+                      onClick={() => {
+                        setInput('Tôi muốn luyện thi IELTS Speaking Part 2 chủ đề "Describe an education experience that changed your life". Hãy đưa ra dàn ý và từ vựng band 7.5+.');
+                        inputRef.current?.focus();
+                      }}
                       className="p-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-primary/60 rounded-2xl transition cursor-pointer group flex flex-col justify-between"
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -612,11 +635,11 @@ export default function AiAssistantPage() {
                     </button>
 
                     <button
-                      onClick={() =>
-                        handleSendMessage(
-                          'Hãy ra cho tôi 3 bài tập trắc nghiệm (quiz) về Python cơ bản cho người mới bắt đầu và giải thích đáp án khi tôi trả lời.'
-                        )
-                      }
+                      type="button"
+                      onClick={() => {
+                        setInput('Hãy ra cho tôi 3 bài tập trắc nghiệm (quiz) về Python cơ bản cho người mới bắt đầu và giải thích đáp án khi tôi trả lời.');
+                        inputRef.current?.focus();
+                      }}
                       className="p-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-primary/60 rounded-2xl transition cursor-pointer group flex flex-col justify-between"
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -632,11 +655,11 @@ export default function AiAssistantPage() {
                     </button>
 
                     <button
-                      onClick={() =>
-                        handleSendMessage(
-                          'Tôi muốn học viết code sạch (Clean Code) trong JavaScript. Hãy chỉ ra 5 nguyên tắc quan trọng nhất kèm code xấu vs code tốt.'
-                        )
-                      }
+                      type="button"
+                      onClick={() => {
+                        setInput('Tôi muốn học viết code sạch (Clean Code) trong JavaScript. Hãy chỉ ra 5 nguyên tắc quan trọng nhất kèm code xấu vs code tốt.');
+                        inputRef.current?.focus();
+                      }}
                       className="p-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-primary/60 rounded-2xl transition cursor-pointer group flex flex-col justify-between"
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -654,11 +677,11 @@ export default function AiAssistantPage() {
                 ) : (
                   <>
                     <button
-                      onClick={() =>
-                        handleSendMessage(
-                          'Xin chào, tôi muốn tư vấn khóa học Lập trình Web Full-Stack (Laravel & React) tại SeduAi. Học phí hiện tại và lộ trình như thế nào?'
-                        )
-                      }
+                      type="button"
+                      onClick={() => {
+                        setInput('Xin chào, tôi muốn tư vấn khóa học Lập trình Web Full-Stack (Laravel & React) tại SeduAi. Học phí hiện tại và lộ trình như thế nào?');
+                        inputRef.current?.focus();
+                      }}
                       className="p-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-emerald-500/60 rounded-2xl transition cursor-pointer group flex flex-col justify-between"
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -674,11 +697,11 @@ export default function AiAssistantPage() {
                     </button>
 
                     <button
-                      onClick={() =>
-                        handleSendMessage(
-                          'Khóa học IELTS 6.5+ cam kết đầu ra của SeduAi có những quyền lợi gì và mức giảm giá khi đăng ký sớm là bao nhiêu?'
-                        )
-                      }
+                      type="button"
+                      onClick={() => {
+                        setInput('Khóa học IELTS 6.5+ cam kết đầu ra của SeduAi có những quyền lợi gì và mức giảm giá khi đăng ký sớm là bao nhiêu?');
+                        inputRef.current?.focus();
+                      }}
                       className="p-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-emerald-500/60 rounded-2xl transition cursor-pointer group flex flex-col justify-between"
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -694,11 +717,11 @@ export default function AiAssistantPage() {
                     </button>
 
                     <button
-                      onClick={() =>
-                        handleSendMessage(
-                          'Tôi muốn đăng ký nhận tư vấn trực tiếp từ chuyên viên SeduAi. Số điện thoại của tôi là 0909123456.'
-                        )
-                      }
+                      type="button"
+                      onClick={() => {
+                        setInput('Tôi muốn đăng ký nhận tư vấn trực tiếp từ chuyên viên SeduAi. Số điện thoại của tôi là: ');
+                        inputRef.current?.focus();
+                      }}
                       className="p-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-emerald-500/60 rounded-2xl transition cursor-pointer group flex flex-col justify-between"
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -714,11 +737,11 @@ export default function AiAssistantPage() {
                     </button>
 
                     <button
-                      onClick={() =>
-                        handleSendMessage(
-                          'SeduAi có khóa học lập trình nào phù hợp cho trẻ em từ 10 tuổi không? Học phí tháng là bao nhiêu?'
-                        )
-                      }
+                      type="button"
+                      onClick={() => {
+                        setInput('SeduAi có khóa học lập trình nào phù hợp cho trẻ em từ 10 tuổi không? Học phí tháng là bao nhiêu?');
+                        inputRef.current?.focus();
+                      }}
                       className="p-4 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 hover:border-emerald-500/60 rounded-2xl transition cursor-pointer group flex flex-col justify-between"
                     >
                       <div className="flex items-center justify-between mb-2">
@@ -749,17 +772,24 @@ export default function AiAssistantPage() {
                     }`}
                   >
                     {/* Avatar */}
-                    <div
-                      className={`w-9 h-9 rounded-2xl flex-shrink-0 flex items-center justify-center font-bold text-sm shadow-md ${
-                        isUser
-                          ? 'bg-primary text-white'
-                          : mode === 'teacher_assistant'
-                          ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950'
-                          : 'bg-gradient-to-tr from-emerald-500 to-teal-500 text-slate-950'
-                      }`}
-                    >
-                      {isUser ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
-                    </div>
+                    {isUser ? (
+                      <img
+                        src={localSync.avatar}
+                        alt={localSync.name}
+                        className="w-9 h-9 rounded-full object-cover border-2 border-primary shadow-md flex-shrink-0"
+                        loading="eager"
+                      />
+                    ) : (
+                      <div
+                        className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm shadow-md ${
+                          mode === 'teacher_assistant'
+                            ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950'
+                            : 'bg-gradient-to-tr from-emerald-500 to-teal-500 text-slate-950'
+                        }`}
+                      >
+                        <Bot className="w-5 h-5 text-slate-950" />
+                      </div>
+                    )}
 
                     {/* Message Content Card */}
                     <div
@@ -833,13 +863,13 @@ export default function AiAssistantPage() {
               {isLoading && (
                 <div className="flex items-start gap-4">
                   <div
-                    className={`w-9 h-9 rounded-2xl flex-shrink-0 flex items-center justify-center font-bold text-sm shadow-md ${
+                    className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm shadow-md ${
                       mode === 'teacher_assistant'
                         ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950'
                         : 'bg-gradient-to-tr from-emerald-500 to-teal-500 text-slate-950'
                     }`}
                   >
-                    <Bot className="w-5 h-5" />
+                    <Bot className="w-5 h-5 text-slate-950" />
                   </div>
                   <div className="bg-slate-800/90 border border-slate-700/80 rounded-3xl rounded-tl-sm p-4 text-xs text-slate-300 flex items-center gap-2.5 shadow-lg">
                     <Loader2 className="w-4 h-4 animate-spin text-primary" />
@@ -856,28 +886,40 @@ export default function AiAssistantPage() {
           )}
         </div>
 
-        {/* PROMPT INPUT BOX (Bottom ChatGPT Input) */}
-        <div className="p-4 sm:p-6 bg-slate-950 border-t border-slate-800/80 relative z-30">
-          <div className="max-w-4xl mx-auto space-y-3">
+        {/* PROMPT INPUT BOX (Bottom Floating ChatGPT Input) */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent z-30 pointer-events-none">
+          <div className="max-w-3xl mx-auto space-y-3 pointer-events-auto">
             {/* Quick Action Chips */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 flex-shrink-0">
                 <Sparkles className="w-3 h-3 text-amber-400" /> Gợi ý hỏi nhanh:
               </span>
               <button
-                onClick={() => setInput('Giải bài tập Python: Viết hàm kiểm tra số nguyên tố tối ưu.')}
+                type="button"
+                onClick={() => {
+                  setInput('Giải bài tập Python: Viết hàm kiểm tra số nguyên tố tối ưu.');
+                  inputRef.current?.focus();
+                }}
                 className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs font-semibold border border-slate-700/60 flex-shrink-0 transition cursor-pointer"
               >
                 🐍 Bài tập Python
               </button>
               <button
-                onClick={() => setInput('Sửa ngữ pháp và từ vựng IELTS cho câu tiếng Anh này: ...')}
+                type="button"
+                onClick={() => {
+                  setInput('Sửa ngữ pháp và từ vựng IELTS cho câu tiếng Anh này: ...');
+                  inputRef.current?.focus();
+                }}
                 className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs font-semibold border border-slate-700/60 flex-shrink-0 transition cursor-pointer"
               >
                 🇬🇧 Sửa IELTS Writing
               </button>
               <button
-                onClick={() => setInput('Tôi muốn nhận Voucher học phí khóa Lập trình Web Full-Stack.')}
+                type="button"
+                onClick={() => {
+                  setInput('Tôi muốn nhận Voucher học phí khóa Lập trình Web Full-Stack.');
+                  inputRef.current?.focus();
+                }}
                 className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs font-semibold border border-slate-700/60 flex-shrink-0 transition cursor-pointer"
               >
                 🎁 Nhận Voucher Khóa Học
@@ -890,9 +932,10 @@ export default function AiAssistantPage() {
                 e.preventDefault();
                 handleSendMessage();
               }}
-              className="relative flex items-center"
+              className="relative flex items-center bg-slate-800/90 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl p-1.5 focus-within:ring-2 focus-within:ring-primary/40 focus-within:border-primary transition"
             >
               <textarea
+                ref={inputRef}
                 rows={2}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -907,7 +950,7 @@ export default function AiAssistantPage() {
                     ? 'Hỏi Giảng viên AI bất cứ câu hỏi nào về Lập trình, Tiếng Anh, bài tập... (Enter để gửi)'
                     : 'Nhập thông tin hoặc câu hỏi về khóa học, số điện thoại để đăng ký tư vấn CRM...'
                 }
-                className="w-full bg-slate-900 focus:bg-slate-900/90 border border-slate-700 focus:border-primary rounded-2xl pl-4 pr-14 py-3.5 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/20 transition resize-none leading-relaxed font-sans"
+                className="w-full bg-transparent border-0 rounded-2xl pl-3 pr-14 py-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-0 transition resize-none leading-relaxed font-sans"
               />
 
               <button
@@ -920,7 +963,7 @@ export default function AiAssistantPage() {
               </button>
             </form>
 
-            <p className="text-[10px] text-slate-500 text-center flex items-center justify-center gap-1">
+            <p className="text-[10px] text-slate-500 text-center flex items-center justify-center gap-1 bg-slate-900/40 py-1 rounded-xl backdrop-blur-sm">
               <span>🔒 AI Assistant tích hợp API OpenAI & NKS SCRMAI CRM.</span>
               <span>Dữ liệu tham khảo chuẩn từ hệ sinh thái giáo dục Edu2Review.</span>
             </p>
