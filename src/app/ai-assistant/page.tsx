@@ -355,7 +355,7 @@ export default function AiAssistantPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-72px)] lg:h-[calc(100vh-122px)] bg-slate-900 text-slate-100 overflow-hidden font-sans relative">
+    <div className="flex h-screen bg-slate-900 text-slate-100 overflow-hidden font-sans relative">
       {/* Backdrop overlay cho Mobile khi mở Sidebar */}
       {isSidebarOpen && (
         <div

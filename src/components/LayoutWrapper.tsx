@@ -13,7 +13,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
   return (
     <>
-      <Navbar />
+      {!isAiAssistant && <Navbar />}
       <main className="flex-grow flex flex-col w-full">{children}</main>
       {!isAiAssistant && <Footer />}
       <ScrollToTop />
