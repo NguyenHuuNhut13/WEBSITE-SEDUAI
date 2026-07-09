@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Brain,
@@ -25,6 +26,9 @@ import {
   X,
   Code2,
   Languages,
+  Lock,
+  LogOut,
+  ArrowLeft,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { createLead } from '@/services/api';
@@ -46,7 +50,9 @@ interface Thread {
 }
 
 export default function AiAssistantPage() {
-  const { localSync } = useAuth();
+  const { user, accessToken, localSync, isLoading: authLoading, logout } = useAuth();
+  const router = useRouter();
+
   const [threads, setThreads] = useState<Thread[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string>('');
   const [mode, setMode] = useState<'teacher_assistant' | 'admissions_crm'>('teacher_assistant');
@@ -56,6 +62,30 @@ export default function AiAssistantPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Check role: teacher, giangvien, gv
+  const isTeacher = user && (
+    (user.username && (
+      user.username.toLowerCase().includes('teacher') ||
+      user.username.toLowerCase().includes('giangvien') ||
+      user.username.toLowerCase().includes('gv')
+    )) ||
+    (user.email && (
+      user.email.toLowerCase().includes('teacher') ||
+      user.email.toLowerCase().includes('giangvien') ||
+      user.email.toLowerCase().includes('gv')
+    )) ||
+    (user as any).role?.toLowerCase().includes('teacher') ||
+    (user as any).role?.toLowerCase().includes('giáo viên') ||
+    (user as any).group?.toLowerCase().includes('teacher')
+  );
+
+  // Redirect to login if unauthenticated
+  useEffect(() => {
+    if (!authLoading && !accessToken) {
+      router.push('/login?redirect=/ai-assistant');
+    }
+  }, [authLoading, accessToken, router]);
 
   // Tự động mở sidebar nếu ở màn hình lớn (Desktop >= 1024px)
   useEffect(() => {
@@ -256,6 +286,72 @@ export default function AiAssistantPage() {
       setIsLoading(false);
     }
   };
+
+  // Loading state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <span className="mt-4 font-bold text-xs uppercase tracking-widest text-slate-500">Đang xác thực thông tin...</span>
+      </div>
+    );
+  }
+
+  // Not logged in -> Let useEffect handle redirect
+  if (!accessToken || !user) {
+    return null;
+  }
+
+  // Access check: Only Teachers
+  if (!isTeacher) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Background decor */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-10"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
+
+        <div className="max-w-md w-full bg-slate-900/80 backdrop-blur-md rounded-3xl border border-rose-500/20 shadow-2xl p-8 text-center relative z-10 animate-scale-up">
+          <div className="w-16 h-16 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center justify-center text-rose-500 mx-auto mb-6 shadow-inner animate-pulse">
+            <Lock className="w-8 h-8" />
+          </div>
+          
+          <h1 className="text-xl font-black text-white tracking-tight mb-2">Quyền Truy Cập Bị Giới Hạn</h1>
+          <p className="text-xs text-rose-400 font-bold uppercase tracking-wider mb-6">Chỉ Dành Cho Giáo Viên</p>
+          
+          <div className="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 text-left text-xs text-slate-400 space-y-2 mb-6">
+            <p className="font-semibold text-slate-300">Tính năng AI Assistant được bảo vệ nghiêm ngặt:</p>
+            <ul className="list-disc pl-4 space-y-1">
+              <li>AI Co-Teacher Assistant giúp soạn giáo án và chấm bài.</li>
+              <li>Admissions CRM truy cập trực tiếp phễu tư vấn NKS API.</li>
+            </ul>
+            <div className="pt-2 border-t border-slate-900 mt-2 text-[11px]">
+              <span className="text-slate-500">Tài khoản hiện tại:</span> <strong className="text-slate-300">{user?.username || 'Chưa xác định'}</strong>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+                router.push('/login?redirect=/ai-assistant');
+              }}
+              className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" /> Đổi Tài Khoản Giáo Viên
+            </button>
+            <Link
+              href="/"
+              className="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition flex items-center justify-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" /> Quay Lại Trang Chủ
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-slate-900 text-slate-100 overflow-hidden font-sans relative">
