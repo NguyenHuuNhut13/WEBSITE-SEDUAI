@@ -564,21 +564,21 @@ export default function AiAssistantPage() {
         </div>
 
         {/* Message Feed Container */}
-        <div className="flex-grow overflow-y-auto p-4 sm:p-8 space-y-6 pb-36 sm:pb-40">
+        <div className="flex-grow overflow-y-auto p-4 sm:p-8 space-y-6">
           {messages.length === 0 ? (
             /* WELCOME SCREEN & SUGGESTED PROMPTS */
-            <div className="max-w-3xl mx-auto py-4 sm:py-6 text-center space-y-6 animate-fadeInUp">
+            <div className="max-w-3xl mx-auto py-8 sm:py-16 text-center space-y-8 animate-fadeInUp">
               <div className="relative inline-block">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-primary via-blue-600 to-amber-500 flex items-center justify-center text-white shadow-xl mx-auto transform hover:rotate-3 transition duration-300">
-                  <Bot className="w-8 h-8" />
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-tr from-primary via-blue-600 to-amber-500 flex items-center justify-center text-white shadow-2xl mx-auto transform hover:rotate-3 transition duration-300">
+                  <Bot className="w-12 h-12" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-slate-900 border border-slate-700 p-1 rounded-xl text-amber-400">
-                  <Sparkles className="w-3.5 h-3.5" />
+                <div className="absolute -bottom-2 -right-2 bg-slate-900 border-2 border-slate-700 p-1.5 rounded-2xl text-amber-400">
+                  <Sparkles className="w-5 h-5" />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-white">
+              <div className="space-y-3">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white">
                   {mode === 'teacher_assistant'
                     ? 'Xin chào! Tôi là Giảng Viên AI SeduAi'
                     : 'Hệ Thống AI Admissions CRM & Tuyển Sinh'}
@@ -886,55 +886,53 @@ export default function AiAssistantPage() {
           )}
         </div>
 
-        {/* PROMPT INPUT BOX (Bottom Floating ChatGPT Input) */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent z-30 pointer-events-none">
-          <div className="max-w-3xl mx-auto space-y-3 pointer-events-auto">
-            {/* Quick Action Chips (Only show when there are active messages in the chat, since the empty screen already shows large suggestion cards) */}
-            {messages.length > 0 && (
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none animate-fade-in">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 flex-shrink-0">
-                  <Sparkles className="w-3 h-3 text-amber-400" /> Gợi ý hỏi nhanh:
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setInput('Giải bài tập Python: Viết hàm kiểm tra số nguyên tố tối ưu.');
-                    inputRef.current?.focus();
-                  }}
-                  className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs font-semibold border border-slate-700/60 flex-shrink-0 transition cursor-pointer"
-                >
-                  🐍 Bài tập Python
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setInput('Sửa ngữ pháp và từ vựng IELTS cho câu tiếng Anh này: ...');
-                    inputRef.current?.focus();
-                  }}
-                  className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs font-semibold border border-slate-700/60 flex-shrink-0 transition cursor-pointer"
-                >
-                  🇬🇧 Sửa IELTS Writing
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setInput('Tôi muốn nhận Voucher học phí khóa Lập trình Web Full-Stack.');
-                    inputRef.current?.focus();
-                  }}
-                  className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs font-semibold border border-slate-700/60 flex-shrink-0 transition cursor-pointer"
-                >
-                  🎁 Nhận Voucher Khóa Học
-                </button>
-              </div>
-            )}
+        {/* PROMPT INPUT BOX (Bottom ChatGPT Input Panel) */}
+        <div className="p-4 sm:p-6 bg-slate-950 border-t border-slate-800 relative z-30">
+          <div className="max-w-4xl mx-auto space-y-3">
+            {/* Quick Action Chips */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1 flex-shrink-0">
+                <Sparkles className="w-3 h-3 text-amber-400" /> Gợi ý hỏi nhanh:
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setInput('Giải bài tập Python: Viết hàm kiểm tra số nguyên tố tối ưu.');
+                  inputRef.current?.focus();
+                }}
+                className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs font-semibold border border-slate-700/60 flex-shrink-0 transition cursor-pointer"
+              >
+                🐍 Bài tập Python
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setInput('Sửa ngữ pháp và từ vựng IELTS cho câu tiếng Anh này: ...');
+                  inputRef.current?.focus();
+                }}
+                className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs font-semibold border border-slate-700/60 flex-shrink-0 transition cursor-pointer"
+              >
+                🇬🇧 Sửa IELTS Writing
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setInput('Tôi muốn nhận Voucher học phí khóa Lập trình Web Full-Stack.');
+                  inputRef.current?.focus();
+                }}
+                className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full text-xs font-semibold border border-slate-700/60 flex-shrink-0 transition cursor-pointer"
+              >
+                🎁 Nhận Voucher Khóa Học
+              </button>
+            </div>
 
-            {/* Input Form */}
+            {/* Input Form with surrounding box styling */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 handleSendMessage();
               }}
-              className="relative flex items-center bg-slate-800/90 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl p-1.5 focus-within:ring-2 focus-within:ring-primary/40 focus-within:border-primary transition"
+              className="relative flex items-center bg-slate-900 border border-slate-800 focus-within:border-primary/80 focus-within:ring-2 focus-within:ring-primary/20 rounded-2xl p-1.5 focus-within:bg-slate-900/90 transition shadow-inner"
             >
               <textarea
                 ref={inputRef}
@@ -965,7 +963,7 @@ export default function AiAssistantPage() {
               </button>
             </form>
 
-            <p className="text-[10px] text-slate-500 text-center flex items-center justify-center gap-1 bg-slate-900/40 py-1 rounded-xl backdrop-blur-sm">
+            <p className="text-[10px] text-slate-500 text-center flex items-center justify-center gap-1">
               <span>🔒 AI Assistant tích hợp API OpenAI & NKS SCRMAI CRM.</span>
               <span>Dữ liệu tham khảo chuẩn từ hệ sinh thái giáo dục Edu2Review.</span>
             </p>
