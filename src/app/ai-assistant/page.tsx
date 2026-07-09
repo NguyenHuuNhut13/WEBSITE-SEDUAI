@@ -354,7 +354,7 @@ export default function AiAssistantPage() {
   }
 
   return (
-    <div className="flex h-screen bg-slate-900 text-slate-100 overflow-hidden font-sans relative">
+    <div className="flex h-[calc(100vh-72px)] lg:h-[calc(100vh-122px)] bg-slate-900 text-slate-100 overflow-hidden font-sans relative">
       {/* Backdrop overlay cho Mobile khi mở Sidebar */}
       {isSidebarOpen && (
         <div
@@ -478,28 +478,6 @@ export default function AiAssistantPage() {
           ))}
         </div>
 
-        {/* User Info Footer inside Sidebar */}
-        <div className="p-4 border-t border-slate-800 bg-slate-900/60 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img
-              src={localSync.avatar}
-              alt={localSync.name}
-              className="w-8 h-8 rounded-full object-cover border border-primary"
-            />
-            <div className="overflow-hidden">
-              <p className="text-xs font-bold text-white truncate max-w-[130px]">{localSync.name}</p>
-              <p className="text-[10px] text-amber-400 font-bold flex items-center gap-1">
-                <Award className="w-3 h-3" /> {localSync.point} điểm Sedu
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/profile"
-            className="text-[11px] font-semibold text-slate-400 hover:text-primary transition"
-          >
-            Hồ sơ
-          </Link>
-        </div>
       </div>
 
       {/* MAIN CHAT AREA */}
