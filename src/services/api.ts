@@ -43,9 +43,15 @@ export interface LeadPayload {
   name: string;
   phone: string;
   email?: string;
+  zalo?: string;
   demand?: string;
+  company?: string;
+  position?: string;
+  comsize?: string | number;
+  source?: string | number; // e.g. 31 (Website)
+  status?: string; // e.g. "APPROVED"
   note?: string;
-  source_id?: number;
+  source_id?: number; // Hỗ trợ tương thích ngược
 }
 
 export interface UserInfo {
@@ -131,13 +137,24 @@ export async function getEduCourses(): Promise<ApiCourse[]> {
  */
 export async function createLead(payload: LeadPayload): Promise<{ success: boolean; id?: number; message?: string }> {
   try {
+    // Chuẩn hóa payload theo đặc tả API của NKS
+    const finalPayload = {
+      source: payload.source ?? 31, // Mặc định 31 là nguồn "Website"
+      status: payload.status ?? 'APPROVED',
+      comsize: payload.comsize ?? 1,
+      company: payload.company ?? 'S',
+      zalo: payload.zalo ?? '',
+      position: payload.position ?? '',
+      ...payload
+    };
+
     const isClient = typeof window !== 'undefined';
     const url = isClient ? '/api/proxy/crm' : `${CRM_API_BASE}/lead/create`;
     const options: RequestInit = isClient
       ? {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ endpoint: 'lead/create', payload }),
+          body: JSON.stringify({ endpoint: 'lead/create', payload: finalPayload }),
         }
       : {
           method: 'POST',
@@ -146,7 +163,7 @@ export async function createLead(payload: LeadPayload): Promise<{ success: boole
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(finalPayload),
         };
 
     const response = await fetch(url, options);
