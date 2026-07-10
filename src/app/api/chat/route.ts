@@ -14,13 +14,22 @@ async function callGemini(messages: any[], systemPrompt: string): Promise<string
     parts: [{ text: m.content || '' }]
   }));
 
-  // Try gemini-2.0-flash first, fallback to gemini-1.5-flash if needed
-  const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+  // Try multiple model and version combinations to find one that works for this key/region
+  const configs = [
+    { model: 'gemini-1.5-flash', version: 'v1' },
+    { model: 'gemini-1.5-flash', version: 'v1beta' },
+    { model: 'gemini-1.5-flash-latest', version: 'v1beta' },
+    { model: 'gemini-1.5-pro', version: 'v1' },
+    { model: 'gemini-1.5-pro', version: 'v1beta' },
+    { model: 'gemini-pro', version: 'v1' },
+    { model: 'gemini-pro', version: 'v1beta' },
+    { model: 'gemini-2.0-flash', version: 'v1beta' }
+  ];
   let lastErr: any = null;
 
-  for (const model of models) {
+  for (const config of configs) {
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const url = `https://generativelanguage.googleapis.com/${config.version}/models/${config.model}:generateContent?key=${apiKey}`;
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
