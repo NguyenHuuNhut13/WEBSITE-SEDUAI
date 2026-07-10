@@ -23,13 +23,63 @@ import CounterSection from '@/components/CounterSection';
 import EventCard from '@/components/EventCard';
 import InstructorCard from '@/components/InstructorCard';
 import TestimonialCard from '@/components/TestimonialCard';
-import { courses } from '@/data/courses';
+import { courses, Course } from '@/data/courses';
 import { events } from '@/data/events';
 import { instructors } from '@/data/instructors';
 import { testimonials } from '@/data/testimonials';
+import { getEduCourses, ApiCourse } from '@/services/api';
 
-export default function Home() {
-  const featuredCourses = courses.slice(0, 4);
+export default async function Home() {
+  const apiCourses = await getEduCourses();
+  
+  const mappedApiCourses: Course[] = apiCourses.map((c: ApiCourse) => ({
+    slug: `api-course-${c.id}`,
+    title: typeof c.title === 'object' && c.title !== null && 'rendered' in c.title ? (c.title as any).rendered : String(c.title || ''),
+    description: c.acf?.description?.replace(/<[^>]*>/g, '') || 'Khóa học chính thức từ hệ thống SeduAi EduCenter.',
+    instructor: typeof c.acf?.expactteacher === 'object' && c.acf?.expactteacher !== null && 'title' in c.acf.expactteacher
+      ? (c.acf.expactteacher as any).title
+      : String(c.acf?.expactteacher || 'Giảng viên SeduAi'),
+    level: typeof (c.acf?.type as any) === 'object' && c.acf?.type !== null 
+      ? (Array.isArray(c.acf.type) ? ((c.acf.type as any)[0]?.post_title || 'Mọi trình độ') : ((c.acf.type as any).title || 'Mọi trình độ'))
+      : String(c.acf?.type || 'Mọi trình độ'),
+    duration: c.acf?.duration || '12 tuần',
+    student_count: 420 + (c.id % 150),
+    rating: 4.9,
+    original_price: Number(c.acf?.price || 3500000),
+    discount_price: Number(c.acf?.sale_price || c.acf?.price || 2490000),
+    price: Number(c.acf?.price || 3500000),
+    reviews_count: 24,
+    image: c.acf?.featureimg || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
+    category: typeof c.acf?.category === 'object' && c.acf?.category !== null && 'title' in c.acf.category
+      ? (c.acf.category as any).title
+      : String(c.acf?.category || 'AI & Công nghệ'),
+    lessons_count: Number(c.acf?.lession || 24),
+    benefits: [
+      'Lộ trình chuẩn thực chiến SeduAi EduCenter',
+      'Thực hành dự án với sự hướng dẫn của chuyên gia',
+      'Đồng hành cùng Trợ lý AI giải đáp thắc mắc 24/7'
+    ],
+    syllabus: [
+      {
+        title: 'Chương 1: Khởi động và kiến thức nền tảng',
+        lessons: ['Bài 1: Giới thiệu khóa học', 'Bài 2: Chuẩn bị môi trường & công cụ']
+      },
+      {
+        title: 'Chương 2: Thực chiến kỹ năng cốt lõi',
+        lessons: ['Bài 3: Ứng dụng thực tế và thực hành chuyên sâu']
+      }
+    ],
+    reviews: [
+      {
+        name: 'Học viên SeduAi',
+        rating: 5,
+        date: 'Vừa xong',
+        comment: 'Khóa học rất chất lượng, giảng viên nhiệt tình, AI hỗ trợ trả lời rất nhanh.'
+      }
+    ]
+  }));
+
+  const featuredCourses = mappedApiCourses.length > 0 ? mappedApiCourses.slice(0, 4) : courses.slice(0, 4);
 
   const categories = [
     {

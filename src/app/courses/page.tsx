@@ -12,19 +12,25 @@ export default function CourseList() {
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [sortBy, setSortBy] = useState('default');
   const [apiCoursesList, setApiCoursesList] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
   const [, startTransition] = useTransition();
 
   const categories = ['Tất cả', 'Tiếng Anh', 'Lập trình', 'Kỹ năng', 'AI & Công nghệ'];
 
   useEffect(() => {
+    setLoading(true);
     getEduCourses().then((list) => {
       if (list && list.length > 0) {
         const mapped: Course[] = list.map((c: ApiCourse) => ({
           slug: `api-course-${c.id}`,
           title: typeof c.title === 'object' && c.title !== null && 'rendered' in c.title ? (c.title as any).rendered : String(c.title || ''),
           description: c.acf?.description?.replace(/<[^>]*>/g, '') || 'Khóa học chính thức từ hệ thống SeduAi EduCenter.',
-          instructor: c.acf?.expactteacher || 'Giảng viên SeduAi',
-          level: (c.acf?.type as any) || 'Mọi trình độ',
+          instructor: typeof c.acf?.expactteacher === 'object' && c.acf?.expactteacher !== null && 'title' in c.acf.expactteacher
+            ? (c.acf.expactteacher as any).title
+            : String(c.acf?.expactteacher || 'Giảng viên SeduAi'),
+          level: typeof (c.acf?.type as any) === 'object' && c.acf?.type !== null 
+            ? (Array.isArray(c.acf.type) ? ((c.acf.type as any)[0]?.post_title || 'Mọi trình độ') : ((c.acf.type as any).title || 'Mọi trình độ'))
+            : String(c.acf?.type || 'Mọi trình độ'),
           duration: c.acf?.duration || '12 tuần',
           student_count: 420 + (c.id % 150),
           rating: 4.9,
@@ -33,7 +39,9 @@ export default function CourseList() {
           price: Number(c.acf?.price || 3500000),
           reviews_count: 24,
           image: c.acf?.featureimg || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
-          category: c.acf?.category || 'AI & Công nghệ',
+          category: typeof c.acf?.category === 'object' && c.acf?.category !== null && 'title' in c.acf.category
+            ? (c.acf.category as any).title
+            : String(c.acf?.category || 'AI & Công nghệ'),
           lessons_count: Number(c.acf?.lession || 24),
           benefits: [
             'Lộ trình chuẩn thực chiến SeduAi EduCenter',
@@ -61,10 +69,11 @@ export default function CourseList() {
         }));
         setApiCoursesList(mapped);
       }
+      setLoading(false);
     });
   }, []);
 
-  const allCombinedCourses = [...apiCoursesList, ...courses];
+  const allCombinedCourses = apiCoursesList;
 
   // Client-side filtering logic
   let filteredCourses = allCombinedCourses.filter((course) => {
@@ -256,11 +265,16 @@ export default function CourseList() {
               {/* Results count */}
               <div className="flex items-center justify-between mb-4">
                 <p className="text-xs text-slate-500">
-                  Hiển thị <strong className="text-slate-900">{filteredCourses.length}</strong> khóa học
+                  Hiển thị <strong className="text-slate-900">{loading ? 0 : filteredCourses.length}</strong> khóa học
                 </p>
               </div>
 
-              {filteredCourses.length > 0 ? (
+              {loading ? (
+                <div className="bg-white border border-slate-200 rounded-2xl p-20 text-center space-y-4 shadow-sm">
+                  <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+                  <p className="text-slate-400 text-xs font-semibold">Đang tải danh sách khóa học thực tế từ CRM...</p>
+                </div>
+              ) : filteredCourses.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredCourses.map((course) => (
                     <CourseCard key={course.slug} course={course} />
