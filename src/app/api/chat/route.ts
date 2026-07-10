@@ -14,33 +14,41 @@ async function callGemini(messages: any[], systemPrompt: string): Promise<string
     parts: [{ text: m.content || '' }]
   }));
 
-  // Endpoint for Gemini 1.5 Flash
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  // Try gemini-2.0-flash first, fallback to gemini-1.5-flash if needed
+  const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+  let lastErr: any = null;
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: formattedContents,
-      systemInstruction: {
-        parts: [{ text: systemPrompt }]
-      },
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 1200
+  for (const model of models) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: formattedContents,
+          systemInstruction: {
+            parts: [{ text: systemPrompt }]
+          },
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 1200
+          }
+        })
+      });
+
+      if (response.ok) {
+        const json = await response.json();
+        const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) return text;
+      } else {
+        lastErr = await response.text();
       }
-    })
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Gemini API returned status ${response.status}: ${errText}`);
+    } catch (err: any) {
+      lastErr = err.message;
+    }
   }
 
-  const json = await response.json();
-  const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error('Gemini API returned an empty candidate list');
-  return text;
+  throw new Error(`Gemini API failed for all models. Last error: ${lastErr}`);
 }
 
 async function callGroq(messages: any[], systemPrompt: string): Promise<string> {

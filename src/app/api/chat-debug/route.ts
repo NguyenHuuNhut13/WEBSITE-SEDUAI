@@ -16,25 +16,39 @@ export async function GET() {
     report.gemini.keyFormat = geminiKey.length > 8 
       ? `${geminiKey.substring(0, 5)}...${geminiKey.substring(geminiKey.length - 4)}`
       : 'Định dạng key không hợp lệ';
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: 'ping' }] }],
-          generationConfig: { maxOutputTokens: 5 }
-        })
-      });
-      const data = await res.json();
-      if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-        report.gemini.working = true;
-        report.gemini.reply = data.candidates[0].content.parts[0].text.trim();
-      } else {
-        report.gemini.error = data;
+    
+    const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+    let geminiSuccess = false;
+    let geminiErrors: any = {};
+
+    for (const model of models) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: 'ping' }] }],
+            generationConfig: { maxOutputTokens: 5 }
+          })
+        });
+        const data = await res.json();
+        if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+          report.gemini.working = true;
+          report.gemini.modelUsed = model;
+          report.gemini.reply = data.candidates[0].content.parts[0].text.trim();
+          geminiSuccess = true;
+          break;
+        } else {
+          geminiErrors[model] = data;
+        }
+      } catch (e: any) {
+        geminiErrors[model] = e.message;
       }
-    } catch (e: any) {
-      report.gemini.error = e.message;
+    }
+
+    if (!geminiSuccess) {
+      report.gemini.error = geminiErrors;
     }
   }
 
