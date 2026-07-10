@@ -17,13 +17,18 @@ export async function GET() {
       ? `${geminiKey.substring(0, 5)}...${geminiKey.substring(geminiKey.length - 4)}`
       : 'Định dạng key không hợp lệ';
     
-    const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+    const configs = [
+      { model: 'gemini-1.5-flash', version: 'v1' },
+      { model: 'gemini-1.5-flash', version: 'v1beta' },
+      { model: 'gemini-1.5-flash-latest', version: 'v1beta' },
+      { model: 'gemini-2.0-flash', version: 'v1beta' }
+    ];
     let geminiSuccess = false;
     let geminiErrors: any = {};
 
-    for (const model of models) {
+    for (const config of configs) {
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiKey}`;
+        const url = `https://generativelanguage.googleapis.com/${config.version}/models/${config.model}:generateContent?key=${geminiKey}`;
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -35,15 +40,15 @@ export async function GET() {
         const data = await res.json();
         if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
           report.gemini.working = true;
-          report.gemini.modelUsed = model;
+          report.gemini.modelUsed = `${config.model} (${config.version})`;
           report.gemini.reply = data.candidates[0].content.parts[0].text.trim();
           geminiSuccess = true;
           break;
         } else {
-          geminiErrors[model] = data;
+          geminiErrors[`${config.model}_${config.version}`] = data;
         }
       } catch (e: any) {
-        geminiErrors[model] = e.message;
+        geminiErrors[`${config.model}_${config.version}`] = e.message;
       }
     }
 
