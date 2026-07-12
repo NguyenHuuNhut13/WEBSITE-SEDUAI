@@ -58,9 +58,11 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
               slug: `api-course-${found.id}`,
               title: typeof found.title === 'object' && found.title !== null && 'rendered' in found.title ? (found.title as any).rendered : String(found.title || ''),
               description: found.acf?.description?.replace(/<[^>]*>/g, '') || 'Khóa học chính thức từ hệ thống SeduAi EduCenter.',
-              instructor: typeof found.acf?.expactteacher === 'object' && found.acf?.expactteacher !== null && 'title' in found.acf.expactteacher
-                ? (found.acf.expactteacher as any).title
-                : String(found.acf?.expactteacher || 'Giảng viên SeduAi'),
+              instructor: typeof found.acf?.faculty === 'object' && found.acf?.faculty !== null && 'title' in found.acf.faculty
+                ? (found.acf.faculty as any).title
+                : (typeof found.acf?.expactteacher === 'object' && found.acf?.expactteacher !== null && 'title' in found.acf.expactteacher
+                  ? (found.acf.expactteacher as any).title
+                  : String(found.acf?.expactteacher || 'Giảng viên SeduAi')),
               level: typeof (found.acf?.type as any) === 'object' && found.acf?.type !== null 
                 ? (Array.isArray(found.acf.type) ? ((found.acf.type as any)[0]?.post_title || 'Mọi trình độ') : ((found.acf.type as any).title || 'Mọi trình độ'))
                 : String(found.acf?.type || 'Mọi trình độ'),
@@ -71,8 +73,8 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
               discount_price: Number(found.acf?.sale_price || found.acf?.price || 2490000),
               reviews_count: 24,
               image: found.acf?.featureimg || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
-              category: typeof found.acf?.category === 'object' && found.acf?.category !== null && 'title' in found.acf.category
-                ? (found.acf.category as any).title
+              category: typeof (found.acf?.category as any) === 'object' && found.acf?.category !== null
+                ? (Array.isArray(found.acf.category) ? ((found.acf.category as any)[0]?.title || 'AI & Công nghệ') : ((found.acf.category as any).title || 'AI & Công nghệ'))
                 : String(found.acf?.category || 'AI & Công nghệ'),
               benefits: (() => {
                 const benefitStr = found.acf?.benefit;

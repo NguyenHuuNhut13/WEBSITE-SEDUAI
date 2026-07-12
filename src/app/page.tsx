@@ -36,9 +36,11 @@ export default async function Home() {
     slug: `api-course-${c.id}`,
     title: typeof c.title === 'object' && c.title !== null && 'rendered' in c.title ? (c.title as any).rendered : String(c.title || ''),
     description: c.acf?.description?.replace(/<[^>]*>/g, '') || 'Khóa học chính thức từ hệ thống SeduAi EduCenter.',
-    instructor: typeof c.acf?.expactteacher === 'object' && c.acf?.expactteacher !== null && 'title' in c.acf.expactteacher
-      ? (c.acf.expactteacher as any).title
-      : String(c.acf?.expactteacher || 'Giảng viên SeduAi'),
+    instructor: typeof c.acf?.faculty === 'object' && c.acf?.faculty !== null && 'title' in c.acf.faculty
+      ? (c.acf.faculty as any).title
+      : (typeof c.acf?.expactteacher === 'object' && c.acf?.expactteacher !== null && 'title' in c.acf.expactteacher
+        ? (c.acf.expactteacher as any).title
+        : String(c.acf?.expactteacher || 'Giảng viên SeduAi')),
     level: typeof (c.acf?.type as any) === 'object' && c.acf?.type !== null 
       ? (Array.isArray(c.acf.type) ? ((c.acf.type as any)[0]?.post_title || 'Mọi trình độ') : ((c.acf.type as any).title || 'Mọi trình độ'))
       : String(c.acf?.type || 'Mọi trình độ'),
@@ -50,8 +52,8 @@ export default async function Home() {
     price: Number(c.acf?.price || 3500000),
     reviews_count: 24,
     image: c.acf?.featureimg || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
-    category: typeof c.acf?.category === 'object' && c.acf?.category !== null && 'title' in c.acf.category
-      ? (c.acf.category as any).title
+    category: typeof (c.acf?.category as any) === 'object' && c.acf?.category !== null
+      ? (Array.isArray(c.acf.category) ? ((c.acf.category as any)[0]?.title || 'AI & Công nghệ') : ((c.acf.category as any).title || 'AI & Công nghệ'))
       : String(c.acf?.category || 'AI & Công nghệ'),
     lessons_count: Number(c.acf?.lession || 24),
     benefits: [

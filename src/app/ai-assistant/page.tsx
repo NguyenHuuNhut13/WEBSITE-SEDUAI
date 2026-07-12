@@ -400,51 +400,6 @@ export default function AiAssistantPage() {
           </button>
         </div>
 
-        {/* Mode Switcher inside Sidebar */}
-        <div className="px-3 py-2">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 mb-1.5">
-            Chế Độ Hoạt Động (Mode)
-          </p>
-          <div className="grid grid-cols-2 gap-1.5 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800/80">
-            <button
-              onClick={() => {
-                setMode('teacher_assistant');
-                if (currentThread) {
-                  setThreads((prev) =>
-                    prev.map((t) => (t.id === activeThreadId ? { ...t, mode: 'teacher_assistant' } : t))
-                  );
-                }
-              }}
-              className={`py-2 px-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                mode === 'teacher_assistant'
-                  ? 'bg-amber-500 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-              }`}
-              title="Gia sư AI 1-1, giải bài tập, chấm IELTS, Code"
-            >
-              <GraduationCap className="w-3.5 h-3.5" /> Teacher AI
-            </button>
-            <button
-              onClick={() => {
-                setMode('admissions_crm');
-                if (currentThread) {
-                  setThreads((prev) =>
-                    prev.map((t) => (t.id === activeThreadId ? { ...t, mode: 'admissions_crm' } : t))
-                  );
-                }
-              }}
-              className={`py-2 px-2 rounded-lg text-[11px] font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                mode === 'admissions_crm'
-                  ? 'bg-emerald-500 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-              }`}
-              title="Tư vấn khóa học & tự động đồng bộ CRM"
-            >
-              <Target className="w-3.5 h-3.5" /> Admissions CRM
-            </button>
-          </div>
-        </div>
-
         {/* Conversation Threads List */}
         <div className="flex-grow overflow-y-auto px-3 py-2 space-y-1 scrollbar-thin">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-2 my-2">
