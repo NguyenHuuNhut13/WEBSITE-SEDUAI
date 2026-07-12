@@ -99,110 +99,144 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
                 const t = (typeof found.title === 'object' && found.title !== null && 'rendered' in found.title ? (found.title as any).rendered : String(found.title || '')).toLowerCase();
                 const cat = (typeof found.acf?.category === 'object' && found.acf?.category !== null && 'title' in found.acf.category ? (found.acf.category as any).title : String(found.acf?.category || 'AI & Công nghệ')).toLowerCase();
                 
+                // Get the total lessons from the API
+                const totalLessons = Number(found.acf?.lession || 24);
+                const part = Math.floor(totalLessons / 3);
+                const rem = totalLessons % 3;
+
+                const count1 = part + (rem > 0 ? 1 : 0);
+                const count2 = part + (rem > 1 ? 1 : 0);
+                const count3 = part;
+
+                // Predefined topic templates based on course category
+                const englishTopics = [
+                  'Nghe hiểu và phân tích từ khóa chính (Keywords) trong đoạn hội thoại',
+                  'Phương pháp làm bài đọc matching headings hiệu quả nhanh chóng',
+                  'Bố cục lập luận và cách viết đoạn văn Task 2 mạch lạc thuyết phục',
+                  'Từ vựng học thuật theo các chủ đề nóng (Education, Environment)',
+                  'Phát âm chuẩn IPA - Các lỗi nuốt âm, nối âm người Việt hay mắc',
+                  'Phản xạ giao tiếp tự tin và trôi chảy cùng Trợ lý ảo AI SeduAi',
+                  'Chiến thuật trả lời Speaking Part 2 ghi điểm ấn tượng với giám khảo',
+                  'Luyện đề thi thử trên hệ thống máy tính chuẩn định dạng IELTS',
+                  'Nâng cấp cấu trúc câu phức và từ vựng nâng band điểm Writing',
+                  'Giải quyết các dạng bài khó trong Reading (True/False/Not Given)',
+                  'Viết luận Task 1 - Kỹ năng đọc hiểu và tóm tắt số liệu biểu đồ'
+                ];
+
+                const codingTopics = [
+                  'Tổng quan khóa học và hướng dẫn cài đặt môi trường lập trình',
+                  'Cú pháp cơ bản, khai báo biến số và các cấu trúc dữ liệu cốt lõi',
+                  'Cấu trúc điều khiển rẽ nhánh (If-Else) và Vòng lặp (Loops) thực tế',
+                  'Xây dựng hàm (Functions) và tư duy tái sử dụng mã nguồn hiệu quả',
+                  'Các khái niệm hướng đối tượng (OOP) cơ bản và các mẫu thiết kế',
+                  'Thiết kế giao diện người dùng Responsive với CSS Grid & Tailwind',
+                  'Kết nối API, xử lý bất đồng bộ (Async/Await) và nạp dữ liệu động',
+                  'Quản lý trạng thái ứng dụng (State Management) quy mô lớn',
+                  'Tối ưu hóa hiệu năng ứng dụng, bảo mật và xử lý ngoại lệ',
+                  'Viết Unit Test kiểm thử chức năng tự động cho hệ thống',
+                  'Đóng gói ứng dụng (Docker) và triển khai lên máy chủ VPS/Cloud'
+                ];
+
+                const marketingTopics = [
+                  'Tổng quan về Chatbot Marketing & Tư duy tự động hóa bán hàng',
+                  'Hướng dẫn kết nối Fanpage, Messenger & Thiết lập lời chào mở đầu',
+                  'Cấu trúc kịch bản hội thoại tự động và phân loại nhóm khách hàng',
+                  'Kịch bản chốt đơn tự động, tính tiền & chăm sóc khách hàng sau mua',
+                  'Thiết kế kịch bản Minigame (Vòng quay may mắn, Viral share viral link)',
+                  'Ứng dụng chatbot trong Livestream chốt đơn tự động tránh cướp đơn',
+                  'Tích hợp API CRM lưu trữ thông tin cơ hội (Lead) tự động từ chat',
+                  'Kỹ thuật Remarketing 0 đồng gửi tin nhắn hàng loạt trên Messenger',
+                  'Xây dựng phễu thu hút hàng chục nghìn khách hàng với chi phí tối ưu',
+                  'Quản lý, đo lường và tối ưu hóa chi phí quảng cáo Facebook Ads',
+                  'Đo lường các chỉ số hiệu quả chiến dịch (ROI, CTR) tự động'
+                ];
+
+                const generalTopics = [
+                  'Giới thiệu tổng quan và xác định mục tiêu học tập của khóa học',
+                  'Các khái niệm cơ bản nền tảng nhất cần nắm vững trước khi bắt đầu',
+                  'Chuẩn bị tư duy, tài liệu học tập và cài đặt công cụ cần thiết',
+                  'Thực chiến áp dụng các kỹ năng cốt lõi vào bài tập thực hành - Phần 1',
+                  'Thực chiến áp dụng các kỹ năng cốt lõi vào bài tập thực hành - Phần 2',
+                  'Hướng dẫn xử lý các tình huống thực tế thường gặp trong công việc',
+                  'Tối ưu hóa hiệu quả, năng suất và giảm thiểu thời gian thực hiện',
+                  'Phương pháp làm việc cộng tác nhóm và quản lý thời gian khoa học',
+                  'Giải quyết bài tập tình huống lớn tổng hợp cuối khóa học',
+                  'Đánh giá kết quả học tập và định hướng lộ trình phát triển bản thân'
+                ];
+
+                const generateLessons = (start: number, count: number, templates: string[]): string[] => {
+                  const list: string[] = [];
+                  for (let i = 0; i < count; i++) {
+                    const idx = start + i;
+                    const template = templates[i % templates.length];
+                    list.push(`Bài ${idx}: ${template}`);
+                  }
+                  return list;
+                };
+
                 if (t.includes('ielts') || t.includes('english') || t.includes('tiếng anh') || cat.includes('tiếng anh')) {
                   return [
                     {
                       title: 'Phần 1: Xây dựng nền tảng từ vựng & ngữ pháp nâng cao',
-                      lessons: [
-                        'Bài 1: Tổng quan và phương pháp làm bài',
-                        'Bài 2: Từ vựng chuyên sâu & phát âm chuẩn',
-                        'Bài 3: Ngữ pháp cốt lõi của khóa học'
-                      ]
+                      lessons: generateLessons(1, count1, englishTopics)
                     },
                     {
                       title: 'Phần 2: Rèn luyện 4 kỹ năng (Nghe, Nói, Đọc, Viết) thực tế',
-                      lessons: [
-                        'Bài 4: Chiến thuật đọc hiểu nhanh (Scanning & Skimming)',
-                        'Bài 5: Bố cục bài viết chuẩn Band điểm cao',
-                        'Bài 6: Phản xạ giao tiếp tự tin và trôi chảy'
-                      ]
+                      lessons: generateLessons(count1 + 1, count2, englishTopics)
                     },
                     {
                       title: 'Phần 3: Chiến thuật phòng thi & Luyện đề thực tế',
-                      lessons: [
-                        'Bài 7: Giải đề thi mẫu chuẩn định dạng',
-                        'Bài 8: Chữa lỗi sai phổ biến & Lời khuyên phòng thi'
-                      ]
+                      lessons: generateLessons(count1 + count2 + 1, count3, englishTopics)
                     }
                   ];
                 }
+
                 if (t.includes('code') || t.includes('lập trình') || t.includes('python') || t.includes('react') || cat.includes('lập trình') || cat.includes('công nghệ')) {
                   return [
                     {
                       title: 'Chương 1: Thiết lập môi trường & Kiến thức nền tảng',
-                      lessons: [
-                        'Bài 1: Giới thiệu khóa học & các công nghệ sử dụng',
-                        'Bài 2: Hướng dẫn cài đặt công cụ lập trình & IDE',
-                        'Bài 3: Cấu trúc cú pháp cơ bản & Các khái niệm cốt lõi'
-                      ]
+                      lessons: generateLessons(1, count1, codingTopics)
                     },
                     {
                       title: 'Chương 2: Lập trình thực chiến & Xây dựng các tính năng chính',
-                      lessons: [
-                        'Bài 4: Xây dựng cấu trúc dữ liệu và giải quyết bài toán thực tế',
-                        'Bài 5: Kết nối API, xử lý bất đồng bộ & Quản lý trạng thái',
-                        'Bài 6: Thiết kế giao diện UI/UX tối ưu & Responsive'
-                      ]
+                      lessons: generateLessons(count1 + 1, count2, codingTopics)
                     },
                     {
                       title: 'Chương 3: Đóng gói sản phẩm, Tối ưu & Triển khai dự án',
-                      lessons: [
-                        'Bài 7: Viết Unit Test, tối ưu hiệu năng & kiểm tra bảo mật',
-                        'Bài 8: Đưa sản phẩm lên môi trường Production (Hosting/Cloud)'
-                      ]
+                      lessons: generateLessons(count1 + count2 + 1, count3, codingTopics)
                     }
                   ];
                 }
+
                 if (t.includes('marketing') || t.includes('bán hàng') || t.includes('chatbot') || cat.includes('marketing') || cat.includes('bán hàng')) {
                   return [
                     {
                       title: 'Phần 1: Tư duy Marketing tự động & Thiết lập Chatbot cơ bản',
-                      lessons: [
-                        'Bài 1: Tổng quan về Chatbot Marketing & Các kênh triển khai',
-                        'Bài 2: Hướng dẫn kết nối Fanpage, Messenger & Thiết lập lời chào',
-                        'Bài 3: Cấu trúc kịch bản kịch bản hội thoại tự động và phân loại khách hàng'
-                      ]
+                      lessons: generateLessons(1, count1, marketingTopics)
                     },
                     {
                       title: 'Phần 2: Xây dựng kịch bản bán hàng & Minigame thu hút khách hàng',
-                      lessons: [
-                        'Bài 4: Kịch bản chốt đơn tự động, tính tiền & chăm sóc khách hàng',
-                        'Bài 5: Thiết kế kịch bản Minigame (Vòng quay may mắn, Viral share)',
-                        'Bài 6: Ứng dụng hệ thống tự động trong Livestream tăng tương tác chốt đơn'
-                      ]
+                      lessons: generateLessons(count1 + 1, count2, marketingTopics)
                     },
                     {
                       title: 'Phần 3: Đồng bộ API CRM & Vận hành chiến dịch Remarketing',
-                      lessons: [
-                        'Bài 7: Tích hợp API CRM lưu trữ thông tin Lead tự động',
-                        'Bài 8: Kỹ thuật Remarketing 0 đồng gửi tin nhắn hàng loạt & Đánh giá hiệu quả'
-                      ]
+                      lessons: generateLessons(count1 + count2 + 1, count3, marketingTopics)
                     }
                   ];
                 }
+
                 return [
                   {
                     title: 'Chương 1: Tổng quan và Nhập môn',
-                    lessons: [
-                      'Bài 1: Giới thiệu và mục tiêu khóa học',
-                      'Bài 2: Các khái niệm cơ bản đầu tiên',
-                      'Bài 3: Chuẩn bị tư duy và công cụ'
-                    ]
+                    lessons: generateLessons(1, count1, generalTopics)
                   },
                   {
                     title: 'Chương 2: Đi sâu thực hành & Ứng dụng thực tế',
-                    lessons: [
-                      'Bài 4: Thực chiến kỹ năng cốt lõi',
-                      'Bài 5: Hướng dẫn xử lý các tình huống thực tế',
-                      'Bài 6: Tối ưu hóa hiệu quả công việc'
-                    ]
+                    lessons: generateLessons(count1 + 1, count2, generalTopics)
                   },
                   {
                     title: 'Chương 3: Dự án thực tế & Tổng kết khóa học',
-                    lessons: [
-                      'Bài 7: Xây dựng dự án/bài tập lớn cuối khóa',
-                      'Bài 8: Tổng kết lộ trình phát triển bản thân tiếp theo'
-                    ]
+                    lessons: generateLessons(count1 + count2 + 1, count3, generalTopics)
                   }
                 ];
               })(),
