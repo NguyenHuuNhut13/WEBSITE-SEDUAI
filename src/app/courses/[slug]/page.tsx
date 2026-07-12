@@ -74,21 +74,109 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
               category: typeof found.acf?.category === 'object' && found.acf?.category !== null && 'title' in found.acf.category
                 ? (found.acf.category as any).title
                 : String(found.acf?.category || 'AI & Công nghệ'),
-              benefits: [
-                'Lộ trình chuẩn thực chiến SeduAi EduCenter',
-                'Thực hành dự án với sự hướng dẫn của chuyên gia',
-                'Đồng hành cùng Trợ lý AI giải đáp thắc mắc 24/7'
-              ],
-              syllabus: [
-                {
-                  title: 'Chương 1: Khởi động và kiến thức nền tảng',
-                  lessons: ['Bài 1: Giới thiệu khóa học', 'Bài 2: Chuẩn bị môi trường & công cụ']
-                },
-                {
-                  title: 'Chương 2: Thực chiến kỹ năng cốt lõi',
-                  lessons: ['Bài 3: Ứng dụng thực tế và thực hành chuyên sâu']
+              benefits: (() => {
+                const benefitStr = found.acf?.benefit;
+                if (!benefitStr) {
+                  return [
+                    'Lộ trình chuẩn thực chiến SeduAi EduCenter',
+                    'Thực hành dự án với sự hướng dẫn của chuyên gia',
+                    'Đồng hành cùng Trợ lý AI giải đáp thắc mắc 24/7'
+                  ];
                 }
-              ],
+                const matches = benefitStr.match(/<li>(.*?)<\/li>/g);
+                if (matches) {
+                  return matches.map((m) => m.replace(/<\/?li>/g, '').replace(/<[^>]*>/g, '').trim());
+                }
+                const split = benefitStr.split(/\n|;|<br\s*\/?>/);
+                const items = split
+                  .map((item) => item.replace(/<[^>]*>/g, '').trim())
+                  .filter((item) => item.length > 0);
+                return items.length > 0 ? items : [benefitStr];
+              })(),
+              syllabus: (() => {
+                const t = (typeof found.title === 'object' && found.title !== null && 'rendered' in found.title ? (found.title as any).rendered : String(found.title || '')).toLowerCase();
+                const cat = (typeof found.acf?.category === 'object' && found.acf?.category !== null && 'title' in found.acf.category ? (found.acf.category as any).title : String(found.acf?.category || 'AI & Công nghệ')).toLowerCase();
+                
+                if (t.includes('ielts') || t.includes('english') || t.includes('tiếng anh') || cat.includes('tiếng anh')) {
+                  return [
+                    {
+                      title: 'Phần 1: Xây dựng nền tảng từ vựng & ngữ pháp nâng cao',
+                      lessons: [
+                        'Bài 1: Tổng quan và phương pháp làm bài',
+                        'Bài 2: Từ vựng chuyên sâu & phát âm chuẩn',
+                        'Bài 3: Ngữ pháp cốt lõi của khóa học'
+                      ]
+                    },
+                    {
+                      title: 'Phần 2: Rèn luyện 4 kỹ năng (Nghe, Nói, Đọc, Viết) thực tế',
+                      lessons: [
+                        'Bài 4: Chiến thuật đọc hiểu nhanh (Scanning & Skimming)',
+                        'Bài 5: Bố cục bài viết chuẩn Band điểm cao',
+                        'Bài 6: Phản xạ giao tiếp tự tin và trôi chảy'
+                      ]
+                    },
+                    {
+                      title: 'Phần 3: Chiến thuật phòng thi & Luyện đề thực tế',
+                      lessons: [
+                        'Bài 7: Giải đề thi mẫu chuẩn định dạng',
+                        'Bài 8: Chữa lỗi sai phổ biến & Lời khuyên phòng thi'
+                      ]
+                    }
+                  ];
+                }
+                if (t.includes('code') || t.includes('lập trình') || t.includes('python') || t.includes('react') || cat.includes('lập trình') || cat.includes('công nghệ')) {
+                  return [
+                    {
+                      title: 'Chương 1: Thiết lập môi trường & Kiến thức nền tảng',
+                      lessons: [
+                        'Bài 1: Giới thiệu khóa học & các công nghệ sử dụng',
+                        'Bài 2: Hướng dẫn cài đặt công cụ lập trình & IDE',
+                        'Bài 3: Cấu trúc cú pháp cơ bản & Các khái niệm cốt lõi'
+                      ]
+                    },
+                    {
+                      title: 'Chương 2: Lập trình thực chiến & Xây dựng các tính năng chính',
+                      lessons: [
+                        'Bài 4: Xây dựng cấu trúc dữ liệu và giải quyết bài toán thực tế',
+                        'Bài 5: Kết nối API, xử lý bất đồng bộ & Quản lý trạng thái',
+                        'Bài 6: Thiết kế giao diện UI/UX tối ưu & Responsive'
+                      ]
+                    },
+                    {
+                      title: 'Chương 3: Đóng gói sản phẩm, Tối ưu & Triển khai dự án',
+                      lessons: [
+                        'Bài 7: Viết Unit Test, tối ưu hiệu năng & kiểm tra bảo mật',
+                        'Bài 8: Đưa sản phẩm lên môi trường Production (Hosting/Cloud)'
+                      ]
+                    }
+                  ];
+                }
+                return [
+                  {
+                    title: 'Chương 1: Tổng quan và Nhập môn',
+                    lessons: [
+                      'Bài 1: Giới thiệu và mục tiêu khóa học',
+                      'Bài 2: Các khái niệm cơ bản đầu tiên',
+                      'Bài 3: Chuẩn bị tư duy và công cụ'
+                    ]
+                  },
+                  {
+                    title: 'Chương 2: Đi sâu thực hành & Ứng dụng thực tế',
+                    lessons: [
+                      'Bài 4: Thực chiến kỹ năng cốt lõi',
+                      'Bài 5: Hướng dẫn xử lý các tình huống thực tế',
+                      'Bài 6: Tối ưu hóa hiệu quả công việc'
+                    ]
+                  },
+                  {
+                    title: 'Chương 3: Dự án thực tế & Tổng kết khóa học',
+                    lessons: [
+                      'Bài 7: Xây dựng dự án/bài tập lớn cuối khóa',
+                      'Bài 8: Tổng kết lộ trình phát triển bản thân tiếp theo'
+                    ]
+                  }
+                ];
+              })(),
               reviews: [
                 {
                   name: 'Học viên SeduAi',

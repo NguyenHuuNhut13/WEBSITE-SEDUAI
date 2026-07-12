@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
+import FloatingChatbot from '@/components/FloatingChatbot';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,6 +17,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
       {!isAiAssistant && <Navbar />}
       <main className="flex-grow flex flex-col w-full">{children}</main>
       {!isAiAssistant && <Footer />}
+      {!isAiAssistant && <FloatingChatbot />}
       <ScrollToTop />
     </>
   );
