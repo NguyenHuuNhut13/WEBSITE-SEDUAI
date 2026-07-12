@@ -153,6 +153,33 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
                     }
                   ];
                 }
+                if (t.includes('marketing') || t.includes('bán hàng') || t.includes('chatbot') || cat.includes('marketing') || cat.includes('bán hàng')) {
+                  return [
+                    {
+                      title: 'Phần 1: Tư duy Marketing tự động & Thiết lập Chatbot cơ bản',
+                      lessons: [
+                        'Bài 1: Tổng quan về Chatbot Marketing & Các kênh triển khai',
+                        'Bài 2: Hướng dẫn kết nối Fanpage, Messenger & Thiết lập lời chào',
+                        'Bài 3: Cấu trúc kịch bản kịch bản hội thoại tự động và phân loại khách hàng'
+                      ]
+                    },
+                    {
+                      title: 'Phần 2: Xây dựng kịch bản bán hàng & Minigame thu hút khách hàng',
+                      lessons: [
+                        'Bài 4: Kịch bản chốt đơn tự động, tính tiền & chăm sóc khách hàng',
+                        'Bài 5: Thiết kế kịch bản Minigame (Vòng quay may mắn, Viral share)',
+                        'Bài 6: Ứng dụng hệ thống tự động trong Livestream tăng tương tác chốt đơn'
+                      ]
+                    },
+                    {
+                      title: 'Phần 3: Đồng bộ API CRM & Vận hành chiến dịch Remarketing',
+                      lessons: [
+                        'Bài 7: Tích hợp API CRM lưu trữ thông tin Lead tự động',
+                        'Bài 8: Kỹ thuật Remarketing 0 đồng gửi tin nhắn hàng loạt & Đánh giá hiệu quả'
+                      ]
+                    }
+                  ];
+                }
                 return [
                   {
                     title: 'Chương 1: Tổng quan và Nhập môn',
