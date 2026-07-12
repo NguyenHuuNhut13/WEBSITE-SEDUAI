@@ -274,3 +274,33 @@ body {
   z-index: 100;
   animation: stricky-slide 0.35s ease-out forwards;
 }
+
+/* API Intro Rich-Text Content Styling */
+.api-intro-content {
+  font-size: 0.825rem;
+  line-height: 1.625;
+  color: #475569;
+}
+.api-intro-content p {
+  margin-bottom: 0.875rem;
+}
+.api-intro-content ul {
+  list-style-type: disc !important;
+  margin-left: 1.25rem !important;
+  margin-bottom: 0.875rem !important;
+  padding-left: 0 !important;
+}
+.api-intro-content ol {
+  list-style-type: decimal !important;
+  margin-left: 1.25rem !important;
+  margin-bottom: 0.875rem !important;
+  padding-left: 0 !important;
+}
+.api-intro-content li {
+  margin-bottom: 0.375rem;
+  display: list-item !important;
+}
+.api-intro-content strong {
+  font-weight: 700;
+  color: #0f172a;
+}

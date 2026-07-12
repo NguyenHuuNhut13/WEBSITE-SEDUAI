@@ -186,7 +186,8 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
                   date: 'Vừa xong',
                   comment: 'Khóa học rất chất lượng, giảng viên nhiệt tình, AI hỗ trợ trả lời rất nhanh.'
                 }
-              ]
+              ],
+              intro: found.acf?.intro || found.acf?.description || ''
             };
             setCourse(mapped);
           }
@@ -389,6 +390,17 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
                       <p className="text-xs font-bold text-slate-900 mt-0.5">{course.student_count}+</p>
                     </div>
                   </div>
+
+                  {/* Detailed Description from API */}
+                  {course.intro && (
+                    <div className="pt-6 border-t border-slate-100 space-y-4">
+                      <h3 className="text-base font-extrabold text-slate-950">Giới thiệu chi tiết khóa học</h3>
+                      <div 
+                        className="text-xs text-slate-600 leading-relaxed space-y-3 prose max-w-none api-intro-content"
+                        dangerouslySetInnerHTML={{ __html: course.intro }}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
 

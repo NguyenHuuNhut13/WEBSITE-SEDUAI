@@ -27,6 +27,7 @@ export interface Course {
     benefits: string[];
     syllabus: SyllabusChapter[];
     reviews: Review[];
+    intro?: string;
 }
 
 export const courses: Course[] = [
