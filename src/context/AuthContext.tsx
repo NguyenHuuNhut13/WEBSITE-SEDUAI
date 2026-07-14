@@ -49,26 +49,11 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserInfo | null>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('seduai_user_info');
-      try { return stored ? JSON.parse(stored) : null; } catch { return null; }
-    }
-    return null;
-  });
-  const [accessToken, setAccessToken] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('seduai_access_token');
-    }
-    return null;
-  });
-  const [localSync, setLocalSync] = useState<LocalSyncData>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('seduai_local_sync');
-      try { return stored ? JSON.parse(stored) : defaultLocalSync; } catch { return defaultLocalSync; }
-    }
-    return defaultLocalSync;
-  });
+  // Keep the server render and the client's first render identical.
+  // Browser storage is restored only after hydration in the mount effect below.
+  const [user, setUser] = useState<UserInfo | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [localSync, setLocalSync] = useState<LocalSyncData>(defaultLocalSync);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lmsRole, setLmsRoleState] = useState<UserRole>(() => {
     return 'STUDENT';
@@ -79,10 +64,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const storedToken = localStorage.getItem('seduai_access_token');
     const storedUser = localStorage.getItem('seduai_user_info');
+    const storedLocalSync = localStorage.getItem('seduai_local_sync');
 
     if (storedToken && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
+        setAccessToken(storedToken);
+        setUser(parsedUser);
+        if (storedLocalSync) {
+          try {
+            setLocalSync(JSON.parse(storedLocalSync));
+          } catch {
+            setLocalSync(defaultLocalSync);
+          }
+        }
 
         // Nâng cấp dữ liệu ngầm từ API (Chỉ cập nhật nếu đúng tài khoản, không ghi đè thành demo_student và không làm mất dữ liệu CCCD/profile local)
         fetchUserInfo(storedToken).then((freshUser) => {
