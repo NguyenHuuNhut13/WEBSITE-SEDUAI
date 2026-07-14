@@ -43,6 +43,7 @@ export default function LoginPage() {
       const res = await loginUser(username, password);
 
       // 1. Kiểm tra nếu máy chủ NKS trả về thành công (200 OK / success: true / có token hoặc userInfo)
+      const dataPayload = res.data as Record<string, any> | undefined;
       const isApiSuccess =
         res.success === true ||
         res.code === 200 ||
@@ -51,11 +52,11 @@ export default function LoginPage() {
         Boolean(res.token) ||
         (Boolean(res.userInfo) && !res.error) ||
         (Boolean(res.user) && !res.error) ||
-        (Boolean(res.data) && (res.data.access_token || res.data.token || res.data.userInfo || res.data.user || res.data.id));
+        (dataPayload !== undefined && (dataPayload.access_token || dataPayload.token || dataPayload.userInfo || dataPayload.user || dataPayload.id));
 
       if (isApiSuccess) {
-        const token = res.access_token || res.token || res.data?.access_token || res.data?.token || `seduai_nks_token_${Date.now()}`;
-        const rawUser = res.userInfo || res.user || res.data?.userInfo || res.data?.user || (res.data?.id || res.data?.username ? res.data : null);
+        const token = res.access_token || res.token || dataPayload?.access_token || dataPayload?.token || `seduai_nks_token_${Date.now()}`;
+        const rawUser = res.userInfo || res.user || dataPayload?.userInfo || dataPayload?.user || (dataPayload?.id || dataPayload?.username ? dataPayload : null);
         const info = rawUser || {
           username,
           name: username === 'demo_student' ? 'Học viên Demo SeduAi' : username,

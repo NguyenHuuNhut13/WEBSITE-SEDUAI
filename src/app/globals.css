@@ -559,3 +559,27 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+
+/* LMS Custom styles */
+.lms-sidebar {
+  flex-shrink: 0;
+  z-index: 40;
+}
+.lms-sidebar-collapsed {
+  width: 72px !important;
+}
+.lms-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.lms-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.08);
+}
+@keyframes blink-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.animate-blink-slow {
+  animation: blink-slow 2s infinite ease-in-out;
+}
+

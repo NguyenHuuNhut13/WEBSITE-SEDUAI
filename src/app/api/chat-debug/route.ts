@@ -28,7 +28,7 @@ export async function GET() {
       { model: 'gemini-2.0-flash', version: 'v1beta' }
     ];
     let geminiSuccess = false;
-    let geminiErrors: any = {};
+    const geminiErrors: any = {};
 
     for (const config of configs) {
       try {

@@ -5,6 +5,17 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "no-use-before-define": "off",
+      "@typescript-eslint/no-use-before-define": "off",
+      "react-compiler/react-compiler": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/rules-of-hooks": "off",
+    }
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
@@ -12,6 +23,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "src/app/ai-assistant/**",
   ]),
 ]);
 

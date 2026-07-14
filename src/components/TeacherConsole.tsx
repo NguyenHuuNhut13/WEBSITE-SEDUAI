@@ -42,7 +42,7 @@ print(str(x) + y)`}
         <div className="space-y-2">
           <h4 className="text-emerald-400 font-bold">## CÂU 2 (Tự luận - 6 điểm)</h4>
           <p className="pl-3">Viết một hàm Python mang tên <strong>kiem_tra_so_chan(n)</strong> nhận vào một số nguyên n. Trả về True nếu số đó là số chẵn, ngược lại trả về False.</p>
-          <p className="pl-3 text-slate-500 font-mono mt-1">// Gợi ý đáp án:</p>
+          <p className="pl-3 text-slate-500 font-mono mt-1">{"// Gợi ý đáp án:"}</p>
           <pre className="bg-slate-900 p-3 rounded-lg text-yellow-500 font-mono text-xs">
 {`def kiem_tra_so_chan(n):
     return n % 2 == 0`}
@@ -143,7 +143,7 @@ print(str(x) + y)`}
             teacherMockContent[activeAction]
           ) : !isGenerating ? (
             <span className="text-slate-500">
-              // Chọn một tác vụ của Giáo viên ở trên để xem Trợ lý AI thực hiện soạn thảo tài liệu giáo án lập tức.
+              {"// Chọn một tác vụ của Giáo viên ở trên để xem Trợ lý AI thực hiện soạn thảo tài liệu giáo án lập tức."}
             </span>
           ) : null}
         </div>

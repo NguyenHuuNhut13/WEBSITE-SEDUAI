@@ -64,9 +64,12 @@ export default function Navbar() {
 
   // Close mobile menu & reset dropdowns on path changes
   useEffect(() => {
-    setIsOpen(false);
-    setShowUserMenu(false);
-    setMobileCourseOpen(false);
+    const timer = setTimeout(() => {
+      setIsOpen(false);
+      setShowUserMenu(false);
+      setMobileCourseOpen(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   // Listen to scroll events to trigger sticky header class
@@ -111,6 +114,7 @@ export default function Navbar() {
       ],
     },
     { name: 'Tính năng CRM', href: '/#ai-crm-demo' },
+    ...(accessToken ? [{ name: 'Hệ thống LMS', href: '/lms' }] : []),
     { name: 'Sự kiện', href: '/events' },
     { name: 'Tin tức', href: '/blog' },
     { name: 'Liên hệ', href: '/contact' },

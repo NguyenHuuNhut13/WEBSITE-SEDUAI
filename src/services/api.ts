@@ -86,7 +86,7 @@ export interface LoginResponse {
   token?: string;
   userInfo?: UserInfo;
   user?: UserInfo;
-  data?: any;
+  data?: unknown;
   error?: string;
 }
 
@@ -172,9 +172,9 @@ export async function createLead(payload: LeadPayload): Promise<{ success: boole
       return { success: true, id: json.id };
     }
     return { success: false, message: json.message || 'Không thể tạo Lead' };
-  } catch (error: any) {
+  } catch (error) {
     console.error('Lỗi khi gọi API tạo Lead:', error);
-    return { success: false, message: error.message };
+    return { success: false, message: error instanceof Error ? error.message : String(error) };
   }
 }
 
@@ -201,7 +201,7 @@ export async function loginUser(username: string, password: string): Promise<Log
 
     const json = await response.json();
     return json;
-  } catch (error: any) {
+  } catch (error) {
     console.error('Lỗi khi đăng nhập API:', error);
     return { success: false, error: 'Lỗi kết nối máy chủ' };
   }
@@ -283,8 +283,8 @@ export async function updatePasswordApi(access_token: string, old_password: stri
       return { success: true };
     }
     return { success: false, message: json.error || json.message || 'Mật khẩu cũ không chính xác' };
-  } catch (error: any) {
-    return { success: false, message: error.message };
+  } catch (error) {
+    return { success: false, message: error instanceof Error ? error.message : String(error) };
   }
 }
 

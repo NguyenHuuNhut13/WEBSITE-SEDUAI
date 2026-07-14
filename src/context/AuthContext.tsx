@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { UserInfo, fetchUserInfo } from '@/services/api';
+import type { UserRole } from '@/types/lms-types';
 
 export interface LocalSyncData {
   name: string;
@@ -14,9 +15,15 @@ interface AuthContextType {
   accessToken: string | null;
   localSync: LocalSyncData;
   isLoading: boolean;
+  lmsRole: UserRole;
+  lmsUserId: string | null;
   login: (token: string, userInfo: UserInfo) => void;
   logout: () => void;
   updateUser: (data: Partial<UserInfo>) => void;
+  setLmsRole: (role: UserRole) => void;
+  isAdmin: () => boolean;
+  isTeacher: () => boolean;
+  isStudent: () => boolean;
 }
 
 const defaultLocalSync: LocalSyncData = {
@@ -30,36 +37,60 @@ const AuthContext = createContext<AuthContextType>({
   accessToken: null,
   localSync: defaultLocalSync,
   isLoading: true,
+  lmsRole: 'STUDENT',
+  lmsUserId: null,
   login: () => {},
   logout: () => {},
   updateUser: () => {},
+  setLmsRole: () => {},
+  isAdmin: () => false,
+  isTeacher: () => false,
+  isStudent: () => true,
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserInfo | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [localSync, setLocalSync] = useState<LocalSyncData>(defaultLocalSync);
+  const [user, setUser] = useState<UserInfo | null>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('seduai_user_info');
+      try { return stored ? JSON.parse(stored) : null; } catch { return null; }
+    }
+    return null;
+  });
+  const [accessToken, setAccessToken] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('seduai_access_token');
+    }
+    return null;
+  });
+  const [localSync, setLocalSync] = useState<LocalSyncData>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('seduai_local_sync');
+      try { return stored ? JSON.parse(stored) : defaultLocalSync; } catch { return defaultLocalSync; }
+    }
+    return defaultLocalSync;
+  });
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [lmsRole, setLmsRoleState] = useState<UserRole>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('seduai_lms_role') as UserRole) || 'STUDENT';
+    }
+    return 'STUDENT';
+  });
+  const [lmsUserId, setLmsUserId] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('seduai_lms_user_id');
+    }
+    return null;
+  });
 
   // Sync state từ localStorage khi mount
   useEffect(() => {
     const storedToken = localStorage.getItem('seduai_access_token');
     const storedUser = localStorage.getItem('seduai_user_info');
-    const storedSync = localStorage.getItem('seduai_local_sync');
-
-    if (storedSync) {
-      try {
-        setLocalSync(JSON.parse(storedSync));
-      } catch (e) {
-        console.error('Lỗi parse local sync:', e);
-      }
-    }
 
     if (storedToken && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        setAccessToken(storedToken);
-        setUser(parsedUser);
 
         // Nâng cấp dữ liệu ngầm từ API (Chỉ cập nhật nếu đúng tài khoản, không ghi đè thành demo_student và không làm mất dữ liệu CCCD/profile local)
         fetchUserInfo(storedToken).then((freshUser) => {
@@ -69,7 +100,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             ['dob', 'gender', 'intro', 'province', 'phone', 'id_number', 'id_date', 'id_place', 'cccd_front', 'cccd_back', 'avatar', 'name', 'firstname', 'lastname'].forEach((key) => {
               const k = key as keyof UserInfo;
               if (parsedUser[k] !== undefined && parsedUser[k] !== null && parsedUser[k] !== '' && (!freshUser[k] || freshUser[k] === '')) {
-                (mergedUser as any)[k] = parsedUser[k];
+                const userKey = k as keyof UserInfo;
+                (mergedUser as Record<string, unknown>)[userKey] = parsedUser[userKey];
               }
             });
 
@@ -88,7 +120,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Lỗi parse user info:', e);
       }
     }
-    setIsLoading(false);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 0);
   }, []);
 
   const login = (token: string, userInfo: UserInfo) => {
@@ -110,11 +144,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAccessToken(null);
     setUser(null);
     setLocalSync(defaultLocalSync);
+    setLmsRoleState('STUDENT');
+    setLmsUserId(null);
     localStorage.removeItem('seduai_access_token');
     localStorage.removeItem('seduai_user_info');
     localStorage.removeItem('seduai_local_sync');
     localStorage.removeItem('seduai_remembered_user');
+    localStorage.removeItem('seduai_lms_role');
+    localStorage.removeItem('seduai_lms_user_id');
   };
+
+  const setLmsRole = (role: UserRole) => {
+    setLmsRoleState(role);
+    localStorage.setItem('seduai_lms_role', role);
+  };
+
+  const isAdmin = () => lmsRole === 'ADMIN';
+  const isTeacher = () => lmsRole === 'TEACHER';
+  const isStudent = () => lmsRole === 'STUDENT';
 
   const updateUser = (data: Partial<UserInfo>) => {
     if (!user) return;
@@ -138,9 +185,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         accessToken,
         localSync,
         isLoading,
+        lmsRole,
+        lmsUserId,
         login,
         logout,
         updateUser,
+        setLmsRole,
+        isAdmin,
+        isTeacher,
+        isStudent,
       }}
     >
       {children}

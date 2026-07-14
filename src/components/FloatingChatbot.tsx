@@ -251,7 +251,7 @@ export default function FloatingChatbot() {
                             <div className="flex justify-between items-start gap-2">
                               <h4 className="font-bold text-[11px] text-slate-900 line-clamp-1">
                                 {typeof course.title === 'object' && course.title !== null && 'rendered' in course.title 
-                                  ? (course.title as any).rendered 
+                                  ? (course.title as { rendered: string }).rendered 
                                   : String(course.title || '')}
                               </h4>
                               <span className="text-[9px] bg-primary-light text-primary font-bold px-1.5 py-0.25 rounded">

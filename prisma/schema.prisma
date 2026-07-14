@@ -1,0 +1,223 @@
+// Prisma schema for SeduAi LMS Module
+// Database: Neon PostgreSQL
+// Prisma 7 — datasource url moved to prisma.config.ts
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+
+enum UserRole {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum LessonType {
+  THEORY
+  PRACTICAL
+}
+
+enum ExamType {
+  LESSON_QUIZ
+  MIDTERM
+  FINAL
+}
+
+enum SubmissionStatus {
+  PENDING
+  AI_GRADED
+  REVIEWED
+}
+
+enum ClassStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+// ==========================================
+// MODELS
+// ==========================================
+
+/// User trong hệ thống LMS (sync từ NKS Account)
+model LmsUser {
+  id          String   @id @default(cuid())
+  nksUserId   String?  @unique /// ID từ hệ thống NKS (account.nks.vn)
+  username    String   @unique
+  name        String
+  email       String?
+  phone       String?
+  avatar      String?
+  role        UserRole @default(STUDENT)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  teachingClasses LmsClass[]        @relation("ClassTeacher")
+  enrollments     LmsClassStudent[]
+  submissions     LmsSubmission[]
+  examResults     LmsExamResult[]
+
+  @@map("lms_users")
+}
+
+/// Lớp học (tối đa 25 học sinh, 1 giáo viên, 4 môn)
+model LmsClass {
+  id          String      @id @default(cuid())
+  name        String
+  teacherId   String
+  maxStudents Int         @default(25)
+  status      ClassStatus @default(ACTIVE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  teacher     LmsUser          @relation("ClassTeacher", fields: [teacherId], references: [id])
+  students    LmsClassStudent[]
+  subjects    LmsSubject[]
+  examConfigs LmsExamConfig[]
+
+  @@map("lms_classes")
+}
+
+/// Bảng trung gian: Học sinh trong lớp
+model LmsClassStudent {
+  id         String   @id @default(cuid())
+  classId    String
+  studentId  String
+  enrolledAt DateTime @default(now())
+
+  // Relations
+  class   LmsClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student LmsUser  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, studentId])
+  @@map("lms_class_students")
+}
+
+/// Môn học (mỗi lớp có 4 môn, mỗi môn 8 LT + 8 TH = 16 buổi)
+model LmsSubject {
+  id               String   @id @default(cuid())
+  classId          String
+  name             String
+  theoryLessons    Int      @default(8)
+  practicalLessons Int      @default(8)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  class       LmsClass        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  lessons     LmsLesson[]
+  examConfigs LmsExamConfig[]
+
+  @@map("lms_subjects")
+}
+
+/// Bài học (Lý thuyết hoặc Thực hành)
+model LmsLesson {
+  id          String     @id @default(cuid())
+  subjectId   String
+  type        LessonType
+  orderIndex  Int        /// Thứ tự buổi (1-8)
+  title       String
+  content     String?    @db.Text /// Nội dung bài học (HTML/Markdown)
+  attachments String?    @db.Text /// JSON array: [{name, url, size}]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  subject     LmsSubject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  assignments LmsAssignment[]
+
+  @@unique([subjectId, type, orderIndex])
+  @@map("lms_lessons")
+}
+
+/// Bài tập gắn với bài học
+model LmsAssignment {
+  id          String    @id @default(cuid())
+  lessonId    String
+  title       String
+  description String?   @db.Text
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  lesson      LmsLesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  submissions LmsSubmission[]
+
+  @@map("lms_assignments")
+}
+
+/// Bài nộp của học sinh
+model LmsSubmission {
+  id            String           @id @default(cuid())
+  assignmentId  String
+  studentId     String
+  content       String?          @db.Text /// Nội dung bài làm
+  files         String?          @db.Text /// JSON array: [{name, url}]
+  grade         Float?           /// Điểm (0-10)
+  aiReview      String?          @db.Text /// Nhận xét từ AI
+  teacherReview String?          @db.Text /// Nhận xét từ giáo viên
+  status        SubmissionStatus @default(PENDING)
+  submittedAt   DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  // Relations
+  assignment LmsAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    LmsUser       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+  @@map("lms_submissions")
+}
+
+/// Cấu hình đề thi (KHÔNG lưu câu hỏi — AI sinh realtime)
+model LmsExamConfig {
+  id              String   @id @default(cuid())
+  subjectId       String
+  classId         String
+  examType        ExamType
+  questionCount   Int      /// 30 (giữa kỳ) hoặc 50 (cuối kỳ) hoặc tuỳ chỉnh
+  durationMinutes Int      /// Thời gian thi (phút)
+  password        String?  /// Mật khẩu thi (nullable)
+  startTime       DateTime? /// Thời gian mở thi
+  endTime         DateTime? /// Thời gian đóng thi
+  lessonOrder     Int?     /// Buổi học nào (cho LESSON_QUIZ), null cho midterm/final
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  subject LmsSubject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  class   LmsClass      @relation(fields: [classId], references: [id], onDelete: Cascade)
+  results LmsExamResult[]
+
+  @@map("lms_exam_configs")
+}
+
+/// Kết quả thi (lưu đáp án + điểm)
+model LmsExamResult {
+  id             String   @id @default(cuid())
+  examConfigId   String
+  studentId      String
+  score          Float    /// Điểm (0-10)
+  correctCount   Int      /// Số câu đúng
+  totalQuestions Int      /// Tổng số câu
+  answers        String?  @db.Text /// JSON: đáp án học sinh [{questionIndex, selectedOption, isCorrect}]
+  startedAt      DateTime @default(now())
+  finishedAt     DateTime?
+
+  // Relations
+  examConfig LmsExamConfig @relation(fields: [examConfigId], references: [id], onDelete: Cascade)
+  student    LmsUser       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([examConfigId, studentId])
+  @@map("lms_exam_results")
+}
