@@ -255,9 +255,16 @@ export async function fetchUserInfo(access_token: string): Promise<UserInfo | nu
       || data?.user
       || data;
 
-    return account && typeof account === 'object' && typeof account.username === 'string'
-      ? account as UserInfo
-      : null;
+    if (account && typeof account === 'object') {
+      const username = account.username || account.email;
+      if (typeof username === 'string' && username.trim()) {
+        return {
+          ...account,
+          username: username.trim(),
+        } as UserInfo;
+      }
+    }
+    return null;
   } catch (error) {
     if (error instanceof AccountSessionUnavailableError) throw error;
     throw new AccountSessionUnavailableError();

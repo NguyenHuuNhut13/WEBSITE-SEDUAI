@@ -71,7 +71,8 @@ export async function requireLmsUser(request: NextRequest, roles?: UserRole[]): 
 }
 
 export async function syncLmsUser(account: any): Promise<LmsUser> {
-  const username = typeof account?.username === 'string' ? account.username.trim() : '';
+  const rawUsername = account?.username || account?.email;
+  const username = typeof rawUsername === 'string' ? rawUsername.trim() : '';
   if (!username) throw new Error('Không xác định được tài khoản NKS');
 
   const displayName = String(account.name
