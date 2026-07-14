@@ -12,8 +12,10 @@ import {
   ShieldCheck,
   Headset,
   Zap,
-  CalendarDays,
   Mail,
+  Sparkles,
+  Flame,
+  Volume2
 } from 'lucide-react';
 import HeroSlider from '@/components/HeroSlider';
 import ChatbotCRM from '@/components/ChatbotCRM';
@@ -85,87 +87,60 @@ export default async function Home() {
 
   const categories = [
     {
-      icon: <Globe className="w-7 h-7" />,
+      icon: <Globe className="w-6 h-6 text-slate-700 group-hover:text-primary transition-colors duration-300" />,
       title: 'Tiếng Anh & IELTS',
       count: 2,
-      color: 'bg-blue-50 text-blue-600 border-blue-100',
-      hoverColor: 'hover:bg-blue-600 hover:text-white hover:border-blue-600',
     },
     {
-      icon: <Cpu className="w-7 h-7" />,
+      icon: <Cpu className="w-6 h-6 text-slate-700 group-hover:text-primary transition-colors duration-300" />,
       title: 'Lập trình & Công nghệ',
       count: 2,
-      color: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-      hoverColor: 'hover:bg-emerald-600 hover:text-white hover:border-emerald-600',
     },
     {
-      icon: <Lightbulb className="w-7 h-7" />,
+      icon: <Lightbulb className="w-6 h-6 text-slate-700 group-hover:text-primary transition-colors duration-300" />,
       title: 'AI & Ứng dụng',
       count: 1,
-      color: 'bg-purple-50 text-purple-600 border-purple-100',
-      hoverColor: 'hover:bg-purple-600 hover:text-white hover:border-purple-600',
     },
     {
-      icon: <BookOpen className="w-7 h-7" />,
+      icon: <BookOpen className="w-6 h-6 text-slate-700 group-hover:text-primary transition-colors duration-300" />,
       title: 'Kỹ năng mềm',
       count: 1,
-      color: 'bg-amber-50 text-amber-600 border-amber-100',
-      hoverColor: 'hover:bg-amber-600 hover:text-white hover:border-amber-600',
-    },
-  ];
-
-  const whyChooseUs = [
-    {
-      icon: <Bot className="w-6 h-6" />,
-      title: 'AI đồng hành 24/7',
-      desc: 'Trợ lý AI giải đáp thắc mắc, sửa bài tập và cá nhân hóa lộ trình học mọi lúc mọi nơi.',
-    },
-    {
-      icon: <ShieldCheck className="w-6 h-6" />,
-      title: 'Cam kết đầu ra',
-      desc: 'Chương trình chuẩn hóa, cam kết kết quả rõ ràng. Hoàn tiền nếu không đạt mục tiêu.',
-    },
-    {
-      icon: <Headset className="w-6 h-6" />,
-      title: 'Mentor 1-1 tận tâm',
-      desc: 'Đội ngũ mentor kinh nghiệm hỗ trợ riêng từng học viên, sửa bài chi tiết hàng tuần.',
-    },
-    {
-      icon: <Zap className="w-6 h-6" />,
-      title: 'Thực hành dự án thực tế',
-      desc: 'Học qua dự án thực tế. Tốt nghiệp với portfolio ấn tượng sẵn sàng cho CV xin việc.',
     },
   ];
 
   return (
-    <div className="overflow-hidden">
-      {/* ====== Hero Slider ====== */}
+    <div className="overflow-hidden bg-slate-50 min-h-screen">
+      {/* ====== Upgraded Hero Slider ====== */}
       <HeroSlider />
 
-      {/* ====== Course Categories ====== */}
-      <section className="py-20 bg-white">
+      {/* ====== Course Categories Section ====== */}
+      <section className="py-16 bg-white border-b border-slate-100 relative">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-              Danh mục <span className="gradient-text">Khóa học</span>
+          <div className="text-center mb-12 space-y-2">
+            <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Danh mục</span>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-tight">
+              Khám Phá Các Lĩnh Vực Đào Tạo
             </h2>
-            <p className="text-slate-500 mt-3 text-sm max-w-lg mx-auto">
-              Khám phá các lĩnh vực đào tạo chất lượng cao kết hợp công nghệ AI tiên tiến
+            <p className="text-slate-500 text-xs sm:text-sm max-w-lg mx-auto">
+              Chương trình chuẩn quốc tế kết hợp công nghệ AI tiên tiến giúp tăng tốc lộ trình học tập.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {categories.map((cat, index) => (
               <Link
                 key={index}
                 href={`/courses?category=${encodeURIComponent(cat.title.split(' & ')[0])}`}
-                className={`border rounded-2xl p-6 text-center space-y-3 transition-all duration-300 group card-hover-lift ${cat.color} ${cat.hoverColor}`}
+                className="bg-white border border-slate-200/60 rounded-3xl p-6 text-center space-y-4 hover-lift-glow card-shine transition-all duration-300 group shadow-sm flex flex-col justify-between min-h-[160px]"
               >
-                <div className="w-16 h-16 rounded-2xl bg-white/80 flex items-center justify-center mx-auto shadow-sm group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto group-hover:bg-primary/10 transition-all duration-300">
                   {cat.icon}
                 </div>
-                <h3 className="font-bold text-sm">{cat.title}</h3>
-                <p className="text-xs opacity-70">{cat.count} khóa học</p>
+                <div className="space-y-1">
+                  <h3 className="font-bold text-slate-900 text-sm group-hover:text-primary transition-colors duration-200">{cat.title}</h3>
+                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">{cat.count} khóa học</p>
+                </div>
               </Link>
             ))}
           </div>
@@ -173,23 +148,24 @@ export default async function Home() {
       </section>
 
       {/* ====== Featured Courses ====== */}
-      <section className="py-20 bg-slate-50">
+      <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-12">
-            <div>
-              <h2 className="text-3xl font-extrabold text-slate-900">
-                Khóa Học <span className="gradient-text">Nổi Bật</span>
+            <div className="space-y-2">
+              <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Nổi bật</span>
+              <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-tight">
+                Khóa Học Nổi Bật Nhất
               </h2>
-              <p className="text-slate-500 mt-2 text-sm">
-                Các khóa đào tạo kết hợp cùng công cụ Trí tuệ nhân tạo độc quyền tại SeduAi
+              <p className="text-slate-500 text-xs sm:text-sm">
+                Các khóa đào tạo đột phá tích hợp công cụ Trí tuệ nhân tạo độc quyền tại SeduAi.
               </p>
             </div>
             <Link
               href="/courses"
-              className="px-5 py-2.5 rounded-full border border-primary/30 hover:bg-primary hover:text-white text-primary font-semibold text-sm transition-all duration-300 flex items-center gap-2 cursor-pointer bg-primary-light shadow-sm hover:shadow-primary/30 hover:shadow-md group"
+              className="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-primary hover:border-primary hover:text-white text-slate-700 font-bold text-xs transition-all duration-300 flex items-center gap-1.5 bg-white shadow-sm hover:scale-105 group"
             >
-              Xem tất cả khóa học
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
+              Xem Tất Cả Khóa Học
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
 
@@ -203,55 +179,130 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ====== Why Choose Us ====== */}
-      <section className="py-20 bg-white">
+      {/* ====== Bento Grid Features (Why Choose Us Redesign) ====== */}
+      <section className="py-16 bg-white border-t border-b border-slate-100 relative">
+        <div className="absolute top-[20%] left-0 w-90 h-90 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-              Tại sao chọn <span className="gradient-text">SeduAi</span>?
+          <div className="text-center mb-14 space-y-2">
+            <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Khác biệt</span>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+              Hệ Sinh Thái Đào Tạo Ưu Việt SeduAi
             </h2>
-            <p className="text-slate-500 mt-3 text-sm max-w-lg mx-auto">
-              Nền tảng giáo dục duy nhất tích hợp AI toàn diện vào mọi khâu từ tuyển sinh, giảng dạy đến quản lý
+            <p className="text-slate-500 text-xs sm:text-sm max-w-lg mx-auto">
+              Nền tảng EdTech tiên phong ứng dụng trí tuệ nhân tạo giúp tối ưu hiệu năng dạy và học toàn diện.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {whyChooseUs.map((item, index) => (
-              <div
-                key={index}
-                className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 hover-lift-glow glow-border card-shine group text-center animate-fade-in-up"
-                style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'both' }}
-              >
-                <div className="w-14 h-14 rounded-2xl bg-primary-light text-primary flex items-center justify-center mx-auto group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-sm">
-                  {item.icon}
+          {/* Premium Bento Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Box 1 (Span 2, height x2) - AI Assistant interactive representation */}
+            <div className="col-span-1 md:col-span-2 bg-slate-900 text-white rounded-3xl p-8 border border-slate-800 relative overflow-hidden flex flex-col justify-between hover-lift-glow group min-h-[320px]">
+              <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:2rem_2rem] pointer-events-none" />
+              <div className="absolute -right-10 -top-10 w-48 h-48 bg-primary/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-500 pointer-events-none" />
+              
+              <div className="space-y-3 relative z-10">
+                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-accent">
+                  <Bot className="w-5.5 h-5.5" />
                 </div>
-                <h3 className="font-bold text-slate-900 text-base group-hover:text-primary transition-colors duration-200">{item.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
+                <h3 className="text-xl font-bold text-white group-hover:text-accent transition-colors">Trợ Lý AI Đồng Hành 24/7</h3>
+                <p className="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-xl">
+                  Học viên được đàm thoại nói trực tiếp, luyện phát âm chuẩn đến từng âm tiết và sửa lỗi ngữ pháp bài viết tức thì cùng trợ lý AI 1-1 mà không cần chờ đợi.
+                </p>
               </div>
-            ))}
+
+              {/* Mock AI companion visual representation */}
+              <div className="mt-6 bg-slate-950/60 p-4 rounded-2xl border border-white/5 flex items-center justify-between gap-4 max-w-md relative z-10">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping flex-shrink-0" />
+                  <span className="text-[10px] font-mono text-slate-400">AI Voice Model:</span>
+                </div>
+                <p className="text-xs text-slate-200 font-medium italic flex-grow">"Excellent pronunciation! Try stressing the second syllable of 'alternative'."</p>
+                <Volume2 className="w-4 h-4 text-accent animate-pulse" />
+              </div>
+            </div>
+
+            {/* Box 2 (Span 1) - Cam ket dau ra */}
+            <div className="col-span-1 bg-white border border-slate-200/80 rounded-3xl p-8 flex flex-col justify-between hover-lift-glow card-shine group min-h-[320px] shadow-sm">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                  <ShieldCheck className="w-5.5 h-5.5" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-950 group-hover:text-primary transition-colors">Cam Kết Chuẩn Đầu Ra</h3>
+                <p className="text-slate-500 text-xs leading-relaxed">
+                  Lộ trình học tập chuẩn hóa, cam kết kết quả đầu ra rõ ràng bằng văn bản pháp lý. Sẵn sàng hoàn trả học phí nếu không đạt mục tiêu đề ra ban đầu.
+                </p>
+              </div>
+              <div className="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider flex items-center gap-1.5 mt-4">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Cam kết pháp lý
+              </div>
+            </div>
+
+            {/* Box 3 (Span 1) - Mentor 1-1 */}
+            <div className="col-span-1 bg-white border border-slate-200/80 rounded-3xl p-8 flex flex-col justify-between hover-lift-glow card-shine group min-h-[320px] shadow-sm">
+              <div className="space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                  <Headset className="w-5.5 h-5.5" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-950 group-hover:text-primary transition-colors">Mentor 1-1 Tận Tâm</h3>
+                <p className="text-slate-500 text-xs leading-relaxed">
+                  Đội ngũ giáo viên, giảng viên chuyên môn cao hỗ trợ chữa bài viết, bài nói thủ công chi tiết hàng tuần và định hình chiến thuật thi tốt nhất.
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 mt-4">
+                {/* Micro avatar profiles mockup */}
+                <div className="flex -space-x-2.5">
+                  <div className="w-6 h-6 rounded-full bg-blue-500 border border-white text-[8px] font-bold flex items-center justify-center text-white">GV</div>
+                  <div className="w-6 h-6 rounded-full bg-purple-500 border border-white text-[8px] font-bold flex items-center justify-center text-white">MT</div>
+                  <div className="w-6 h-6 rounded-full bg-emerald-500 border border-white text-[8px] font-bold flex items-center justify-center text-white">AI</div>
+                </div>
+                <span className="text-[10px] font-extrabold text-slate-400 tracking-wider">Hỗ trợ kết hợp 1-1</span>
+              </div>
+            </div>
+
+            {/* Box 4 (Span 2) - Project thuc chien */}
+            <div className="col-span-1 md:col-span-2 bg-gradient-to-r from-primary to-blue-600 text-white rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between hover-lift-glow min-h-[220px]">
+              <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="space-y-3 relative z-10">
+                <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-accent">
+                  <Zap className="w-5.5 h-5.5" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Thực Chiến Qua Các Dự Án Thực Tế</h3>
+                <p className="text-blue-100 text-xs sm:text-sm leading-relaxed max-w-xl">
+                  Chúng tôi xây dựng phương pháp học qua thực hành (Project-based learning). Học viên phát triển đồ án thực tế giúp lưu giữ kiến thức lâu dài và tạo portfolio nổi bật.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] font-bold text-blue-200 mt-4 relative z-10">
+                <span>PROJECT COMPLETE RATE: 100%</span>
+                <span className="text-accent flex items-center gap-1"><Sparkles className="w-3 h-3" /> Ready for CV</span>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
 
-      {/* ====== AI Admissions CRM (Interactive Chat) ====== */}
-      <section id="ai-crm-demo" className="py-20 bg-slate-50 scroll-mt-28">
+      {/* ====== AI Admissions CRM Demo Section ====== */}
+      <section id="ai-crm-demo" className="py-16 bg-slate-50 scroll-mt-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Info */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="w-14 h-14 rounded-2xl bg-primary-light text-primary flex items-center justify-center text-2xl shadow-sm">
-                <Bot className="w-8 h-8" />
+              <div className="w-12 h-12 rounded-2xl bg-primary-light text-primary flex items-center justify-center shadow-sm">
+                <Bot className="w-6 h-6" />
               </div>
-              <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                AI Admissions <span className="gradient-text">CRM</span>
-              </h2>
+              <div className="space-y-2">
+                <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Hệ thống CRM</span>
+                <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+                  AI Admissions CRM
+                </h2>
+              </div>
               <p className="text-slate-600 text-sm leading-relaxed">
-                Trợ lý tuyển sinh AI tương tác trực tiếp với phụ huynh và học sinh qua
-                Website/Fanpage. AI tự động khai thác nhu cầu thực tế: độ tuổi, môn học mong muốn,
-                ngân sách, vị trí địa lý... sau đó phân tích và tự động tạo cơ hội (Lead) trên CRM
-                quản trị kèm theo đánh giá tiềm năng.
+                Trợ lý tuyển sinh AI tương tác trực tiếp với phụ huynh và học sinh qua Website/Fanpage. AI tự động khai thác nhu cầu thực tế: độ tuổi, môn học mong muốn, ngân sách, vị trí địa lý... sau đó phân tích và tự động tạo cơ hội (Lead) trên CRM quản trị kèm theo chấm điểm tiềm năng.
               </p>
-              <div className="space-y-3 font-semibold text-sm text-slate-700">
+              <div className="space-y-3 font-semibold text-xs sm:text-sm text-slate-700">
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
                   <span>Trò chuyện tự nhiên 24/7 không cần người trực.</span>
@@ -275,8 +326,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ====== AI Teacher Assistant ====== */}
-      <section className="py-20 bg-white border-t border-slate-100">
+      {/* ====== AI Teacher Assistant Section ====== */}
+      <section className="py-16 bg-white border-t border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Console */}
@@ -286,19 +337,19 @@ export default async function Home() {
 
             {/* Right Info */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="w-14 h-14 rounded-2xl bg-primary-light text-primary flex items-center justify-center text-2xl shadow-sm">
-                <Users className="w-8 h-8" />
+              <div className="w-12 h-12 rounded-2xl bg-primary-light text-primary flex items-center justify-center shadow-sm">
+                <Users className="w-6 h-6" />
               </div>
-              <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                AI Teacher <span className="gradient-text">Assistant</span>
-              </h2>
+              <div className="space-y-2">
+                <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Dành cho giáo viên</span>
+                <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+                  AI Teacher Assistant
+                </h2>
+              </div>
               <p className="text-slate-600 text-sm leading-relaxed">
-                Giảm tải áp lực chuẩn bị bài học cho giáo viên. Chỉ với lệnh nói hoặc văn bản đơn
-                giản, Trợ lý AI sẽ hỗ trợ đắc lực giáo viên trong việc: soạn thảo giáo án chi tiết
-                theo chương trình, tạo kho đề thi phong phú đa dạng, hỗ trợ chấm điểm và viết nhận
-                xét học sinh định kỳ chi tiết và ý nghĩa.
+                Giảm tải áp lực chuẩn bị bài học cho giáo viên. Chỉ với lệnh nói hoặc văn bản đơn giản, Trợ lý AI sẽ hỗ trợ đắc lực giáo viên trong việc: soạn thảo giáo án chi tiết theo chương trình, tạo kho đề thi phong phú đa dạng, hỗ trợ chấm điểm và viết nhận xét học sinh định kỳ chi tiết và ý nghĩa.
               </p>
-              <div className="space-y-3 font-semibold text-sm text-slate-700">
+              <div className="space-y-3 font-semibold text-xs sm:text-sm text-slate-700">
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
                   <span>Tiết kiệm 10+ giờ làm việc mỗi tuần cho giáo viên.</span>
@@ -321,18 +372,19 @@ export default async function Home() {
       <CounterSection />
 
       {/* ====== Upcoming Events ====== */}
-      <section className="py-20 bg-slate-50">
+      <section className="py-16 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-              Lịch <span className="gradient-text">Khai giảng & Sự kiện</span>
+          <div className="text-center mb-12 space-y-2">
+            <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Khai giảng</span>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+              Lịch Khai Giảng & Sự Kiện
             </h2>
-            <p className="text-slate-500 mt-3 text-sm max-w-lg mx-auto">
-              Đừng bỏ lỡ các sự kiện, workshop miễn phí và lịch khai giảng sắp tới
+            <p className="text-slate-500 text-xs sm:text-sm max-w-lg mx-auto">
+              Đừng bỏ lỡ các sự kiện, workshop giáo dục miễn phí và lịch mở lớp mới nhất.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {events.map((event, index) => (
               <EventCard key={index} event={event} />
             ))}
@@ -341,14 +393,15 @@ export default async function Home() {
       </section>
 
       {/* ====== Instructors Section ====== */}
-      <section className="py-20 bg-white">
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-              Đội ngũ <span className="gradient-text">Giảng viên</span>
+          <div className="text-center mb-12 space-y-2">
+            <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Giảng viên</span>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+              Đội Ngũ Giảng Viên Chuyên Môn
             </h2>
-            <p className="text-slate-500 mt-3 text-sm max-w-lg mx-auto">
-              Giảng viên giàu kinh nghiệm thực chiến, đồng hành cùng Trợ lý AI trong mỗi bài giảng
+            <p className="text-slate-500 text-xs sm:text-sm max-w-lg mx-auto">
+              Giảng viên giàu kinh nghiệm thực chiến đạt chuẩn quốc tế, trực tiếp giảng dạy cùng sự hỗ trợ của trợ lý AI.
             </p>
           </div>
 
@@ -361,14 +414,15 @@ export default async function Home() {
       </section>
 
       {/* ====== Testimonials ====== */}
-      <section className="py-20 bg-slate-50">
+      <section className="py-16 bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-              Học viên <span className="gradient-text">nói gì về SeduAi</span>
+          <div className="text-center mb-12 space-y-2">
+            <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Cảm nhận</span>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+              Học Viên Nói Gì Về SeduAi
             </h2>
-            <p className="text-slate-500 mt-3 text-sm max-w-lg mx-auto">
-              Hàng ngàn học viên đã tin tưởng và đạt được kết quả vượt mong đợi
+            <p className="text-slate-500 text-xs sm:text-sm max-w-lg mx-auto">
+              Hàng ngàn học viên đã tìm thấy lộ trình tối ưu và nâng cao vượt bậc năng lực học tập cùng SeduAi.
             </p>
           </div>
 
@@ -380,10 +434,10 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ====== Partner Logos Marquee ====== */}
+      {/* ====== Grayscale Partner Logos Marquee ====== */}
       <section className="py-14 bg-white border-t border-slate-100 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-xs font-semibold text-slate-400 uppercase tracking-widest mb-8">
+          <p className="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-8">
             Được tin tưởng bởi các đối tác giáo dục hàng đầu
           </p>
           <div className="relative overflow-hidden">
@@ -408,7 +462,7 @@ export default async function Home() {
               ].map((name, i) => (
                 <div
                   key={i}
-                  className="flex-shrink-0 px-8 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-400"
+                  className="flex-shrink-0 px-6 py-3 bg-slate-50 border border-slate-150 rounded-xl text-xs font-extrabold text-slate-400/80 uppercase tracking-wider shadow-sm"
                 >
                   {name}
                 </div>
@@ -418,32 +472,38 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ====== Newsletter CTA ====== */}
-      <section className="py-20 bg-gradient-to-br from-primary to-blue-700 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:3rem_3rem]"></div>
-        <div className="absolute top-1/4 -left-20 w-80 h-80 bg-white/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl"></div>
+      {/* ====== Premium Newsletter CTA ====== */}
+      <section className="py-16 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-slate-950 rounded-3xl py-14 px-8 sm:px-16 text-center text-white relative overflow-hidden border border-slate-800 shadow-2xl">
+            {/* Grid Pattern overlays */}
+            <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />
+            <div className="absolute -right-10 -bottom-10 w-80 h-80 bg-primary/20 rounded-full blur-[100px] animate-blob pointer-events-none" style={{ animationDelay: '2s' }} />
+            <div className="absolute -left-10 -top-10 w-60 h-60 bg-accent/5 rounded-full blur-[80px] animate-blob pointer-events-none" style={{ animationDelay: '5s' }} />
 
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center mx-auto">
-            <Mail className="w-8 h-8" />
-          </div>
-          <h2 className="text-3xl font-extrabold tracking-tight">
-            Nhận thông tin khóa học & ưu đãi mới nhất
-          </h2>
-          <p className="text-blue-100 text-sm max-w-md mx-auto">
-            Đăng ký nhận bản tin để không bỏ lỡ các khóa học mới, workshop miễn phí và ưu đãi học phí lên đến 30%.
-          </p>
-          <div className="flex max-w-md mx-auto bg-white/10 backdrop-blur-sm rounded-full overflow-hidden border border-white/20">
-            <input
-              type="email"
-              placeholder="Nhập email của bạn..."
-              className="flex-grow px-6 py-4 bg-transparent text-white placeholder-white/50 focus:outline-none text-sm"
-            />
-            <button className="px-6 py-4 bg-accent hover:bg-accent-dark text-slate-900 font-bold text-sm transition-colors duration-200 flex items-center gap-2 cursor-pointer">
-              Đăng ký
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="relative z-10 space-y-6 max-w-2xl mx-auto">
+              <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mx-auto text-accent">
+                <Mail className="w-6 h-6" />
+              </div>
+              <h2 className="text-3xl font-extrabold tracking-tight">
+                Nhận Thông Tin Khóa Học & Ưu Đãi Mới Nhất
+              </h2>
+              <p className="text-slate-300 text-xs sm:text-sm max-w-md mx-auto">
+                Đăng ký nhận bản tin để không bỏ lỡ các khóa học mới, workshop miễn phí và ưu đãi học phí lên đến 30%.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row max-w-md mx-auto bg-white/5 rounded-2xl overflow-hidden border border-white/10 focus-within:ring-2 focus-within:ring-primary/40 focus-within:border-transparent p-1 gap-1">
+                <input
+                  type="email"
+                  placeholder="Nhập email của bạn..."
+                  className="flex-grow px-5 py-3.5 bg-transparent text-white placeholder-slate-400 focus:outline-none text-xs sm:text-sm"
+                />
+                <button className="px-6 py-3.5 bg-primary hover:bg-primary-dark text-white font-bold text-xs sm:text-sm rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-md shadow-primary/20 cursor-pointer">
+                  Đăng ký
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
