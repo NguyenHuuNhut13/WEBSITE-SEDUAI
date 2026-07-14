@@ -33,36 +33,32 @@ import { getEduCourses, ApiCourse } from '@/services/api';
 
 const partners = [
   {
-    name: 'ĐH Bách Khoa',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/e/ef/HCMUT_official_logo.png',
+    name: 'Đại học Thủ Dầu Một',
+    logo: 'https://tdmu.edu.vn/img/brand/Logo_TDMU_2024_nguyen_ban.svg',
   },
   {
-    name: 'ĐH FPT',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/1/11/FPT_logo_2010.svg',
+    name: 'Công ty NKS',
+    logo: 'https://nks.com.vn/wp-content/uploads/2025/07/nks-fulllogo.png',
   },
   {
-    name: 'Google for Education',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg',
+    name: 'Google',
+    logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v16/icons/google.svg',
   },
   {
-    name: 'Microsoft Learn',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg',
+    name: 'Gemini',
+    logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v16/icons/googlegemini.svg',
   },
   {
-    name: 'AWS Academy',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg',
+    name: 'OpenAI',
+    logo: 'https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/openai/default.svg',
   },
   {
-    name: 'British Council',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/British_Council_logo.svg',
+    name: 'Groq',
+    logo: 'https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/groq/default.svg',
   },
   {
-    name: 'VNUHCM',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a8/Logo_%C4%90HQG_TP.HCM.png',
-  },
-  {
-    name: 'ĐH Kinh tế (UEH)',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b4/Logo_UEH_xanh.png',
+    name: 'Vercel',
+    logo: 'https://cdn.jsdelivr.net/npm/simple-icons@v16/icons/vercel.svg',
   },
 ];
 
