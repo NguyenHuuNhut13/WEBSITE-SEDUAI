@@ -14,7 +14,6 @@ import {
   Zap,
   Mail,
   Sparkles,
-  Flame,
   Volume2
 } from 'lucide-react';
 import HeroSlider from '@/components/HeroSlider';
@@ -30,6 +29,90 @@ import { events } from '@/data/events';
 import { instructors } from '@/data/instructors';
 import { testimonials } from '@/data/testimonials';
 import { getEduCourses, ApiCourse } from '@/services/api';
+
+const partners = [
+  {
+    name: 'Đại học Bách Khoa',
+    logo: (
+      <svg className="w-5 h-5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+        <path d="M12 8v8M8 12h8" />
+      </svg>
+    )
+  },
+  {
+    name: 'Đại học FPT',
+    logo: (
+      <svg className="w-5 h-5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2L2 22h20L12 2z" />
+        <path d="M12 7l6 11H6l6-11z" />
+      </svg>
+    )
+  },
+  {
+    name: 'Google for Education',
+    logo: (
+      <svg className="w-4.5 h-4.5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+    )
+  },
+  {
+    name: 'Microsoft Learn',
+    logo: (
+      <svg className="w-4.5 h-4.5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="currentColor">
+        <rect x="1" y="1" width="10" height="10" />
+        <rect x="13" y="1" width="10" height="10" />
+        <rect x="1" y="13" width="10" height="10" />
+        <rect x="13" y="13" width="10" height="10" />
+      </svg>
+    )
+  },
+  {
+    name: 'AWS Academy',
+    logo: (
+      <svg className="w-5 h-5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 10h-1.26A8 8 0 109 15h9a3 3 0 000-6z" />
+        <path d="M6 19c3 3 9 3 12 0" />
+        <path d="M18 19l-1-2.5 M18 19l-2.5 1" />
+      </svg>
+    )
+  },
+  {
+    name: 'British Council',
+    logo: (
+      <svg className="w-4.5 h-4.5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <circle cx="6" cy="6" r="2" />
+        <circle cx="18" cy="6" r="2" />
+        <circle cx="6" cy="18" r="2" />
+        <circle cx="18" cy="18" r="2" />
+        <path d="M6 8v8 M18 8v8 M8 6h8 M8 18h8" />
+      </svg>
+    )
+  },
+  {
+    name: 'VNUHCM',
+    logo: (
+      <svg className="w-5 h-5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+        <circle cx="12" cy="9" r="3" />
+      </svg>
+    )
+  },
+  {
+    name: 'Đại học Kinh tế',
+    logo: (
+      <svg className="w-4.5 h-4.5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M3 22h18 M6 18V7 M12 18V7 M18 18V7 M3 7h18 M12 2L3 7h18z" />
+      </svg>
+    )
+  }
+];
 
 export default async function Home() {
   const apiCourses = await getEduCourses();
@@ -87,22 +170,22 @@ export default async function Home() {
 
   const categories = [
     {
-      icon: <Globe className="w-6 h-6 text-slate-700 group-hover:text-primary transition-colors duration-300" />,
+      icon: <Globe className="w-5 h-5 transition-transform" />,
       title: 'Tiếng Anh & IELTS',
       count: 2,
     },
     {
-      icon: <Cpu className="w-6 h-6 text-slate-700 group-hover:text-primary transition-colors duration-300" />,
+      icon: <Cpu className="w-5 h-5 transition-transform" />,
       title: 'Lập trình & Công nghệ',
       count: 2,
     },
     {
-      icon: <Lightbulb className="w-6 h-6 text-slate-700 group-hover:text-primary transition-colors duration-300" />,
+      icon: <Lightbulb className="w-5 h-5 transition-transform" />,
       title: 'AI & Ứng dụng',
       count: 1,
     },
     {
-      icon: <BookOpen className="w-6 h-6 text-slate-700 group-hover:text-primary transition-colors duration-300" />,
+      icon: <BookOpen className="w-5 h-5 transition-transform" />,
       title: 'Kỹ năng mềm',
       count: 1,
     },
@@ -132,14 +215,22 @@ export default async function Home() {
               <Link
                 key={index}
                 href={`/courses?category=${encodeURIComponent(cat.title.split(' & ')[0])}`}
-                className="bg-white border border-slate-200/60 rounded-3xl p-6 text-center space-y-4 hover-lift-glow card-shine transition-all duration-300 group shadow-sm flex flex-col justify-between min-h-[160px]"
+                className="bg-white border border-slate-200/60 rounded-3xl p-6 hover-lift-glow card-shine transition-all duration-300 group shadow-sm flex flex-col justify-between min-h-[180px] text-left"
               >
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto group-hover:bg-primary/10 transition-all duration-300">
+                <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-300">
                   {cat.icon}
                 </div>
-                <div className="space-y-1">
-                  <h3 className="font-bold text-slate-900 text-sm group-hover:text-primary transition-colors duration-200">{cat.title}</h3>
-                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">{cat.count} khóa học</p>
+                <div className="space-y-1.5 pt-4">
+                  <h3 className="font-bold text-slate-950 text-[15px] group-hover:text-primary transition-colors duration-200">
+                    {cat.title}
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-extrabold tracking-wider uppercase">
+                    {cat.count} khóa học
+                  </p>
+                </div>
+                <div className="pt-3 border-t border-slate-105 flex items-center text-[10px] font-extrabold text-primary uppercase tracking-wider gap-1.5 group-hover:gap-2.5 transition-all">
+                  Khám phá ngay
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </div>
               </Link>
             ))}
@@ -434,7 +525,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ====== Grayscale Partner Logos Marquee ====== */}
+      {/* ====== Grayscale Partner Logos Marquee with Custom SVG Icons ====== */}
       <section className="py-14 bg-white border-t border-slate-100 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-8">
@@ -442,29 +533,13 @@ export default async function Home() {
           </p>
           <div className="relative overflow-hidden">
             <div className="animate-marquee marquee-track">
-              {[
-                'Đại học Bách Khoa',
-                'Đại học FPT',
-                'British Council',
-                'Google for Education',
-                'Microsoft Learn',
-                'AWS Academy',
-                'Đại học Kinh tế',
-                'VNUHCM',
-                'Đại học Bách Khoa',
-                'Đại học FPT',
-                'British Council',
-                'Google for Education',
-                'Microsoft Learn',
-                'AWS Academy',
-                'Đại học Kinh tế',
-                'VNUHCM',
-              ].map((name, i) => (
+              {partners.concat(partners).map((partner, i) => (
                 <div
                   key={i}
-                  className="flex-shrink-0 px-6 py-3 bg-slate-50 border border-slate-150 rounded-xl text-xs font-extrabold text-slate-400/80 uppercase tracking-wider shadow-sm"
+                  className="flex-shrink-0 flex items-center px-6 py-3.5 bg-white border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-500 hover:text-primary hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-md cursor-default group"
                 >
-                  {name}
+                  {partner.logo}
+                  <span>{partner.name}</span>
                 </div>
               ))}
             </div>
