@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { lmsErrorResponse, requireLmsUser } from '@/lib/lms-auth';
+import { LmsRequestError, lmsErrorResponse, requireLmsUser } from '@/lib/lms-auth';
+import { requiredText, stringIdList } from '@/lib/lms-input';
+
+const userSummarySelect = { id: true, username: true, name: true, avatar: true, role: true } as const;
 
 // GET /api/lms/classes?teacherId=xxx
 export async function GET(request: NextRequest) {
@@ -9,20 +12,26 @@ export async function GET(request: NextRequest) {
     const where = actor.role === 'ADMIN'
       ? {}
       : actor.role === 'TEACHER'
-        ? { teacherId: actor.id }
-        : { students: { some: { studentId: actor.id } } };
+        ? { teacherId: actor.id, status: 'ACTIVE' as const }
+        : { students: { some: { studentId: actor.id } }, status: 'ACTIVE' as const };
     const classes = await prisma.lmsClass.findMany({
       where,
       include: {
-        teacher: true,
+        teacher: { select: userSummarySelect },
         subjects: true,
-        students: { include: { student: true } },
+        ...(actor.role !== 'STUDENT' ? {
+          students: {
+            include: { student: { select: userSummarySelect } },
+            orderBy: { enrolledAt: 'asc' as const },
+          },
+        } : {}),
         _count: { select: { students: true, subjects: true } },
       },
       orderBy: { createdAt: 'desc' },
+      take: 100,
     });
 
-    const data = classes.map((c: any) => ({
+    const data = classes.map((c) => ({
       ...c,
       studentCount: c._count.students,
       subjectCount: c._count.subjects,
@@ -40,51 +49,48 @@ export async function POST(request: NextRequest) {
   try {
     await requireLmsUser(request, ['ADMIN']);
     const body = await request.json();
-    const { name, teacherId, subjects, studentIds = [] } = body;
-
-    if (!name || !teacherId) {
-      return NextResponse.json({ success: false, error: 'name và teacherId là bắt buộc' }, { status: 400 });
-    }
-
-    // Kiểm tra teacher tồn tại và có role TEACHER
-    const teacher = await prisma.lmsUser.findUnique({ where: { id: teacherId } });
-    if (!teacher || teacher.role !== 'TEACHER') {
-      return NextResponse.json({ success: false, error: 'Giáo viên không tồn tại hoặc không có quyền' }, { status: 400 });
-    }
+    const name = requiredText(body.name, 'Tên lớp', 120);
+    const teacherId = requiredText(body.teacherId, 'Giáo viên', 100);
 
     // Lọc các môn học hợp lệ (tối đa 4 môn, không rỗng)
-    const validSubjects = (subjects || [])
-      .map((s: any) => (typeof s === 'string' ? s.trim() : ''))
-      .filter(Boolean);
-
-    const uniqueStudentIds: string[] = [...new Set(Array.isArray(studentIds) ? studentIds : [])] as string[];
-    if (uniqueStudentIds.length > 25) {
-      return NextResponse.json({ success: false, error: 'Một lớp có tối đa 25 học sinh' }, { status: 400 });
-    }
-    const studentCount = await prisma.lmsUser.count({ where: { id: { in: uniqueStudentIds }, role: 'STUDENT' } });
-    if (studentCount !== uniqueStudentIds.length) {
-      return NextResponse.json({ success: false, error: 'Danh sách lớp có tài khoản không phải học sinh' }, { status: 400 });
+    if (!Array.isArray(body.subjects)) throw new LmsRequestError('Danh sách môn học không hợp lệ');
+    const subjectInputs = body.subjects as unknown[];
+    const validSubjects: string[] = [...new Set(subjectInputs.map((subject) => requiredText(subject, 'Tên môn học', 120)))];
+    if (validSubjects.length < 1 || validSubjects.length > 4) {
+      throw new LmsRequestError('Mỗi lớp phải có từ 1 đến 4 môn học');
     }
 
-    // Tạo lớp + 4 môn học
-    const newClass = await prisma.lmsClass.create({
-      data: {
-        name,
-        teacherId,
-        subjects: {
-          create: validSubjects.slice(0, 4).map((subjectName: string) => ({
-            name: subjectName,
-          })),
+    const uniqueStudentIds = body.studentIds === undefined ? [] : stringIdList(body.studentIds, 'Danh sách học sinh', 25);
+    const newClass = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('lms-user-role-management'))`;
+      const teacher = await tx.lmsUser.findUnique({ where: { id: teacherId }, select: { role: true } });
+      if (!teacher || teacher.role !== 'TEACHER') {
+        throw new LmsRequestError('Giáo viên không tồn tại hoặc chưa có vai trò TEACHER');
+      }
+      const studentCount = await tx.lmsUser.count({
+        where: { id: { in: uniqueStudentIds }, role: 'STUDENT' },
+      });
+      if (studentCount !== uniqueStudentIds.length) {
+        throw new LmsRequestError('Danh sách lớp có tài khoản không phải học sinh');
+      }
+
+      return tx.lmsClass.create({
+        data: {
+          name,
+          teacherId,
+          subjects: {
+            create: validSubjects.slice(0, 4).map((subjectName) => ({ name: subjectName })),
+          },
+          students: {
+            create: uniqueStudentIds.map((studentId) => ({ studentId })),
+          },
         },
-        students: {
-          create: uniqueStudentIds.map((studentId) => ({ studentId })),
+        include: {
+          teacher: { select: userSummarySelect },
+          subjects: true,
+          students: { include: { student: { select: userSummarySelect } } },
         },
-      },
-      include: {
-        teacher: true,
-        subjects: true,
-        students: { include: { student: true } },
-      },
+      });
     });
 
     return NextResponse.json({ success: true, data: newClass });

@@ -13,16 +13,22 @@ export default function CreateExamPage() {
   const [examType, setExamType] = useState('MIDTERM');
   const [questionCount, setQuestionCount] = useState(30);
   const [durationMinutes, setDurationMinutes] = useState(45);
+  const [lessonOrder, setLessonOrder] = useState(1);
   const [password, setPassword] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   const loadClasses = async () => {
     try {
       const res = await fetch('/api/lms/classes');
-      const json = await res.json();
-      if (json.success) setClasses(json.data);
-    } catch (e) { console.error(e); }
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) throw new Error(json?.error || 'Không thể tải danh sách lớp.');
+      setClasses(json.data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Không thể tải danh sách lớp.');
+    }
   };
 
   useEffect(() => { loadClasses(); }, []);
@@ -34,6 +40,8 @@ export default function CreateExamPage() {
   }, [examType]);
 
   const selectedClass = classes.find((c) => c.id === classId);
+  const selectedSubject = selectedClass?.subjects?.find((subject: any) => subject.id === subjectId);
+  const maxLessonOrder = Math.max(selectedSubject?.theoryLessons || 0, selectedSubject?.practicalLessons || 0, 1);
 
   const handleSubmit = async () => {
     setError('');
@@ -43,13 +51,23 @@ export default function CreateExamPage() {
       const res = await fetch('/api/lms/exams/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ classId, subjectId, examType, questionCount, durationMinutes, password: password || null }),
+        body: JSON.stringify({
+          classId,
+          subjectId,
+          examType,
+          questionCount,
+          durationMinutes,
+          lessonOrder: examType === 'LESSON_QUIZ' ? lessonOrder : null,
+          password: password || null,
+          startTime: startTime ? new Date(startTime).toISOString() : null,
+          endTime: endTime ? new Date(endTime).toISOString() : null,
+        }),
       });
-      const json = await res.json();
-      if (json.success) router.push(`/lms/teacher/classes/${classId}`);
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.success) router.push(`/lms/teacher/classes/${classId}`);
       else setError(json.error);
-    } catch (e: any) { setError(e.message); }
-    setSaving(false);
+    } catch (e) { setError(e instanceof Error ? e.message : 'Không thể tạo cấu hình bài thi.'); }
+    finally { setSaving(false); }
   };
 
   return (
@@ -68,7 +86,7 @@ export default function CreateExamPage() {
         {/* Class */}
         <div>
           <label className="text-xs font-bold text-slate-600 block mb-1.5">Lớp học *</label>
-          <select value={classId} onChange={(e) => { setClassId(e.target.value); setSubjectId(''); }}
+            <select value={classId} onChange={(e) => { setClassId(e.target.value); setSubjectId(''); setLessonOrder(1); }}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20">
             <option value="">Chọn lớp...</option>
             {classes.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -79,7 +97,7 @@ export default function CreateExamPage() {
         {classId && (
           <div>
             <label className="text-xs font-bold text-slate-600 block mb-1.5">Môn học *</label>
-            <select value={subjectId} onChange={(e) => setSubjectId(e.target.value)}
+            <select value={subjectId} onChange={(e) => { setSubjectId(e.target.value); setLessonOrder(1); }}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/20">
               <option value="">Chọn môn...</option>
               {selectedClass?.subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -121,10 +139,37 @@ export default function CreateExamPage() {
           </div>
         </div>
 
+        {examType === 'LESSON_QUIZ' && (
+          <div>
+            <label className="text-xs font-bold text-slate-600 block mb-1.5">Buổi học dùng cho quiz</label>
+            <input
+              type="number"
+              min={1}
+              max={maxLessonOrder}
+              value={lessonOrder}
+              onChange={(event) => setLessonOrder(Number(event.target.value))}
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-center text-sm font-bold"
+            />
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <label className="text-xs font-bold text-slate-600 block mb-1.5">Thời gian mở (tùy chọn)</label>
+            <input type="datetime-local" value={startTime} onChange={(event) => setStartTime(event.target.value)}
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm" />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-slate-600 block mb-1.5">Thời gian đóng (tùy chọn)</label>
+            <input type="datetime-local" value={endTime} onChange={(event) => setEndTime(event.target.value)}
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm" />
+          </div>
+        </div>
+
         {/* Password */}
         <div>
           <label className="text-xs font-bold text-slate-600 flex items-center gap-1 mb-1.5"><Lock className="w-3.5 h-3.5" /> Mật khẩu thi (tuỳ chọn)</label>
-          <input type="text" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Để trống nếu không cần mật khẩu"
+          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Để trống nếu không cần mật khẩu"
             className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm" />
           <p className="text-xs text-slate-400 mt-1">Học sinh phải nhập đúng mật khẩu mới được vào thi</p>
         </div>

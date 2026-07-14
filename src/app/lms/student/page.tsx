@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { ClipboardCheck, AlertCircle, ChevronRight } from 'lucide-react';
@@ -12,13 +12,11 @@ export default function StudentDashboard() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadStudentData = async () => {
+  const loadStudentData = useCallback(async () => {
     if (!lmsUserId) return;
     try {
-      // Fetch classes for the student. Since user.id might be the lmsUser id or NKS user id,
-      // let's fetch all classes and filter client-side or use a dedicated endpoint if available.
-      // In this setup, GET /api/lms/classes returns all classes with their students.
-      const classRes = await fetch(`/api/lms/classes?studentId=${encodeURIComponent(lmsUserId)}`);
+      // API derives the student from the verified LMS session.
+      const classRes = await fetch('/api/lms/classes');
       const classJson = await classRes.json();
       
       if (classJson.success) {
@@ -26,10 +24,7 @@ export default function StudentDashboard() {
         setClasses(studentClasses);
 
         if (studentClasses.length > 0) {
-          const classIds = studentClasses.map((c: any) => c.id);
-          
-          // Fetch exams for these classes
-          const examRes = await fetch(`/api/lms/exams/config?classId=${classIds[0]}`);
+          const examRes = await fetch('/api/lms/exams/config');
           const examJson = await examRes.json();
           if (examJson.success) {
             setExams(examJson.data);
@@ -45,11 +40,11 @@ export default function StudentDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [lmsUserId]);
 
   useEffect(() => {
-    loadStudentData();
-  }, [lmsUserId]);
+    void loadStudentData();
+  }, [loadStudentData]);
 
   if (loading) {
     return (

@@ -102,7 +102,7 @@ export interface LmsExamConfigDTO {
   examType: ExamType;
   questionCount: number;
   durationMinutes: number;
-  password?: string;
+  hasPassword: boolean;
   startTime?: string;
   endTime?: string;
   lessonOrder?: number;
@@ -141,6 +141,8 @@ export interface QuizQuestion {
   correctAnswer: number; // index of correct option (0-3)
   explanation?: string;
 }
+
+export type PublicQuizQuestion = Omit<QuizQuestion, 'correctAnswer' | 'explanation'>;
 
 export interface GeneratedQuiz {
   questions: QuizQuestion[];
@@ -227,11 +229,6 @@ export interface CreateExamConfigPayload {
 
 export interface SubmitExamPayload {
   examConfigId: string;
-  studentId: string;
-  answers: ExamAnswer[];
-  score: number;
-  correctCount: number;
-  totalQuestions: number;
-  startedAt: string;
-  finishedAt: string;
+  answers: Array<{ questionIndex: number; selectedOption: number }>;
+  attemptToken: string;
 }

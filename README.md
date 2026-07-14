@@ -2,6 +2,10 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Copy `.env.example` to `.env.local` and configure the required server-side values. For a new LMS database, set `LMS_BOOTSTRAP_ADMIN_USERNAME` to the exact username of the first trusted NKS administrator. The account becomes `ADMIN` only after NKS successfully verifies that login and only while the database has no administrator.
+
+Configure at least one of `GEMINI_API_KEY` or `GROQ_API_KEY` before using SEDUAI grading or exam generation. `LMS_EXAM_SECRET` signs exam attempts and must remain stable between deployments. `CRM_API_TOKEN` is server-only and must also be configured in Vercel; never expose it through a `NEXT_PUBLIC_` variable.
+
 First, run the development server:
 
 ```bash

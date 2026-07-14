@@ -1,29 +1,54 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, Download, FileText, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Download, ChevronRight, AlertCircle, RefreshCw } from 'lucide-react';
+
+interface LessonAttachment {
+  name?: string;
+  url?: string;
+}
+
+function getSafeAttachmentUrl(value: unknown) {
+  if (typeof value !== 'string') return null;
+  const url = value.trim();
+  if (/^\/(?!\/)/.test(url) && !url.includes('\\')) return url;
+
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.toString() : null;
+  } catch {
+    return null;
+  }
+}
 
 export default function StudentLessonDetail({ params }: { params: Promise<{ lessonId: string }> }) {
   const { lessonId } = use(params);
   const [lesson, setLesson] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const loadLesson = async () => {
+  const loadLesson = useCallback(async () => {
+    setLoading(true);
+    setError('');
     try {
       const res = await fetch(`/api/lms/lessons?id=${lessonId}`);
-      const json = await res.json();
-      if (json.success) setLesson(json.data);
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success || !json.data) {
+        throw new Error(json?.error || 'Không thể tải nội dung bài học.');
+      }
+      setLesson(json.data);
     } catch (e) {
-      console.error(e);
+      setLesson(null);
+      setError(e instanceof Error ? e.message : 'Không thể tải nội dung bài học.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [lessonId]);
 
   useEffect(() => {
-    loadLesson();
-  }, [lessonId]);
+    void loadLesson();
+  }, [loadLesson]);
 
   if (loading) {
     return (
@@ -33,21 +58,31 @@ export default function StudentLessonDetail({ params }: { params: Promise<{ less
     );
   }
 
-  if (!lesson) {
+  if (error || !lesson) {
     return (
-      <div className="text-center py-12">
-        <p className="text-slate-500 font-semibold">Không tìm thấy thông tin bài học.</p>
+      <div className="mx-auto max-w-md rounded-2xl border border-rose-200 bg-white p-8 text-center shadow-sm">
+        <AlertCircle className="mx-auto h-10 w-10 text-rose-500" />
+        <p className="mt-3 font-semibold text-slate-800">Không thể mở bài học</p>
+        <p className="mt-1 text-sm text-slate-500">{error || 'Không tìm thấy thông tin bài học.'}</p>
+        <button
+          type="button"
+          onClick={() => void loadLesson()}
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-700"
+        >
+          <RefreshCw className="h-4 w-4" /> Thử lại
+        </button>
       </div>
     );
   }
 
   // Parse attachments if JSON string
-  let parsedAttachments = [];
+  let parsedAttachments: LessonAttachment[] = [];
   if (lesson.attachments) {
     try {
-      parsedAttachments = JSON.parse(lesson.attachments);
-    } catch (e) {
-      console.error(e);
+      const parsed = JSON.parse(lesson.attachments);
+      parsedAttachments = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      parsedAttachments = [];
     }
   }
 
@@ -75,7 +110,7 @@ export default function StudentLessonDetail({ params }: { params: Promise<{ less
             <h2 className="text-base font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100">Nội dung bài học</h2>
             <div className="prose max-w-none text-slate-700 leading-relaxed text-sm">
               {lesson.content ? (
-                <div dangerouslySetInnerHTML={{ __html: lesson.content.replace(/\n/g, '<br />') }} />
+                <div className="whitespace-pre-wrap break-words">{lesson.content}</div>
               ) : (
                 <p className="text-slate-400 italic">Bài học này chưa có nội dung chi tiết.</p>
               )}
@@ -92,18 +127,27 @@ export default function StudentLessonDetail({ params }: { params: Promise<{ less
               <p className="text-xs text-slate-400 italic">Không có tài liệu đính kèm.</p>
             ) : (
               <div className="space-y-2">
-                {parsedAttachments.map((file: any, i: number) => (
-                  <a
-                    key={i}
-                    href={file.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between p-3 border border-slate-100 rounded-xl hover:bg-slate-50 transition text-xs font-bold text-slate-700"
-                  >
-                    <span className="truncate max-w-[150px]">{file.name}</span>
-                    <Download className="w-4 h-4 text-primary" />
-                  </a>
-                ))}
+                {parsedAttachments.map((file, i) => {
+                  const safeUrl = getSafeAttachmentUrl(file.url);
+                  const fileName = file.name?.trim() || `Tài liệu ${i + 1}`;
+
+                  return safeUrl ? (
+                    <a
+                      key={`${fileName}-${i}`}
+                      href={safeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-3 border border-slate-100 rounded-xl hover:bg-slate-50 transition text-xs font-bold text-slate-700"
+                    >
+                      <span className="truncate max-w-[150px]">{fileName}</span>
+                      <Download className="w-4 h-4 text-primary" />
+                    </a>
+                  ) : (
+                    <div key={`${fileName}-${i}`} className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                      {fileName}: liên kết tài liệu không hợp lệ.
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

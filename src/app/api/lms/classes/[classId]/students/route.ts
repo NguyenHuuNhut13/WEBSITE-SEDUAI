@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { lmsErrorResponse, requireLmsUser } from '@/lib/lms-auth';
+import { LmsRequestError, lmsErrorResponse, requireLmsUser, withClassLock } from '@/lib/lms-auth';
+import { requiredText, stringIdList } from '@/lib/lms-input';
 
 type RouteContext = { params: Promise<{ classId: string }> };
 
@@ -12,54 +13,52 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const body = await request.json();
     const { studentId, studentIds } = body;
 
-    // Kiểm tra lớp tồn tại
-    const classData = await prisma.lmsClass.findUnique({
-      where: { id: classId },
-      include: { _count: { select: { students: true } } },
-    });
-
-    if (!classData) {
-      return NextResponse.json({ success: false, error: 'Lớp không tồn tại' }, { status: 404 });
-    }
-
-    // Xử lý thêm 1 hoặc nhiều HS
     const requestedIds = Array.isArray(studentIds) ? studentIds : (studentId ? [studentId] : []);
-    const idsToAdd = [...new Set(requestedIds.filter((id): id is string => typeof id === 'string' && id.trim() !== ''))];
-
-    if (idsToAdd.length === 0) {
+    if (requestedIds.length === 0) {
       return NextResponse.json({ success: false, error: 'Cần cung cấp studentId hoặc studentIds' }, { status: 400 });
     }
+    const ids = stringIdList(requestedIds, 'Danh sách học sinh', 25);
 
-    // Kiểm tra sĩ số tối đa
-    if (classData._count.students + idsToAdd.length > classData.maxStudents) {
-      return NextResponse.json({
-        success: false,
-        error: `Lớp đã có ${classData._count.students}/${classData.maxStudents} học sinh. Không thể thêm ${idsToAdd.length} HS nữa.`,
-      }, { status: 400 });
-    }
+    const added = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('lms-user-role-management'))`;
+      // Serialize roster changes for this class so concurrent requests cannot
+      // both pass the capacity check and exceed maxStudents.
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${classId}))`;
+      const classData = await tx.lmsClass.findUnique({
+        where: { id: classId },
+        include: { _count: { select: { students: true } } },
+      });
+      if (!classData) throw new LmsRequestError('Lớp không tồn tại', 404);
+      if (classData.status !== 'ACTIVE') throw new LmsRequestError('Không thể thêm học sinh vào lớp đã lưu trữ', 409);
 
-    const validStudents = await prisma.lmsUser.count({ where: { id: { in: idsToAdd }, role: 'STUDENT' } });
-    if (validStudents !== idsToAdd.length) {
-      return NextResponse.json({ success: false, error: 'Danh sách có tài khoản không phải học sinh' }, { status: 400 });
-    }
+      const existing = await tx.lmsClassStudent.findMany({
+        where: { classId, studentId: { in: ids } },
+        select: { studentId: true },
+      });
+      const existingIds = new Set(existing.map((item) => item.studentId));
+      const idsToAdd = ids.filter((id) => !existingIds.has(id));
+      if (classData._count.students + idsToAdd.length > classData.maxStudents) {
+        throw new LmsRequestError(`Lớp đã có ${classData._count.students}/${classData.maxStudents} học sinh`, 409);
+      }
 
-    // Thêm từng HS (skip nếu đã tồn tại)
-    const results = await Promise.allSettled(
-      idsToAdd.map((sid) =>
-        prisma.lmsClassStudent.create({
-          data: { classId, studentId: sid },
-          include: { student: true },
-        })
-      )
-    );
+      const validStudents = await tx.lmsUser.count({ where: { id: { in: idsToAdd }, role: 'STUDENT' } });
+      if (validStudents !== idsToAdd.length) throw new LmsRequestError('Danh sách có tài khoản không phải học sinh');
+      if (idsToAdd.length === 0) return [];
 
-    const added = results.filter((r) => r.status === 'fulfilled').map((r: any) => r.value);
-    const errors = results.filter((r) => r.status === 'rejected').length;
+      await tx.lmsClassStudent.createMany({
+        data: idsToAdd.map((id) => ({ classId, studentId: id })),
+        skipDuplicates: true,
+      });
+      return tx.lmsClassStudent.findMany({
+        where: { classId, studentId: { in: idsToAdd } },
+        include: { student: { select: { id: true, username: true, name: true, avatar: true, role: true } } },
+      });
+    });
 
     return NextResponse.json({
       success: true,
       data: added,
-      message: `Đã thêm ${added.length} học sinh${errors > 0 ? `, ${errors} lỗi (có thể đã tồn tại)` : ''}`,
+      message: added.length > 0 ? `Đã thêm ${added.length} học sinh` : 'Các học sinh đã có trong lớp',
     });
   } catch (error: any) {
     console.error('LMS Students POST error:', error);
@@ -73,14 +72,14 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     await requireLmsUser(request, ['ADMIN']);
     const { classId } = await context.params;
     const body = await request.json();
-    const { studentId } = body;
-
-    if (!studentId) {
-      return NextResponse.json({ success: false, error: 'studentId là bắt buộc' }, { status: 400 });
-    }
-
-    await prisma.lmsClassStudent.deleteMany({
-      where: { classId, studentId },
+    const studentId = requiredText(body.studentId, 'Học sinh', 100);
+    await withClassLock(classId, async (tx) => {
+      const classData = await tx.lmsClass.findUnique({ where: { id: classId }, select: { status: true } });
+      if (!classData) throw new LmsRequestError('Lớp không tồn tại', 404);
+      if (classData.status !== 'ACTIVE') throw new LmsRequestError('Không thể thay đổi sĩ số lớp đã lưu trữ', 409);
+      await tx.lmsClassStudent.deleteMany({
+        where: { classId, studentId },
+      });
     });
 
     return NextResponse.json({ success: true, message: 'Đã xoá học sinh khỏi lớp' });

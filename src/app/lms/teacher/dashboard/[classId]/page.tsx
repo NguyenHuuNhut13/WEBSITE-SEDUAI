@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useCallback, useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, RefreshCw, Trophy, BarChart3, Users, Target } from 'lucide-react';
 
@@ -10,27 +10,27 @@ export default function TeacherRealtimeDashboard({ params }: { params: Promise<{
   const [loading, setLoading] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       const res = await fetch(`/api/lms/dashboard/${classId}`);
       const json = await res.json();
       if (json.success) setStats(json.data);
     } catch (e) { console.error(e); }
     setLoading(false);
-  };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      loadStats();
-    }, 0);
-    return () => clearTimeout(timer);
   }, [classId]);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      void loadStats();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadStats]);
+
+  useEffect(() => {
     if (!autoRefresh) return;
-    const interval = setInterval(loadStats, 10000);
+    const interval = setInterval(() => void loadStats(), 10000);
     return () => clearInterval(interval);
-  }, [autoRefresh, classId]);
+  }, [autoRefresh, loadStats]);
 
   if (loading) return <div className="flex items-center justify-center min-h-[50vh]"><div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
   if (!stats) return <div className="text-center py-12 text-slate-500">Không có dữ liệu</div>;

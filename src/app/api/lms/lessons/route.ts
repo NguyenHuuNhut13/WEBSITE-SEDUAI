@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { LessonType } from '@prisma/client';
 import prisma from '@/lib/prisma';
-import { canAccessClass, lmsErrorResponse, requireLmsUser } from '@/lib/lms-auth';
+import { canAccessClass, lmsErrorResponse, requireLmsUser, withActiveClassMutation } from '@/lib/lms-auth';
+import { enumValue, normalizeAttachments, optionalLongText, positiveInteger, requiredText } from '@/lib/lms-input';
+
+const LESSON_TYPES = ['THEORY', 'PRACTICAL'] as const satisfies readonly LessonType[];
 
 // GET /api/lms/lessons?subjectId=xxx
 export async function GET(request: NextRequest) {
@@ -52,29 +56,30 @@ export async function POST(request: NextRequest) {
   try {
     const actor = await requireLmsUser(request, ['ADMIN', 'TEACHER']);
     const body = await request.json();
-    const { subjectId, type, orderIndex, title, content, attachments } = body;
-
-    if (!subjectId || !type || !orderIndex || !title) {
-      return NextResponse.json({ success: false, error: 'Thiếu thông tin bài học' }, { status: 400 });
-    }
+    const subjectId = requiredText(body.subjectId, 'Môn học', 100);
+    const type = enumValue(body.type, 'Loại bài học', LESSON_TYPES);
+    const orderIndex = positiveInteger(body.orderIndex, 'Thứ tự buổi học', 1, 100);
+    const title = requiredText(body.title, 'Tiêu đề bài học', 200);
+    const content = optionalLongText(body.content, 'Nội dung bài học', 100_000) || '';
+    const attachments = normalizeAttachments(body.attachments);
     const subject = await prisma.lmsSubject.findUnique({ where: { id: subjectId }, select: { classId: true, theoryLessons: true, practicalLessons: true } });
-    if (!subject || !(await canAccessClass(actor, subject.classId))) return NextResponse.json({ success: false, error: 'Bạn không quản lý môn học này' }, { status: 403 });
+    if (!subject) return NextResponse.json({ success: false, error: 'Môn học không tồn tại' }, { status: 404 });
     const maxOrder = type === 'THEORY' ? subject.theoryLessons : subject.practicalLessons;
-    if (!['THEORY', 'PRACTICAL'].includes(type) || !Number.isInteger(orderIndex) || orderIndex < 1 || orderIndex > maxOrder) {
+    if (orderIndex > maxOrder) {
       return NextResponse.json({ success: false, error: 'Loại hoặc thứ tự buổi học không hợp lệ' }, { status: 400 });
     }
 
-    const lesson = await prisma.lmsLesson.create({
+    const lesson = await withActiveClassMutation(actor, subject.classId, (tx) => tx.lmsLesson.create({
       data: {
         subjectId,
         type,
         orderIndex,
         title,
-        content: content || '',
-        attachments: attachments ? JSON.stringify(attachments) : null,
+        content,
+        attachments: attachments?.length ? JSON.stringify(attachments) : null,
       },
       include: { assignments: true },
-    });
+    }));
 
     return NextResponse.json({ success: true, data: lesson });
   } catch (error: any) {
@@ -88,22 +93,20 @@ export async function PUT(request: NextRequest) {
   try {
     const actor = await requireLmsUser(request, ['ADMIN', 'TEACHER']);
     const body = await request.json();
-    const { id, title, content, attachments } = body;
-
-    if (!id) {
-      return NextResponse.json({ success: false, error: 'id bài học là bắt buộc' }, { status: 400 });
-    }
+    const id = requiredText(body.id, 'Bài học', 100);
+    const title = body.title === undefined ? undefined : requiredText(body.title, 'Tiêu đề bài học', 200);
+    const content = body.content === undefined ? undefined : optionalLongText(body.content, 'Nội dung bài học', 100_000) || '';
+    const attachments = body.attachments === undefined ? undefined : normalizeAttachments(body.attachments);
     const lesson = await prisma.lmsLesson.findUnique({ where: { id }, include: { subject: { select: { classId: true } } } });
-    if (!lesson || !(await canAccessClass(actor, lesson.subject.classId))) return NextResponse.json({ success: false, error: 'Bạn không quản lý bài học này' }, { status: 403 });
-
-    const updated = await prisma.lmsLesson.update({
+    if (!lesson) return NextResponse.json({ success: false, error: 'Bài học không tồn tại' }, { status: 404 });
+    const updated = await withActiveClassMutation(actor, lesson.subject.classId, (tx) => tx.lmsLesson.update({
       where: { id },
       data: {
-        ...(title && { title }),
+        ...(title !== undefined && { title }),
         ...(content !== undefined && { content }),
-        ...(attachments !== undefined && { attachments: JSON.stringify(attachments) }),
+        ...(attachments !== undefined && { attachments: attachments.length ? JSON.stringify(attachments) : null }),
       },
-    });
+    }));
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error: any) {

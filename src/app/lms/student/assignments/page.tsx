@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { FileText, AlertCircle, ChevronRight, Star } from 'lucide-react';
@@ -10,7 +10,7 @@ export default function StudentAssignmentsPage() {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadSubmissions = async () => {
+  const loadSubmissions = useCallback(async () => {
     if (!lmsUserId) return;
     try {
       const response = await fetch(`/api/lms/assignments?studentId=${encodeURIComponent(lmsUserId)}`);
@@ -21,11 +21,11 @@ export default function StudentAssignmentsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [lmsUserId]);
 
   useEffect(() => {
-    loadSubmissions();
-  }, [lmsUserId]);
+    void loadSubmissions();
+  }, [loadSubmissions]);
 
   if (loading) {
     return (

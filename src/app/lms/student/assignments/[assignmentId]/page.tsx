@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useCallback, useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { ArrowLeft, Send, Sparkles, Loader2, Star, FileText } from 'lucide-react';
@@ -16,7 +16,7 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const loadAssignmentAndSubmission = async () => {
+  const loadAssignmentAndSubmission = useCallback(async () => {
     if (!lmsUserId) return;
     try {
       const assRes = await fetch(`/api/lms/assignments?id=${assignmentId}`);
@@ -35,11 +35,11 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
     } finally {
       setLoading(false);
     }
-  };
+  }, [assignmentId, lmsUserId]);
 
   useEffect(() => {
-    loadAssignmentAndSubmission();
-  }, [assignmentId, lmsUserId]);
+    void loadAssignmentAndSubmission();
+  }, [loadAssignmentAndSubmission]);
 
   const handleSub = async () => {
     setError('');
@@ -58,7 +58,6 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           assignmentId,
-          studentId: lmsUserId,
           content,
         }),
       });

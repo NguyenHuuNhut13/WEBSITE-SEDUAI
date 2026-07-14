@@ -1,45 +1,32 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
-import { ClipboardCheck, Star, AlertCircle, ChevronRight } from 'lucide-react';
+import { ClipboardCheck, AlertCircle } from 'lucide-react';
 
 export default function StudentExamsIndex() {
-  const { user } = useAuth();
   const [exams, setExams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const loadExams = async () => {
-    if (!user) return;
+  const loadExams = useCallback(async () => {
+    setLoading(true);
+    setError('');
     try {
-      const classRes = await fetch('/api/lms/classes');
-      const classJson = await classRes.json();
-      if (classJson.success) {
-        // Enrolled classes
-        const studentClasses = classJson.data.filter((c: any) =>
-          c.students?.some((s: any) => s.student.username === user.username)
-        );
-        if (studentClasses.length > 0) {
-          const classIds = studentClasses.map((c: any) => c.id);
-          // Let's fetch exam configs for the first enrolled class
-          const examRes = await fetch(`/api/lms/exams/config?classId=${classIds[0]}`);
-          const examJson = await examRes.json();
-          if (examJson.success) {
-            setExams(examJson.data);
-          }
-        }
-      }
+      const examRes = await fetch('/api/lms/exams/config');
+      const examJson = await examRes.json();
+      if (!examRes.ok || !examJson.success) throw new Error(examJson.error || 'Không thể tải lịch thi.');
+      setExams(examJson.data);
     } catch (e) {
-      console.error(e);
+      setError(e instanceof Error ? e.message : 'Không thể tải lịch thi.');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadExams();
-  }, [user]);
+    void loadExams();
+  }, [loadExams]);
 
   if (loading) {
     return (
@@ -55,6 +42,8 @@ export default function StudentExamsIndex() {
         <h1 className="text-2xl font-black text-slate-900">Bài thi & Lịch kiểm tra</h1>
         <p className="text-sm text-slate-500 mt-1">Quản lý lịch thi trắc nghiệm và xem lại kết quả thi</p>
       </div>
+
+      {error && <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">{error}</div>}
 
       {exams.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center">

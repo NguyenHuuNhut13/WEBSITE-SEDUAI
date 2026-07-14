@@ -722,9 +722,8 @@ export default function ProfilePage() {
 
               <div className="pt-3 border-t border-slate-100 mt-2">
                 <button
-                  onClick={() => {
-                    logout();
-                    router.push('/login');
+                  onClick={async () => {
+                    if (await logout()) router.push('/login');
                   }}
                   className="w-full px-4 py-3 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-3 transition cursor-pointer"
                 >

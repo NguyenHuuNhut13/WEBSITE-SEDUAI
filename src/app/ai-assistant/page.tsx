@@ -334,9 +334,8 @@ export default function AiAssistantPage() {
           <div className="flex flex-col gap-3">
             <button
               type="button"
-              onClick={() => {
-                logout();
-                router.push('/login?redirect=/ai-assistant');
+              onClick={async () => {
+                if (await logout()) router.push('/login?redirect=/ai-assistant');
               }}
               className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs rounded-xl shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
             >

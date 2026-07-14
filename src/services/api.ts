@@ -1,7 +1,6 @@
 // Client service cho toàn bộ API NKS SCRMAI và User Management NKS
 
 export const CRM_API_BASE = 'https://sdata.io.vn/wp-json/scrmai/v1';
-export const CRM_TOKEN = '01KWKATNQGB5TWXYDPJ671X3X1';
 
 export const ACCOUNT_API_BASE = 'https://account.nks.vn/api/nks/user';
 export const ONLINE_API_BASE = 'https://online.nks.vn/api/nks';
@@ -90,6 +89,13 @@ export interface LoginResponse {
   error?: string;
 }
 
+export class AccountSessionUnavailableError extends Error {
+  constructor() {
+    super('Dịch vụ xác thực NKS đang tạm thời gián đoạn. Phiên đăng nhập trên thiết bị vẫn được giữ.');
+    this.name = 'AccountSessionUnavailableError';
+  }
+}
+
 // ==========================================
 // ==========================================
 // 1. CRM & COURSES API
@@ -101,6 +107,8 @@ export interface LoginResponse {
 export async function getEduCourses(): Promise<ApiCourse[]> {
   try {
     const isClient = typeof window !== 'undefined';
+    const crmToken = process.env.CRM_API_TOKEN;
+    if (!isClient && !crmToken) return [];
     const url = isClient ? '/api/proxy/crm' : `${CRM_API_BASE}/educourses`;
     const options: RequestInit = isClient
       ? {
@@ -111,7 +119,7 @@ export async function getEduCourses(): Promise<ApiCourse[]> {
       : {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${CRM_TOKEN}`,
+            'Authorization': `Bearer ${crmToken}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
@@ -149,6 +157,10 @@ export async function createLead(payload: LeadPayload): Promise<{ success: boole
     };
 
     const isClient = typeof window !== 'undefined';
+    const crmToken = process.env.CRM_API_TOKEN;
+    if (!isClient && !crmToken) {
+      return { success: false, message: 'CRM_API_TOKEN chưa được cấu hình' };
+    }
     const url = isClient ? '/api/proxy/crm' : `${CRM_API_BASE}/lead/create`;
     const options: RequestInit = isClient
       ? {
@@ -159,7 +171,7 @@ export async function createLead(payload: LeadPayload): Promise<{ success: boole
       : {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${CRM_TOKEN}`,
+            'Authorization': `Bearer ${crmToken}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
@@ -200,6 +212,13 @@ export async function loginUser(username: string, password: string): Promise<Log
     });
 
     const json = await response.json();
+    if (!response.ok || json?.success === false || json?.error) {
+      return {
+        ...json,
+        success: false,
+        error: json?.error || json?.message || 'Tài khoản hoặc mật khẩu không chính xác',
+      };
+    }
     return json;
   } catch (error) {
     console.error('Lỗi khi đăng nhập API:', error);
@@ -225,14 +244,23 @@ export async function fetchUserInfo(access_token: string): Promise<UserInfo | nu
       body: JSON.stringify(bodyPayload),
     });
 
+    if (response.status === 401 || response.status === 403) return null;
+    if (!response.ok) throw new AccountSessionUnavailableError();
+
     const json = await response.json();
-    if (json && (json.userInfo || json.data)) {
-      return json.userInfo || json.data;
-    }
-    return null;
+    const data = json?.data && typeof json.data === 'object' ? json.data : null;
+    const account = json?.userInfo
+      || json?.user
+      || data?.userInfo
+      || data?.user
+      || data;
+
+    return account && typeof account === 'object' && typeof account.username === 'string'
+      ? account as UserInfo
+      : null;
   } catch (error) {
-    // Không log error 500 thành unhandled exception gây ồn ào console
-    return null;
+    if (error instanceof AccountSessionUnavailableError) throw error;
+    throw new AccountSessionUnavailableError();
   }
 }
 

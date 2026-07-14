@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Plus, Trash2, UserPlus, BookOpen, Save, Loader2 } from 'lucide-react';
+import { ArrowLeft, Plus, UserPlus, BookOpen, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface Teacher { id: string; name: string; username: string; }
@@ -20,7 +20,9 @@ export default function CreateClassPage() {
   const [error, setError] = useState('');
 
   // New user quick-add
+  const [newTeacherUsername, setNewTeacherUsername] = useState('');
   const [newTeacherName, setNewTeacherName] = useState('');
+  const [newStudentUsername, setNewStudentUsername] = useState('');
   const [newStudentName, setNewStudentName] = useState('');
   const [addingTeacher, setAddingTeacher] = useState(false);
   const [addingStudent, setAddingStudent] = useState(false);
@@ -45,15 +47,19 @@ export default function CreateClassPage() {
   }, []);
 
   const quickAddTeacher = async () => {
-    if (!newTeacherName.trim()) return;
+    if (!newTeacherUsername.trim() || !newTeacherName.trim()) {
+      setError('Nhập đúng username NKS và họ tên giáo viên.');
+      return;
+    }
+    setError('');
     setAddingTeacher(true);
     try {
       const res = await fetch('/api/lms/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: newTeacherName.toLowerCase().replace(/\s+/g, '_'),
-          name: newTeacherName,
+          username: newTeacherUsername.trim(),
+          name: newTeacherName.trim(),
           role: 'TEACHER',
         }),
       });
@@ -61,22 +67,27 @@ export default function CreateClassPage() {
       if (json.success) {
         setTeachers((prev) => [...prev, json.data]);
         setTeacherId(json.data.id);
+        setNewTeacherUsername('');
         setNewTeacherName('');
-      }
-    } catch (e) { console.error(e); }
+      } else setError(json.error || 'Không thể cấp vai trò giáo viên.');
+    } catch (e) { setError(e instanceof Error ? e.message : 'Không thể cấp vai trò giáo viên.'); }
     setAddingTeacher(false);
   };
 
   const quickAddStudent = async () => {
-    if (!newStudentName.trim()) return;
+    if (!newStudentUsername.trim() || !newStudentName.trim()) {
+      setError('Nhập đúng username NKS và họ tên học sinh.');
+      return;
+    }
+    setError('');
     setAddingStudent(true);
     try {
       const res = await fetch('/api/lms/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: newStudentName.toLowerCase().replace(/\s+/g, '_'),
-          name: newStudentName,
+          username: newStudentUsername.trim(),
+          name: newStudentName.trim(),
           role: 'STUDENT',
         }),
       });
@@ -84,9 +95,10 @@ export default function CreateClassPage() {
       if (json.success) {
         setStudents((prev) => [...prev, json.data]);
         setSelectedStudents((prev) => [...prev, json.data.id]);
+        setNewStudentUsername('');
         setNewStudentName('');
-      }
-    } catch (e) { console.error(e); }
+      } else setError(json.error || 'Không thể cấp tài khoản học sinh.');
+    } catch (e) { setError(e instanceof Error ? e.message : 'Không thể cấp tài khoản học sinh.'); }
     setAddingStudent(false);
   };
 
@@ -154,9 +166,12 @@ export default function CreateClassPage() {
             <option value="">Chọn giáo viên...</option>
             {teachers.map((t) => <option key={t.id} value={t.id}>{t.name} (@{t.username})</option>)}
           </select>
-          <div className="flex items-center gap-2 mt-2">
-            <input type="text" value={newTeacherName} onChange={(e) => setNewTeacherName(e.target.value)} placeholder="Thêm GV mới..."
-              className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-xs" />
+          <p className="mt-2 text-xs text-slate-400">Chỉ cấp vai trò bằng username chính xác của tài khoản NKS; không tự tạo username từ họ tên.</p>
+          <div className="grid grid-cols-1 gap-2 mt-2 sm:grid-cols-[1fr_1fr_auto]">
+            <input type="text" value={newTeacherUsername} onChange={(e) => setNewTeacherUsername(e.target.value)} placeholder="Username NKS"
+              className="min-w-0 px-3 py-2 rounded-lg border border-slate-200 text-xs" />
+            <input type="text" value={newTeacherName} onChange={(e) => setNewTeacherName(e.target.value)} placeholder="Họ tên giáo viên"
+              className="min-w-0 px-3 py-2 rounded-lg border border-slate-200 text-xs" />
             <button onClick={quickAddTeacher} disabled={addingTeacher} className="px-3 py-2 bg-blue-50 text-primary rounded-lg text-xs font-bold hover:bg-blue-100 transition disabled:opacity-50 cursor-pointer">
               {addingTeacher ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Plus className="w-3 h-3 inline" /> Thêm</>}
             </button>
@@ -181,9 +196,12 @@ export default function CreateClassPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-slate-900">Học sinh ({selectedStudents.length}/25)</h2>
         </div>
-        <div className="flex items-center gap-2">
-          <input type="text" value={newStudentName} onChange={(e) => setNewStudentName(e.target.value)} placeholder="Thêm học sinh mới..."
-            className="flex-1 px-3 py-2 rounded-lg border border-slate-200 text-xs" />
+        <p className="text-xs text-slate-400">Học sinh cần có tài khoản NKS; nhập đúng username để liên kết khi đăng nhập.</p>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_1fr_auto]">
+          <input type="text" value={newStudentUsername} onChange={(e) => setNewStudentUsername(e.target.value)} placeholder="Username NKS"
+            className="min-w-0 px-3 py-2 rounded-lg border border-slate-200 text-xs" />
+          <input type="text" value={newStudentName} onChange={(e) => setNewStudentName(e.target.value)} placeholder="Họ tên học sinh"
+            className="min-w-0 px-3 py-2 rounded-lg border border-slate-200 text-xs" />
           <button onClick={quickAddStudent} disabled={addingStudent} className="px-3 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold hover:bg-emerald-100 transition disabled:opacity-50 cursor-pointer">
             {addingStudent ? <Loader2 className="w-3 h-3 animate-spin" /> : <><UserPlus className="w-3 h-3 inline" /> Thêm</>}
           </button>

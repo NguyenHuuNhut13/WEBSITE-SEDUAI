@@ -21,8 +21,12 @@ export default function AdminClassDetailPage({ params }: { params: Promise<{ cla
         fetch('/api/lms/users?role=STUDENT'),
       ]);
       const [classResult, studentResult] = await Promise.all([classResponse.json(), studentResponse.json()]);
-      if (classResult.success) setClassData(classResult.data);
-      if (studentResult.success) setStudents(studentResult.data);
+      if (!classResponse.ok || !classResult.success) throw new Error(classResult.error || 'Không thể tải lớp học.');
+      if (!studentResponse.ok || !studentResult.success) throw new Error(studentResult.error || 'Không thể tải danh sách học sinh.');
+      setClassData(classResult.data);
+      setStudents(studentResult.data);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Không thể tải dữ liệu lớp học.');
     } finally {
       setLoading(false);
     }
@@ -41,32 +45,42 @@ export default function AdminClassDetailPage({ params }: { params: Promise<{ cla
     if (!selectedStudentId) return;
     setSaving(true);
     setMessage('');
-    const response = await fetch(`/api/lms/classes/${classId}/students`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentId: selectedStudentId }),
-    });
-    const result = await response.json();
-    setMessage(result.success ? 'Đã thêm học sinh vào lớp.' : result.error);
-    if (result.success) {
+    try {
+      const response = await fetch(`/api/lms/classes/${classId}/students`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId: selectedStudentId }),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.success) throw new Error(result?.error || 'Không thể thêm học sinh.');
+      setMessage('Đã thêm học sinh vào lớp.');
       setSelectedStudentId('');
       await loadData();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Không thể thêm học sinh.');
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const removeStudent = async (studentId: string) => {
     setSaving(true);
     setMessage('');
-    const response = await fetch(`/api/lms/classes/${classId}/students`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentId }),
-    });
-    const result = await response.json();
-    setMessage(result.success ? 'Đã xóa học sinh khỏi lớp.' : result.error);
-    if (result.success) await loadData();
-    setSaving(false);
+    try {
+      const response = await fetch(`/api/lms/classes/${classId}/students`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId }),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.success) throw new Error(result?.error || 'Không thể xóa học sinh.');
+      setMessage('Đã xóa học sinh khỏi lớp.');
+      await loadData();
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Không thể xóa học sinh.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 className="h-9 w-9 animate-spin text-primary" /></div>;

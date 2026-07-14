@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { BookOpen, ChevronRight, AlertCircle } from 'lucide-react';
@@ -10,7 +10,7 @@ export default function StudentSubjectsList() {
   const [subjects, setSubjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadSubjects = async () => {
+  const loadSubjects = useCallback(async () => {
     if (!lmsUserId) return;
     try {
       const classRes = await fetch(`/api/lms/classes?studentId=${encodeURIComponent(lmsUserId)}`);
@@ -26,11 +26,11 @@ export default function StudentSubjectsList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [lmsUserId]);
 
   useEffect(() => {
-    loadSubjects();
-  }, [lmsUserId]);
+    void loadSubjects();
+  }, [loadSubjects]);
 
   if (loading) {
     return (

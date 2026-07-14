@@ -7,10 +7,8 @@ import { useAuth } from '@/context/AuthContext';
 import {
   LayoutDashboard,
   Users,
-  BookOpen,
   FileText,
   ClipboardCheck,
-  BarChart3,
   GraduationCap,
   ChevronLeft,
   ChevronRight,
@@ -34,10 +32,8 @@ const navItems: NavItem[] = [
 
   // Teacher
   { label: 'Dashboard GV', href: '/lms/teacher', icon: <LayoutDashboard className="w-5 h-5" />, roles: ['TEACHER'] },
-  { label: 'Quản lý môn học', href: '/lms/teacher/subjects', icon: <BookOpen className="w-5 h-5" />, roles: ['TEACHER'] },
   { label: 'Chấm bài', href: '/lms/teacher/grading', icon: <ClipboardCheck className="w-5 h-5" />, roles: ['TEACHER'] },
   { label: 'Tạo đề thi', href: '/lms/teacher/exams/create', icon: <PenTool className="w-5 h-5" />, roles: ['TEACHER'] },
-  { label: 'Thống kê', href: '/lms/teacher/dashboard', icon: <BarChart3 className="w-5 h-5" />, roles: ['TEACHER'] },
 
   // Student
   { label: 'Lớp học', href: '/lms/student', icon: <GraduationCap className="w-5 h-5" />, roles: ['STUDENT'] },

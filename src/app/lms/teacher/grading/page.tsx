@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { Sparkles, Loader2, CheckCircle, Eye, Star } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -9,45 +9,53 @@ export default function TeacherGradingPage() {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [gradingId, setGradingId] = useState<string | null>(null);
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [selectedSub, setSelectedSub] = useState<any>(null);
+  const [error, setError] = useState('');
 
-  const loadSubmissions = async () => {
+  const loadSubmissions = useCallback(async () => {
     try {
       const res = await fetch(`/api/lms/submissions?teacherId=${encodeURIComponent(lmsUserId || '')}`);
       const json = await res.json();
-      if (json.success) setSubmissions(json.data);
-    } catch (e) { console.error(e); }
-    setLoading(false);
-  };
+      if (!res.ok || !json.success) throw new Error(json.error || 'Không thể tải danh sách bài nộp.');
+      setSubmissions(json.data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Không thể tải danh sách bài nộp.');
+    } finally {
+      setLoading(false);
+    }
+  }, [lmsUserId]);
 
-  useEffect(() => { if (lmsUserId) loadSubmissions(); }, [lmsUserId]);
+  useEffect(() => { if (lmsUserId) void loadSubmissions(); }, [lmsUserId, loadSubmissions]);
 
   const aiGrade = async (id: string) => {
     setGradingId(id);
+    setError('');
     try {
       const res = await fetch(`/api/lms/submissions/${id}/ai-grade`, { method: 'POST' });
       const json = await res.json();
-      if (json.success) {
-        setSubmissions((prev) => prev.map((s) => s.id === id ? json.data : s));
-        setSelectedSub(json.data);
-      }
-    } catch (e) { console.error(e); }
+      if (!res.ok || !json.success) throw new Error(json.error || 'SEDUAI chưa thể chấm bài.');
+      setSubmissions((prev) => prev.map((s) => s.id === id ? json.data : s));
+      setSelectedSub(json.data);
+    } catch (e) { setError(e instanceof Error ? e.message : 'SEDUAI chưa thể chấm bài.'); }
     setGradingId(null);
   };
 
-  const reviewSubmission = async (id: string, grade: number, teacherReview: string) => {
+  const reviewSubmission = async (id: string, grade: number, teacherReview: string, expectedUpdatedAt: string) => {
+    setError('');
+    setReviewingId(id);
     try {
       const res = await fetch('/api/lms/submissions', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, grade, teacherReview, status: 'REVIEWED' }),
+        body: JSON.stringify({ id, grade, teacherReview, expectedUpdatedAt, status: 'REVIEWED' }),
       });
       const json = await res.json();
-      if (json.success) {
-        setSubmissions((prev) => prev.map((s) => s.id === id ? json.data : s));
-        setSelectedSub(null);
-      }
-    } catch (e) { console.error(e); }
+      if (!res.ok || !json.success) throw new Error(json.error || 'Không thể xác nhận điểm.');
+      setSubmissions((prev) => prev.map((s) => s.id === id ? json.data : s));
+      setSelectedSub(null);
+    } catch (e) { setError(e instanceof Error ? e.message : 'Không thể xác nhận điểm.'); }
+    finally { setReviewingId(null); }
   };
 
   if (loading) return <div className="flex items-center justify-center min-h-[50vh]"><div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
@@ -69,6 +77,12 @@ export default function TeacherGradingPage() {
         <h1 className="text-2xl font-black text-slate-900">Chấm bài với AI</h1>
         <p className="text-sm text-slate-500 mt-1">Sử dụng SEDUAI để chấm bài tự động, sau đó review và chỉnh điểm</p>
       </div>
+
+      {error && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Submissions List */}
@@ -133,8 +147,16 @@ export default function TeacherGradingPage() {
               )}
 
               {/* Teacher Review Form */}
-              {(selectedSub.status === 'AI_GRADED' || selectedSub.status === 'PENDING') && selectedSub.aiReview && (
-                <TeacherReviewForm sub={selectedSub} onReview={reviewSubmission} />
+              {(
+                selectedSub.status === 'AI_GRADED'
+                || (selectedSub.status === 'PENDING' && !selectedSub.content && selectedSub.files)
+              ) && (
+                <TeacherReviewForm
+                  key={selectedSub.id}
+                  sub={selectedSub}
+                  reviewing={reviewingId === selectedSub.id}
+                  onReview={reviewSubmission}
+                />
               )}
 
               {selectedSub.status === 'REVIEWED' && selectedSub.teacherReview && (
@@ -159,8 +181,16 @@ export default function TeacherGradingPage() {
   );
 }
 
-function TeacherReviewForm({ sub, onReview }: { sub: any; onReview: (id: string, grade: number, review: string) => void }) {
-  const [grade, setGrade] = useState(sub.grade || 0);
+function TeacherReviewForm({
+  sub,
+  reviewing,
+  onReview,
+}: {
+  sub: any;
+  reviewing: boolean;
+  onReview: (id: string, grade: number, review: string, expectedUpdatedAt: string) => Promise<void>;
+}) {
+  const [grade, setGrade] = useState(sub.grade ?? 0);
   const [review, setReview] = useState('');
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-3">
@@ -174,9 +204,9 @@ function TeacherReviewForm({ sub, onReview }: { sub: any; onReview: (id: string,
       <textarea value={review} onChange={(e) => setReview(e.target.value)} rows={3}
         placeholder="Nhận xét thêm cho học sinh..."
         className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm resize-y" />
-      <button onClick={() => onReview(sub.id, grade, review)}
-        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition cursor-pointer">
-        <CheckCircle className="w-4 h-4" /> Xác nhận Review
+      <button onClick={() => void onReview(sub.id, grade, review.trim(), sub.updatedAt)} disabled={reviewing || !Number.isFinite(grade) || grade < 0 || grade > 10 || !review.trim()}
+        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+        {reviewing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />} Xác nhận Review
       </button>
     </div>
   );

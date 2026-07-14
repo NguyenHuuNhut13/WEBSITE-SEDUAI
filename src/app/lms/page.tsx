@@ -11,7 +11,7 @@ export default function LMSPage() {
   useEffect(() => {
     if (isLoading) return;
     if (!accessToken) {
-      router.push('/login');
+      router.replace('/login');
       return;
     }
 

@@ -22,7 +22,8 @@ import {
 } from 'lucide-react';
 import { courses, Course } from '@/data/courses';
 import CourseCard from '@/components/CourseCard';
-import { createLead, getEduCourses, ApiCourse } from '@/services/api';
+import { createLead, getEduCourses } from '@/services/api';
+import { htmlToPlainText } from '@/lib/plain-text';
 
 type TabKey = 'overview' | 'syllabus' | 'reviews' | 'instructor';
 
@@ -372,6 +373,8 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
             {/* Right - Course Image */}
             <div className="lg:col-span-5">
               <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+                {/* Course images may come from the allowlisted CRM CDN at runtime. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={course.image}
                   alt={course.title}
@@ -456,10 +459,9 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
                   {course.intro && (
                     <div className="pt-6 border-t border-slate-100 space-y-4">
                       <h3 className="text-base font-extrabold text-slate-950">Giới thiệu chi tiết khóa học</h3>
-                      <div 
-                        className="text-xs text-slate-600 leading-relaxed space-y-3 prose max-w-none api-intro-content"
-                        dangerouslySetInnerHTML={{ __html: course.intro }}
-                      />
+                      <div className="text-xs text-slate-600 leading-relaxed whitespace-pre-line">
+                        {htmlToPlainText(course.intro)}
+                      </div>
                     </div>
                   )}
                 </div>

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, Users, FileText, BarChart3, Clock, PenTool } from 'lucide-react';
+import { ArrowLeft, BookOpen, Users, FileText, BarChart3, PenTool } from 'lucide-react';
 
 export default function TeacherClassDetail({ params }: { params: Promise<{ classId: string }> }) {
   const { classId } = use(params);
@@ -10,18 +10,18 @@ export default function TeacherClassDetail({ params }: { params: Promise<{ class
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'subjects' | 'students' | 'exams'>('subjects');
 
-  const loadClass = async () => {
+  const loadClass = useCallback(async () => {
     try {
       const res = await fetch(`/api/lms/classes/${classId}`);
       const json = await res.json();
       if (json.success) setClassData(json.data);
     } catch (e) { console.error(e); }
     setLoading(false);
-  };
+  }, [classId]);
 
   useEffect(() => {
-    loadClass();
-  }, [classId]);
+    void loadClass();
+  }, [loadClass]);
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-[50vh]"><div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
@@ -133,7 +133,7 @@ export default function TeacherClassDetail({ params }: { params: Promise<{ class
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                {exam.password && <span className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-lg font-bold">🔒 Có mật khẩu</span>}
+                {exam.hasPassword && <span className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-lg font-bold">🔒 Có mật khẩu</span>}
                 <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg font-bold">{exam._count?.results || 0} kết quả</span>
               </div>
             </div>

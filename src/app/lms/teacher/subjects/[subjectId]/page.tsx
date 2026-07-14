@@ -1,8 +1,19 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useCallback, useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, BookOpen, Save, Loader2, Plus, FileText, Beaker } from 'lucide-react';
+
+function toLocalDateTimeInput(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const localTime = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return localTime.toISOString().slice(0, 16);
+}
+
+function toIsoDateTime(value: string) {
+  return value ? new Date(value).toISOString() : null;
+}
 
 export default function TeacherSubjectPage({ params }: { params: Promise<{ subjectId: string }> }) {
   const { subjectId } = use(params);
@@ -13,46 +24,64 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
   const [lessonContent, setLessonContent] = useState('');
   const [saving, setSaving] = useState(false);
   const [assignmentLessonId, setAssignmentLessonId] = useState<string | null>(null);
+  const [editingAssignmentId, setEditingAssignmentId] = useState<string | null>(null);
   const [assignmentTitle, setAssignmentTitle] = useState('');
   const [assignmentDescription, setAssignmentDescription] = useState('');
   const [assignmentDueDate, setAssignmentDueDate] = useState('');
+  const [operationError, setOperationError] = useState('');
 
-  const loadSubject = async () => {
+  const loadSubject = useCallback(async () => {
     try {
       const res = await fetch(`/api/lms/subjects/${subjectId}`);
-      const json = await res.json();
-      if (json.success) setSubject(json.data);
-    } catch (e) { console.error(e); }
-    setLoading(false);
-  };
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success) throw new Error(json?.error || 'Không thể tải môn học.');
+      setSubject(json.data);
+    } catch (error) {
+      setOperationError(error instanceof Error ? error.message : 'Không thể tải môn học.');
+    } finally {
+      setLoading(false);
+    }
+  }, [subjectId]);
 
-  useEffect(() => { loadSubject(); }, [subjectId]);
+  useEffect(() => { void loadSubject(); }, [loadSubject]);
 
   const createLesson = async (type: string, order: number) => {
     setSaving(true);
+    setOperationError('');
     try {
-      await fetch('/api/lms/lessons', {
+      const response = await fetch('/api/lms/lessons', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ subjectId, type, orderIndex: order, title: `Buổi ${order} - ${type === 'THEORY' ? 'Lý thuyết' : 'Thực hành'}` }),
       });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.success) throw new Error(result?.error || 'Không thể tạo bài học.');
       await loadSubject();
-    } catch (e) { console.error(e); }
-    setSaving(false);
+    } catch (error) {
+      setOperationError(error instanceof Error ? error.message : 'Không thể tạo bài học.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const updateLesson = async (lessonId: string) => {
     setSaving(true);
+    setOperationError('');
     try {
-      await fetch('/api/lms/lessons', {
+      const response = await fetch('/api/lms/lessons', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: lessonId, title: lessonTitle, content: lessonContent }),
       });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.success) throw new Error(result?.error || 'Không thể cập nhật bài học.');
       setEditingLesson(null);
       await loadSubject();
-    } catch (e) { console.error(e); }
-    setSaving(false);
+    } catch (error) {
+      setOperationError(error instanceof Error ? error.message : 'Không thể cập nhật bài học.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const startEdit = (lesson: any) => {
@@ -64,6 +93,7 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
   const createAssignment = async (lessonId: string) => {
     if (!assignmentTitle.trim()) return;
     setSaving(true);
+    setOperationError('');
     try {
       const response = await fetch('/api/lms/assignments', {
         method: 'POST',
@@ -72,18 +102,64 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
           lessonId,
           title: assignmentTitle.trim(),
           description: assignmentDescription.trim(),
-          dueDate: assignmentDueDate || undefined,
+          dueDate: assignmentDueDate ? toIsoDateTime(assignmentDueDate) : undefined,
         }),
       });
       const result = await response.json();
-      if (!result.success) throw new Error(result.error || 'Không thể tạo bài tập');
-      setAssignmentLessonId(null);
-      setAssignmentTitle('');
-      setAssignmentDescription('');
-      setAssignmentDueDate('');
+      if (!response.ok || !result.success) throw new Error(result.error || 'Không thể tạo bài tập');
+      resetAssignmentForm();
       await loadSubject();
     } catch (error) {
-      console.error(error);
+      setOperationError(error instanceof Error ? error.message : 'Không thể tạo bài tập');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const resetAssignmentForm = () => {
+    setAssignmentLessonId(null);
+    setEditingAssignmentId(null);
+    setAssignmentTitle('');
+    setAssignmentDescription('');
+    setAssignmentDueDate('');
+  };
+
+  const startCreateAssignment = (lessonId: string) => {
+    resetAssignmentForm();
+    setAssignmentLessonId(lessonId);
+    setOperationError('');
+  };
+
+  const startEditAssignment = (lessonId: string, assignment: any) => {
+    setAssignmentLessonId(lessonId);
+    setEditingAssignmentId(assignment.id);
+    setAssignmentTitle(assignment.title || '');
+    setAssignmentDescription(assignment.description || '');
+    setAssignmentDueDate(assignment.dueDate ? toLocalDateTimeInput(assignment.dueDate) : '');
+    setOperationError('');
+  };
+
+  const updateAssignment = async () => {
+    if (!editingAssignmentId || !assignmentTitle.trim()) return;
+    setSaving(true);
+    setOperationError('');
+    try {
+      const response = await fetch('/api/lms/assignments', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingAssignmentId,
+          title: assignmentTitle.trim(),
+          description: assignmentDescription,
+          dueDate: toIsoDateTime(assignmentDueDate),
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || 'Không thể cập nhật bài tập');
+      resetAssignmentForm();
+      await loadSubject();
+    } catch (error) {
+      setOperationError(error instanceof Error ? error.message : 'Không thể cập nhật bài tập');
     } finally {
       setSaving(false);
     }
@@ -150,9 +226,12 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
               <div className="mt-3 border-t border-slate-100 pt-3">
                 <div className="space-y-2">
                   {lesson.assignments?.map((assignment: any) => (
-                    <div key={assignment.id} className="flex items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-xs">
-                      <span className="font-semibold text-amber-900">{assignment.title}</span>
-                      <span className="text-amber-700">{assignment._count?.submissions || 0} bài nộp</span>
+                    <div key={assignment.id} className="flex items-center justify-between gap-3 rounded-lg bg-amber-50 px-3 py-2 text-xs">
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-amber-900">{assignment.title}</p>
+                        <p className="text-amber-700">{assignment._count?.submissions || 0} bài nộp{assignment.dueDate ? ` · Hạn ${new Date(assignment.dueDate).toLocaleString('vi-VN')}` : ''}</p>
+                      </div>
+                      <button type="button" onClick={() => startEditAssignment(lesson.id, assignment)} className="shrink-0 font-bold text-amber-800 hover:underline">Sửa</button>
                     </div>
                   ))}
                 </div>
@@ -165,13 +244,13 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
                     <input type="datetime-local" value={assignmentDueDate} onChange={(event) => setAssignmentDueDate(event.target.value)}
                       className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
                     <div className="flex gap-2">
-                      <button onClick={() => createAssignment(lesson.id)} disabled={saving || !assignmentTitle.trim()}
-                        className="rounded-lg bg-amber-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">Tạo bài tập</button>
-                      <button onClick={() => setAssignmentLessonId(null)} className="rounded-lg bg-white px-3 py-2 text-xs font-bold text-slate-600">Hủy</button>
+                      <button onClick={() => editingAssignmentId ? updateAssignment() : createAssignment(lesson.id)} disabled={saving || !assignmentTitle.trim()}
+                        className="rounded-lg bg-amber-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">{editingAssignmentId ? 'Lưu bài tập' : 'Tạo bài tập'}</button>
+                      <button onClick={resetAssignmentForm} className="rounded-lg bg-white px-3 py-2 text-xs font-bold text-slate-600">Hủy</button>
                     </div>
                   </div>
                 ) : (
-                  <button onClick={() => setAssignmentLessonId(lesson.id)} className="mt-2 flex items-center gap-1 text-xs font-bold text-amber-700">
+                  <button onClick={() => startCreateAssignment(lesson.id)} className="mt-2 flex items-center gap-1 text-xs font-bold text-amber-700">
                     <FileText className="h-3.5 w-3.5" /> Thêm bài tập
                   </button>
                 )}
@@ -194,6 +273,12 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
           <p className="text-sm text-slate-500">Lớp: {subject.class?.name} · {subject.theoryLessons} LT + {subject.practicalLessons} TH</p>
         </div>
       </div>
+
+      {operationError && (
+        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+          {operationError}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Theory */}

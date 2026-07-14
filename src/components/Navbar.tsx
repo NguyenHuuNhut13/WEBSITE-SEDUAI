@@ -390,9 +390,8 @@ export default function Navbar() {
                         <Sparkles className="w-4 h-4 text-amber-500" /> Mở ChatGPT Assistant
                       </Link>
                       <button
-                        onClick={() => {
-                          logout();
-                          setShowUserMenu(false);
+                        onClick={async () => {
+                          if (await logout()) setShowUserMenu(false);
                         }}
                         className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition text-left cursor-pointer mt-1 border-t border-slate-100 pt-2"
                       >
@@ -574,9 +573,8 @@ export default function Navbar() {
                         <User className="w-3.5 h-3.5 text-primary" /> Hồ sơ VIP
                       </Link>
                       <button
-                        onClick={() => {
-                          logout();
-                          setIsOpen(false);
+                        onClick={async () => {
+                          if (await logout()) setIsOpen(false);
                         }}
                         className="py-2.5 px-3 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
                       >

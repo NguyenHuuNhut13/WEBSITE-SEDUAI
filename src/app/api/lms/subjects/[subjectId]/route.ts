@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { canAccessClass, lmsErrorResponse, requireLmsUser } from '@/lib/lms-auth';
+import { canAccessClass, lmsErrorResponse, requireLmsUser, withActiveClassMutation } from '@/lib/lms-auth';
+import { requiredText } from '@/lib/lms-input';
 
 type RouteContext = { params: Promise<{ subjectId: string }> };
 
@@ -15,7 +16,13 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const subject = await prisma.lmsSubject.findUnique({
       where: { id: subjectId },
       include: {
-        class: { include: { teacher: true } },
+        class: {
+          include: {
+            teacher: {
+              select: { id: true, username: true, name: true, avatar: true, role: true },
+            },
+          },
+        },
         lessons: {
           include: {
             assignments: {
@@ -25,7 +32,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
           orderBy: [{ type: 'asc' }, { orderIndex: 'asc' }],
         },
         examConfigs: {
-          include: { _count: { select: { results: true } } },
+          include: {
+            _count: {
+              select: { results: { where: { finishedAt: { not: null } } } },
+            },
+          },
           orderBy: { createdAt: 'desc' },
         },
       },
@@ -35,7 +46,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ success: false, error: 'Môn học không tồn tại' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, data: subject });
+    const examConfigs = subject.examConfigs.map(({ password, ...config }) => ({
+      ...config,
+      hasPassword: Boolean(password),
+    }));
+    return NextResponse.json({ success: true, data: { ...subject, examConfigs } });
   } catch (error: any) {
     console.error('LMS Subject GET error:', error);
     return lmsErrorResponse(error);
@@ -48,14 +63,14 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     const { subjectId } = await context.params;
     const actor = await requireLmsUser(request, ['ADMIN', 'TEACHER']);
     const accessSubject = await prisma.lmsSubject.findUnique({ where: { id: subjectId }, select: { classId: true } });
-    if (!accessSubject || !(await canAccessClass(actor, accessSubject.classId))) return NextResponse.json({ success: false, error: 'Bạn không quản lý môn học này' }, { status: 403 });
+    if (!accessSubject) return NextResponse.json({ success: false, error: 'Môn học không tồn tại' }, { status: 404 });
     const body = await request.json();
-    const { name } = body;
+    const name = requiredText(body.name, 'Tên môn học', 120);
 
-    const updated = await prisma.lmsSubject.update({
+    const updated = await withActiveClassMutation(actor, accessSubject.classId, (tx) => tx.lmsSubject.update({
       where: { id: subjectId },
-      data: { ...(name && { name }) },
-    });
+      data: { name },
+    }));
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error: any) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { BookOpen, ClipboardCheck, BarChart3, Users, FileText, ChevronRight, AlertCircle } from 'lucide-react';
@@ -11,7 +11,7 @@ export default function TeacherDashboard() {
   const [pendingSubmissions, setPendingSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const [classRes, subRes] = await Promise.all([
         fetch(`/api/lms/classes?teacherId=${encodeURIComponent(lmsUserId || '')}`),
@@ -23,11 +23,11 @@ export default function TeacherDashboard() {
       if (subJson.success) setPendingSubmissions(subJson.data);
     } catch (e) { console.error(e); }
     setLoading(false);
-  };
+  }, [lmsUserId]);
 
   useEffect(() => {
-    if (lmsUserId) loadData();
-  }, [lmsUserId]);
+    if (lmsUserId) void loadData();
+  }, [lmsUserId, loadData]);
 
   if (loading) {
     return (
