@@ -1,5 +1,6 @@
-import { after, NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { consumeRateLimit } from '@/lib/rate-limit';
+import { syncLmsUser } from '@/lib/lms-auth';
 
 const ACCOUNT_API_BASE = 'https://account.nks.vn/api/nks/user';
 const SESSION_COOKIE = 'seduai_access_token';
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest) {
       // Expire the browser session in the immediate response. Waiting for NKS
       // here could let a late logout response erase a newer login cookie.
       if (logoutToken) {
-        after(async () => {
+        void (async () => {
           try {
             const revokeResponse = await fetch(`${ACCOUNT_API_BASE}/logout`, {
               method: 'POST',
@@ -115,7 +116,7 @@ export async function POST(req: NextRequest) {
               error instanceof Error ? error.message : String(error),
             );
           }
-        });
+        })();
       }
 
       const response = NextResponse.json({
@@ -176,14 +177,11 @@ export async function POST(req: NextRequest) {
     const response = NextResponse.json(json, { status: responseStatus });
 
     if (operationSucceeded && account.username) {
-      after(async () => {
-        try {
-          const { syncLmsUser } = await import('@/lib/lms-auth');
-          await syncLmsUser(account);
-        } catch (error) {
-          console.warn('[Proxy Account] Background database sync failed:', error instanceof Error ? error.message : String(error));
-        }
-      });
+      try {
+        await syncLmsUser(account);
+      } catch (error) {
+        console.warn('[Proxy Account] Database sync failed:', error instanceof Error ? error.message : String(error));
+      }
     }
 
     if (action === 'login') {
