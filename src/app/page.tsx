@@ -34,35 +34,35 @@ import { getEduCourses, ApiCourse } from '@/services/api';
 const partners = [
   {
     name: 'ĐH Bách Khoa',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/HCMUT_official_logo.png/200px-HCMUT_official_logo.png',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/e/ef/HCMUT_official_logo.png',
   },
   {
     name: 'ĐH FPT',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/FPT_logo_2010.svg/200px-FPT_logo_2010.svg.png',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/1/11/FPT_logo_2010.svg',
   },
   {
     name: 'Google for Education',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/200px-Google_2015_logo.svg.png',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg',
   },
   {
     name: 'Microsoft Learn',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/200px-Microsoft_logo.svg.png',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg',
   },
   {
     name: 'AWS Academy',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Amazon_Web_Services_Logo.svg/200px-Amazon_Web_Services_Logo.svg.png',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg',
   },
   {
     name: 'British Council',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/British_Council_logo.svg/200px-British_Council_logo.svg.png',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/British_Council_logo.svg',
   },
   {
     name: 'VNUHCM',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Logo_%C4%90HQG_TP.HCM.png/200px-Logo_%C4%90HQG_TP.HCM.png',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/a/a8/Logo_%C4%90HQG_TP.HCM.png',
   },
   {
     name: 'ĐH Kinh tế (UEH)',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Logo_UEH_xanh.png/200px-Logo_UEH_xanh.png',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/b/b4/Logo_UEH_xanh.png',
   },
 ];
 
@@ -495,6 +495,7 @@ export default async function Home() {
                     alt={`Logo ${partner.name}`}
                     width={96}
                     height={40}
+                    unoptimized
                     className="mr-3 h-8 w-20 object-contain grayscale opacity-70 transition-all duration-300 group-hover:grayscale-0 group-hover:opacity-100"
                   />
                   <span>{partner.name}</span>
