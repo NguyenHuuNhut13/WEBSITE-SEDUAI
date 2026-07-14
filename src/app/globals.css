@@ -15,6 +15,7 @@
   --color-accent: #ffb606;
   --color-accent-dark: #d99a00;
   --font-sans: var(--font-sans);
+  --font-heading: var(--font-heading);
 }
 
 body {
@@ -23,9 +24,9 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-sans), sans-serif;
-  letter-spacing: -0.03em;
-  font-weight: 800;
+  font-family: var(--font-heading), var(--font-sans), sans-serif;
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
 
 /* Custom Scrollbar */
