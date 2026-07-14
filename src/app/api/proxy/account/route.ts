@@ -159,7 +159,7 @@ export async function POST(req: NextRequest) {
     const account = extractAccount(json);
     const responseToken = extractToken(json);
     const operationSucceeded = action === 'login'
-      ? Boolean(success && responseToken && stringValue(account.username))
+      ? Boolean(success && responseToken)
       : action === ''
         ? Boolean(success && stringValue(account.username))
         : success;
