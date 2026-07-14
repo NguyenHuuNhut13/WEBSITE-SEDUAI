@@ -175,6 +175,17 @@ export async function POST(req: NextRequest) {
     }
     const response = NextResponse.json(json, { status: responseStatus });
 
+    if (operationSucceeded && account.username) {
+      after(async () => {
+        try {
+          const { syncLmsUser } = await import('@/lib/lms-auth');
+          await syncLmsUser(account);
+        } catch (error) {
+          console.warn('[Proxy Account] Background database sync failed:', error instanceof Error ? error.message : String(error));
+        }
+      });
+    }
+
     if (action === 'login') {
       if (operationSucceeded && responseToken) setSessionCookie(response, responseToken);
       else deleteSessionCookie(response);

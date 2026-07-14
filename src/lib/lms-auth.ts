@@ -58,14 +58,28 @@ export async function requireLmsUser(request: NextRequest, roles?: UserRole[]): 
   }
   const payloadData = payload && typeof payload.data === 'object' ? payload.data : null;
   const account = payload.userInfo || payload.user || payloadData?.userInfo || payloadData?.user || payloadData;
+
+  let user: LmsUser;
+  try {
+    user = await syncLmsUser(account);
+  } catch (error: any) {
+    throw new LmsAuthError(error.message, 400);
+  }
+
+  if (roles && !roles.includes(user.role)) throw new LmsAuthError('Bạn không có quyền thực hiện thao tác này', 403);
+  return user;
+}
+
+export async function syncLmsUser(account: any): Promise<LmsUser> {
   const username = typeof account?.username === 'string' ? account.username.trim() : '';
-  if (!username) throw new LmsAuthError('Không xác định được tài khoản NKS', 401);
+  if (!username) throw new Error('Không xác định được tài khoản NKS');
 
   const displayName = String(account.name
     || `${account.lastname || ''} ${account.firstname || ''}`.trim()
     || username).slice(0, 160);
   const nksUserId = account.id !== undefined && account.id !== null ? String(account.id) : null;
-  const user = await prisma.$transaction(async (tx) => {
+
+  return prisma.$transaction(async (tx) => {
     // A browser can trigger several LMS requests immediately after login. Lock
     // both external identity keys before find/create so only one request can
     // provision or relink the profile at a time.
@@ -118,8 +132,6 @@ export async function requireLmsUser(request: NextRequest, roles?: UserRole[]): 
       data: { ...profile, role: shouldBootstrapAdmin ? 'ADMIN' : 'STUDENT' },
     });
   });
-  if (roles && !roles.includes(user.role)) throw new LmsAuthError('Bạn không có quyền thực hiện thao tác này', 403);
-  return user;
 }
 
 export function lmsErrorResponse(error: unknown) {
