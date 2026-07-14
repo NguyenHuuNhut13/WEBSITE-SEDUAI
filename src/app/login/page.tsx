@@ -46,7 +46,7 @@ export default function LoginPage() {
       const dataPayload = res.data as Record<string, any> | undefined;
       const realToken = res.access_token || res.token || dataPayload?.access_token || dataPayload?.token;
       const rawUser = res.userInfo || res.user || dataPayload?.userInfo || dataPayload?.user || (dataPayload?.username ? dataPayload : null);
-      const isApiSuccess = Boolean(realToken && rawUser && !res.error);
+      const isApiSuccess = Boolean(res.success !== false && realToken && rawUser && !res.error);
 
       if (isApiSuccess) {
         login(realToken, rawUser);

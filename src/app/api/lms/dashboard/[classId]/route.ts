@@ -1,154 +1,217 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { requireLmsUser } from '@/lib/lms-auth';
+import { finalizeExpiredExamAttempts, LmsExamError, lmsExamErrorResponse } from '@/lib/lms-exam';
 
 type RouteContext = { params: Promise<{ classId: string }> };
 
-// GET /api/lms/dashboard/[classId] — Aggregated stats for teacher dashboard
-export async function GET(_request: NextRequest, context: RouteContext) {
+interface StudentScore {
+  name: string;
+  avatar?: string;
+  totalScore: number;
+  count: number;
+  submissions: number;
+}
+
+function percentage(completed: number, expected: number) {
+  if (expected <= 0) return 0;
+  return Math.min(100, Math.max(0, Math.round((completed / expected) * 100)));
+}
+
+function average(values: number[]) {
+  if (values.length === 0) return 0;
+  return Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 10) / 10;
+}
+
+// GET /api/lms/dashboard/[classId] — thống kê dành cho Admin/Giáo viên phụ trách
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
+    const actor = await requireLmsUser(request, ['ADMIN', 'TEACHER']);
     const { classId } = await context.params;
 
-    // Lấy thông tin lớp
+    const accessClass = await prisma.lmsClass.findUnique({
+      where: { id: classId },
+      select: { id: true, teacherId: true },
+    });
+    if (!accessClass) {
+      return NextResponse.json(
+        { success: false, error: 'Lớp học không tồn tại' },
+        { status: 404 }
+      );
+    }
+    if (actor.role === 'TEACHER' && accessClass.teacherId !== actor.id) {
+      throw new LmsExamError('Bạn không phụ trách lớp học này', 403);
+    }
+
+    await finalizeExpiredExamAttempts({ examConfig: { classId } });
+
     const classData = await prisma.lmsClass.findUnique({
       where: { id: classId },
-      include: {
-        teacher: true,
-        students: { include: { student: true } },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        students: {
+          select: {
+            studentId: true,
+            student: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+              },
+            },
+          },
+          orderBy: { enrolledAt: 'asc' },
+        },
         subjects: {
-          include: {
+          select: {
+            id: true,
+            name: true,
+            theoryLessons: true,
+            practicalLessons: true,
             lessons: {
-              include: {
+              select: {
+                id: true,
+                content: true,
                 assignments: {
-                  include: {
-                    submissions: true,
+                  select: {
+                    id: true,
+                    submissions: {
+                      select: {
+                        studentId: true,
+                        grade: true,
+                        status: true,
+                      },
+                    },
                   },
                 },
               },
             },
             examConfigs: {
-              include: {
-                results: { include: { student: true } },
+              select: {
+                id: true,
+                results: {
+                  where: { finishedAt: { not: null } },
+                  select: {
+                    studentId: true,
+                    score: true,
+                  },
+                },
               },
             },
           },
         },
       },
     });
-
     if (!classData) {
-      return NextResponse.json({ success: false, error: 'Lớp không tồn tại' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: 'Lớp học không tồn tại' },
+        { status: 404 }
+      );
     }
 
-    const totalStudents = classData.students.length;
+    const enrolledStudentIds = new Set(classData.students.map(({ studentId }) => studentId));
+    const totalStudents = enrolledStudentIds.size;
+    const studentScores = new Map<string, StudentScore>(
+      classData.students.map(({ studentId, student }) => [
+        studentId,
+        {
+          name: student.name,
+          avatar: student.avatar || undefined,
+          totalScore: 0,
+          count: 0,
+          submissions: 0,
+        },
+      ])
+    );
 
-    // Tính toán stats từng môn
-    const subjectStats = classData.subjects.map((subject: any) => {
+    const subjectStats = classData.subjects.map((subject) => {
       const totalLessons = subject.theoryLessons + subject.practicalLessons;
-      const completedLessons = subject.lessons.filter((l: any) => l.content && l.content.length > 0).length;
-
-      // Tỷ lệ nộp bài
-      const allAssignments = subject.lessons.flatMap((l: any) => l.assignments);
-      const allSubmissions = allAssignments.flatMap((a: any) => a.submissions);
-      const expectedSubmissions = allAssignments.length * totalStudents;
-      const submissionRate = expectedSubmissions > 0 ? Math.round((allSubmissions.length / expectedSubmissions) * 100) : 0;
-
-      // Điểm TB
-      const gradedSubmissions = allSubmissions.filter((s: any) => s.grade !== null);
-      const avgScore = gradedSubmissions.length > 0
-        ? Math.round((gradedSubmissions.reduce((sum: number, s: any) => sum + (s.grade || 0), 0) / gradedSubmissions.length) * 10) / 10
-        : 0;
+      const completedLessons = subject.lessons.filter((lesson) => Boolean(lesson.content?.trim())).length;
+      const assignments = subject.lessons.flatMap((lesson) => lesson.assignments);
+      const submissions = assignments
+        .flatMap((assignment) => assignment.submissions)
+        .filter((submission) => enrolledStudentIds.has(submission.studentId));
+      const reviewedGrades = submissions
+        .filter((submission) => submission.status === 'REVIEWED' && Number.isFinite(submission.grade))
+        .map((submission) => Number(submission.grade));
 
       return {
         subjectId: subject.id,
         subjectName: subject.name,
-        averageScore: avgScore,
+        averageScore: average(reviewedGrades),
         completedLessons,
         totalLessons,
-        submissionRate,
+        submissionRate: percentage(submissions.length, assignments.length * totalStudents),
       };
     });
 
-    // Bảng xếp hạng học sinh
-    const studentScores: Record<string, { name: string; avatar?: string; totalScore: number; count: number; submissions: number }> = {};
-
-    classData.subjects.forEach((subject: any) => {
-      subject.lessons.forEach((lesson: any) => {
-        lesson.assignments.forEach((assignment: any) => {
-          assignment.submissions.forEach((sub: any) => {
-            if (!studentScores[sub.studentId]) {
-              const student = classData.students.find((s: any) => s.studentId === sub.studentId)?.student;
-              studentScores[sub.studentId] = {
-                name: student?.name || 'Unknown',
-                avatar: student?.avatar || undefined,
-                totalScore: 0,
-                count: 0,
-                submissions: 0,
-              };
+    for (const subject of classData.subjects) {
+      for (const lesson of subject.lessons) {
+        for (const assignment of lesson.assignments) {
+          for (const submission of assignment.submissions) {
+            const score = studentScores.get(submission.studentId);
+            if (!score) continue;
+            score.submissions += 1;
+            if (submission.status === 'REVIEWED' && Number.isFinite(submission.grade)) {
+              score.totalScore += Number(submission.grade);
+              score.count += 1;
             }
-            studentScores[sub.studentId].submissions++;
-            if (sub.grade !== null) {
-              studentScores[sub.studentId].totalScore += sub.grade || 0;
-              studentScores[sub.studentId].count++;
-            }
-          });
-        });
-      });
-
-      // Thêm điểm thi
-      subject.examConfigs.forEach((exam: any) => {
-        exam.results.forEach((result: any) => {
-          if (!studentScores[result.studentId]) {
-            studentScores[result.studentId] = {
-              name: result.student.name,
-              avatar: result.student.avatar || undefined,
-              totalScore: 0,
-              count: 0,
-              submissions: 0,
-            };
           }
-          studentScores[result.studentId].totalScore += result.score;
-          studentScores[result.studentId].count++;
-        });
-      });
-    });
+        }
+      }
 
-    const leaderboard = Object.entries(studentScores)
-      .map(([studentId, data]: [string, any]) => ({
+      for (const exam of subject.examConfigs) {
+        for (const result of exam.results) {
+          const score = studentScores.get(result.studentId);
+          if (!score || !Number.isFinite(result.score)) continue;
+          score.totalScore += result.score;
+          score.count += 1;
+        }
+      }
+    }
+
+    const leaderboard = Array.from(studentScores.entries())
+      .map(([studentId, score]) => ({
         studentId,
-        studentName: data.name,
-        studentAvatar: data.avatar,
-        averageScore: data.count > 0 ? Math.round((data.totalScore / data.count) * 10) / 10 : 0,
-        totalSubmissions: data.submissions,
+        studentName: score.name,
+        studentAvatar: score.avatar,
+        averageScore: score.count > 0
+          ? Math.round((score.totalScore / score.count) * 10) / 10
+          : 0,
+        totalSubmissions: score.submissions,
         rank: 0,
       }))
-      .sort((a: any, b: any) => b.averageScore - a.averageScore)
-      .map((entry: any, index: number) => ({ ...entry, rank: index + 1 }));
+      .sort((left, right) => right.averageScore - left.averageScore || left.studentName.localeCompare(right.studentName, 'vi'))
+      .map((entry, index) => ({ ...entry, rank: index + 1 }));
 
-    // Tỷ lệ hoàn thành tổng
-    const allAssignments = classData.subjects.flatMap((s: any) => s.lessons.flatMap((l: any) => l.assignments));
-    const allSubmissions = allAssignments.flatMap((a: any) => a.submissions);
-    const expectedTotal = allAssignments.length * totalStudents;
-    const assignmentCompletion = expectedTotal > 0 ? Math.round((allSubmissions.length / expectedTotal) * 100) : 0;
-
-    const allExamConfigs = classData.subjects.flatMap((s: any) => s.examConfigs);
-    const allExamResults = allExamConfigs.flatMap((e: any) => e.results);
-    const expectedExams = allExamConfigs.length * totalStudents;
-    const examCompletion = expectedExams > 0 ? Math.round((allExamResults.length / expectedExams) * 100) : 0;
+    const assignments = classData.subjects.flatMap((subject) =>
+      subject.lessons.flatMap((lesson) => lesson.assignments)
+    );
+    const submissions = assignments
+      .flatMap((assignment) => assignment.submissions)
+      .filter((submission) => enrolledStudentIds.has(submission.studentId));
+    const examConfigs = classData.subjects.flatMap((subject) => subject.examConfigs);
+    const examResults = examConfigs
+      .flatMap((exam) => exam.results)
+      .filter((result) => enrolledStudentIds.has(result.studentId));
 
     return NextResponse.json({
       success: true,
       data: {
         classId,
         className: classData.name,
+        classStatus: classData.status,
         totalStudents,
         subjectStats,
         leaderboard,
-        assignmentCompletion,
-        examCompletion,
+        assignmentCompletion: percentage(submissions.length, assignments.length * totalStudents),
+        examCompletion: percentage(examResults.length, examConfigs.length * totalStudents),
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('LMS Dashboard GET error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return lmsExamErrorResponse(error);
   }
 }

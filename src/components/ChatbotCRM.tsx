@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Bot, User, CheckCircle2, Send, Loader2, Sparkles, BookOpen, ArrowRight } from 'lucide-react';
+import { Bot, CheckCircle2, Send, Loader2, Sparkles, BookOpen, ArrowRight } from 'lucide-react';
 import { createLead, getEduCourses, ApiCourse } from '@/services/api';
+import { htmlToPlainText } from '@/lib/plain-text';
 
 interface Message {
   id: string;
@@ -223,12 +224,9 @@ export default function ChatbotCRM() {
                     isAI
                       ? 'bg-white border border-slate-100 rounded-2xl rounded-tl-none p-3.5 shadow-sm text-sm text-slate-700 leading-relaxed'
                       : 'bg-primary text-white rounded-2xl rounded-tr-none p-3.5 shadow-md text-sm leading-relaxed'
-                  }`}
-                  dangerouslySetInnerHTML={
-                    msg.isHtml ? { __html: msg.text } : undefined
-                  }
+                  } whitespace-pre-line`}
                 >
-                  {!msg.isHtml && msg.text}
+                  {msg.isHtml ? htmlToPlainText(msg.text) : msg.text}
                 </div>
 
                 {/* Suggested Courses from API */}
@@ -251,10 +249,9 @@ export default function ChatbotCRM() {
                           </span>
                         </div>
                         {course.acf?.description && (
-                          <div
-                            className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed"
-                            dangerouslySetInnerHTML={{ __html: course.acf.description }}
-                          />
+                          <div className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">
+                            {htmlToPlainText(course.acf.description)}
+                          </div>
                         )}
                         <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px]">
                           <span className="font-extrabold text-primary">

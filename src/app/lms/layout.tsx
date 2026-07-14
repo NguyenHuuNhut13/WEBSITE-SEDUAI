@@ -12,7 +12,7 @@ export default function LMSLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && !accessToken) {
-      router.push('/login');
+      router.replace('/login');
       return;
     }
 

@@ -1,123 +1,115 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useCallback, useRef } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { ArrowLeft, Clock, Lock, Sparkles, Loader2, ClipboardCheck, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, Clock, Lock, Sparkles, Loader2, ClipboardCheck, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+
+interface ExamQuestion {
+  index: number;
+  content: string;
+  options: string[];
+}
+
+interface ExamAnswerPayload {
+  questionIndex: number;
+  selectedOption: number;
+}
 
 export default function StudentExamPage({ params }: { params: Promise<{ examConfigId: string }> }) {
   const { examConfigId } = use(params);
-  const router = useRouter();
-  const { user } = useAuth();
 
   const [config, setConfig] = useState<any>(null);
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<ExamQuestion[]>([]);
+  const [attemptToken, setAttemptToken] = useState('');
   const [loading, setLoading] = useState(true);
   const [started, setStarted] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [passError, setPassError] = useState('');
+  const [pageError, setPageError] = useState('');
+  const [submitError, setSubmitError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   // Quiz running states
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [timeLeft, setTimeLeft] = useState(0);
   const [activeQuestion, setActiveQuestion] = useState(0);
+  const autoSubmitTriggered = useRef(false);
 
   // Result state
   const [result, setResult] = useState<any>(null);
 
-  const loadConfig = async () => {
+  const loadConfig = useCallback(async () => {
+    setLoading(true);
+    setPageError('');
     try {
       const res = await fetch(`/api/lms/exams/config?id=${examConfigId}`);
-      const json = await res.json();
-      if (json.success) {
-        setConfig(json.data);
-        
-        // If user already took this exam, load the result
-        if (user) {
-          const userRes = await fetch('/api/lms/users');
-          const userJson = await userRes.json();
-          if (userJson.success) {
-            const dbUser = userJson.data.find((u: any) => u.username === user.username);
-            if (dbUser) {
-              const resRes = await fetch(`/api/lms/exams/results?examConfigId=${examConfigId}&studentId=${dbUser.id}`);
-              const resJson = await resRes.json();
-              if (resJson.success && resJson.data.length > 0) {
-                setResult(resJson.data[0]);
-              }
-            }
-          }
-        }
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.success || !json.data) {
+        throw new Error(json?.error || 'Không thể tải cấu hình bài thi.');
       }
+      setConfig(json.data);
+
+      // Backend tự xác định học sinh từ phiên đăng nhập và chỉ trả kết quả của chính họ.
+      const resultResponse = await fetch(`/api/lms/exams/results?examConfigId=${encodeURIComponent(examConfigId)}`);
+      const resultJson = await resultResponse.json().catch(() => null);
+      if (!resultResponse.ok || !resultJson?.success) {
+        throw new Error(resultJson?.error || 'Không thể kiểm tra trạng thái bài thi.');
+      }
+      const previousResult = Array.isArray(resultJson.data) ? resultJson.data[0] : resultJson.data;
+      setResult(previousResult || null);
     } catch (e) {
-      console.error(e);
+      setConfig(null);
+      setPageError(e instanceof Error ? e.message : 'Không thể tải thông tin bài thi.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [examConfigId]);
 
-  const submitExam = async (finalAnswers = answers) => {
-    if (!user || result) return;
+  const submitExam = useCallback(async (finalAnswers: Record<number, number> = answers) => {
+    if (result || submitting) return;
+    setSubmitError('');
+    if (!attemptToken) {
+      setSubmitError('Phiên làm bài không hợp lệ. Vui lòng tải lại trang và bắt đầu lại.');
+      return;
+    }
+
     setSubmitting(true);
     try {
-      const userRes = await fetch('/api/lms/users');
-      const userJson = await userRes.json();
-      if (!userJson.success) throw new Error('Không thể xác thực.');
-
-      const dbUser = userJson.data.find((u: any) => u.username === user.username);
-      if (!dbUser) throw new Error('Học sinh không tồn tại trong hệ thống.');
-
-      // Grade the exam results
-      let correctCount = 0;
-      const formattedAnswers = questions.map((q) => {
+      const formattedAnswers: ExamAnswerPayload[] = questions.map((q) => {
         const selected = finalAnswers[q.index] !== undefined ? finalAnswers[q.index] : -1;
-        const isCorrect = selected === q.correctAnswer;
-        if (isCorrect) correctCount++;
         return {
           questionIndex: q.index,
           selectedOption: selected,
-          isCorrect,
         };
       });
 
-      const score = Math.round((correctCount / questions.length) * 10 * 10) / 10;
-
-      // Save to database LmsExamResult
       const saveRes = await fetch('/api/lms/exams/results', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           examConfigId,
-          studentId: dbUser.id,
-          score,
-          correctCount,
-          totalQuestions: questions.length,
           answers: formattedAnswers,
-          startedAt: new Date(Date.now() - (config.durationMinutes * 60 - timeLeft) * 1000).toISOString(),
-          finishedAt: new Date().toISOString(),
+          attemptToken,
         }),
       });
 
-      const saveJson = await saveRes.json();
-      if (saveJson.success) {
-        setResult(saveJson.data);
+      const saveJson = await saveRes.json().catch(() => null);
+      if (!saveRes.ok || !saveJson?.success || !saveJson.data) {
+        throw new Error(saveJson?.error || 'Không thể nộp bài thi.');
       }
+      setResult(saveJson.data);
     } catch (e) {
-      console.error(e);
+      setSubmitError(e instanceof Error ? e.message : 'Không thể nộp bài thi.');
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const autoSubmit = () => {
-    submitExam();
-  };
+  }, [answers, attemptToken, examConfigId, questions, result, submitting]);
 
   const startExam = async () => {
     setPassError('');
-    if (config.password && passwordInput !== config.password) {
-      setPassError('Sai mật khẩu phòng thi. Vui lòng thử lại.');
+    setSubmitError('');
+    if (config.hasPassword && !passwordInput.trim()) {
+      setPassError('Vui lòng nhập mật khẩu phòng thi.');
       return;
     }
 
@@ -129,19 +121,27 @@ export default function StudentExamPage({ params }: { params: Promise<{ examConf
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           examConfigId,
+          password: passwordInput,
         }),
       });
-      const json = await res.json();
-      if (json.success && json.data.questions) {
+      const json = await res.json().catch(() => null);
+      if (res.ok && json?.success && Array.isArray(json.data?.questions) && json.data?.attemptToken) {
         setQuestions(json.data.questions);
-        setTimeLeft(config.durationMinutes * 60);
+        setAttemptToken(json.data.attemptToken);
+        setAnswers({});
+        setActiveQuestion(0);
+        autoSubmitTriggered.current = false;
+        const serverExpiry = Date.parse(json.data.expiresAt);
+        const remainingSeconds = Number.isFinite(serverExpiry)
+          ? Math.max(0, Math.ceil((serverExpiry - Date.now()) / 1000))
+          : config.durationMinutes * 60;
+        setTimeLeft(remainingSeconds);
         setStarted(true);
       } else {
-        setPassError('Không thể tạo câu hỏi thi từ AI. Vui lòng liên hệ giáo viên.');
+        setPassError(json?.error || 'Không thể bắt đầu bài thi. Vui lòng liên hệ giáo viên.');
       }
-    } catch (e) {
-      console.error(e);
-      setPassError('Đã xảy ra lỗi kết nối.');
+    } catch {
+      setPassError('Không thể kết nối hệ thống thi. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -154,23 +154,20 @@ export default function StudentExamPage({ params }: { params: Promise<{ examConf
   };
 
   useEffect(() => {
-    loadConfig();
-  }, [examConfigId]);
+    void loadConfig();
+  }, [loadConfig]);
 
   useEffect(() => {
     if (!started || timeLeft <= 0 || result) return;
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          autoSubmit();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
+    const timer = setTimeout(() => setTimeLeft((prev) => Math.max(0, prev - 1)), 1000);
+    return () => clearTimeout(timer);
   }, [started, timeLeft, result]);
+
+  useEffect(() => {
+    if (!started || timeLeft !== 0 || result || !attemptToken || autoSubmitTriggered.current) return;
+    autoSubmitTriggered.current = true;
+    void submitExam();
+  }, [attemptToken, result, started, submitExam, timeLeft]);
 
   if (loading) {
     return (
@@ -180,10 +177,19 @@ export default function StudentExamPage({ params }: { params: Promise<{ examConf
     );
   }
 
-  if (!config) {
+  if (pageError || !config) {
     return (
-      <div className="text-center py-12">
-        <p className="text-slate-500">Không tìm thấy thông tin cấu hình phòng thi này.</p>
+      <div className="mx-auto max-w-md rounded-2xl border border-rose-200 bg-white p-8 text-center shadow-sm">
+        <AlertCircle className="mx-auto h-10 w-10 text-rose-500" />
+        <p className="mt-3 font-semibold text-slate-800">Không thể mở phòng thi</p>
+        <p className="mt-1 text-sm text-slate-500">{pageError || 'Không tìm thấy thông tin cấu hình phòng thi này.'}</p>
+        <button
+          type="button"
+          onClick={() => void loadConfig()}
+          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-700"
+        >
+          <RefreshCw className="h-4 w-4" /> Thử lại
+        </button>
       </div>
     );
   }
@@ -191,11 +197,13 @@ export default function StudentExamPage({ params }: { params: Promise<{ examConf
   // If already took the exam, show scorecard
   if (result) {
     let parsedAnswers: any[] = [];
-    if (result.answers) {
+    if (Array.isArray(result.answers)) {
+      parsedAnswers = result.answers;
+    } else if (result.answers) {
       try {
         parsedAnswers = JSON.parse(result.answers);
-      } catch (e) {
-        console.error(e);
+      } catch {
+        parsedAnswers = [];
       }
     }
 
@@ -271,7 +279,7 @@ export default function StudentExamPage({ params }: { params: Promise<{ examConf
             <div className="flex justify-between"><span>Thời gian làm bài:</span><span className="font-bold text-slate-800">{config.durationMinutes} phút</span></div>
           </div>
 
-          {config.password && (
+          {config.hasPassword && (
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-700">Nhập mật khẩu phòng thi *</label>
               <input
@@ -363,6 +371,12 @@ export default function StudentExamPage({ params }: { params: Promise<{ examConf
       {/* Answer Board Sidebar */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-6 h-fit">
         <h3 className="text-sm font-bold text-slate-900">Bảng câu hỏi</h3>
+
+        {submitError && (
+          <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold leading-relaxed text-rose-700">
+            {submitError}
+          </div>
+        )}
         
         <div className="grid grid-cols-5 gap-2">
           {questions.map((q, i) => (
@@ -383,7 +397,7 @@ export default function StudentExamPage({ params }: { params: Promise<{ examConf
         </div>
 
         <button
-          onClick={() => submitExam()}
+          onClick={() => void submitExam()}
           disabled={submitting}
           className="w-full py-3.5 bg-rose-600 hover:bg-rose-700 disabled:bg-slate-300 text-white rounded-xl font-bold text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
         >

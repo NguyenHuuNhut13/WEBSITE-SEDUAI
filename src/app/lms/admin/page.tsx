@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
-import { Users, BookOpen, GraduationCap, Plus, Search, MoreVertical, Trash2, Eye } from 'lucide-react';
+import { Users, BookOpen, GraduationCap, Plus, Search, Eye } from 'lucide-react';
 
 interface ClassItem {
   id: string;
@@ -21,7 +20,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  const loadClasses = async () => {
+  const loadClasses = useCallback(async () => {
     try {
       const res = await fetch('/api/lms/classes');
       const json = await res.json();
@@ -31,11 +30,11 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadClasses();
-  }, []);
+    void loadClasses();
+  }, [loadClasses]);
 
   const filtered = classes.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
 
@@ -127,6 +126,8 @@ export default function AdminDashboard() {
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
                         {cls.teacher?.avatar && (
+                          // NKS avatar URLs are dynamic and cannot be safely allowlisted in next/image.
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img src={cls.teacher.avatar} className="w-7 h-7 rounded-full object-cover" alt="" />
                         )}
                         <span className="text-sm text-slate-700 font-medium">{cls.teacher?.name || '—'}</span>

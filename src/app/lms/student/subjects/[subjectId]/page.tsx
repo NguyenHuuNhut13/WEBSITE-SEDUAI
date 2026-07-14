@@ -1,15 +1,15 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useCallback, useState, useEffect, use } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, Beaker, ChevronRight, FileText } from 'lucide-react';
+import { ArrowLeft, BookOpen, Beaker, ChevronRight } from 'lucide-react';
 
 export default function StudentSubjectDetail({ params }: { params: Promise<{ subjectId: string }> }) {
   const { subjectId } = use(params);
   const [subject, setSubject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadSubject = async () => {
+  const loadSubject = useCallback(async () => {
     try {
       const res = await fetch(`/api/lms/subjects/${subjectId}`);
       const json = await res.json();
@@ -19,11 +19,11 @@ export default function StudentSubjectDetail({ params }: { params: Promise<{ sub
     } finally {
       setLoading(false);
     }
-  };
+  }, [subjectId]);
 
   useEffect(() => {
-    loadSubject();
-  }, [subjectId]);
+    void loadSubject();
+  }, [loadSubject]);
 
   if (loading) {
     return (
