@@ -97,14 +97,15 @@ export default function AboutPage() {
   ];
 
   const timeline = [
-    { year: '2020', title: 'Thành lập SeduAi', desc: 'Ra đời với sứ mệnh kết hợp AI và Giáo dục chất lượng cao, định hình mô hình EdTech thế hệ mới.' },
-    { year: '2021', title: 'Hệ thống CRM v1.0', desc: 'Triển khai phần mềm quản lý học viên AI đầu tiên tại TP.HCM, tự động hóa quy trình chăm sóc.' },
-    { year: '2023', title: 'AI Teacher Assistant', desc: 'Ra mắt trợ lý giảng dạy AI hỗ trợ giáo viên soạn giáo án, tạo đề và hỗ trợ chấm điểm Writing/Speaking.' },
-    { year: '2026', title: 'SeduAi Platform v3', desc: 'Nền tảng toàn diện tích hợp LMS thông minh, phục vụ hơn 15,000+ học viên trên toàn quốc.' },
+    { date: '01/07/2026', title: 'Khởi động dự án SeduAi & Thiết kế Kiến trúc', desc: 'Đặt những viên gạch đầu tiên cho nền tảng EdTech kết hợp AI. Thiết lập ý tưởng về hệ thống cá nhân hóa lộ trình và kiến trúc cơ sở dữ liệu ban đầu.' },
+    { date: '08/07/2026', title: 'Hoàn thiện phân hệ AI Admissions CRM', desc: 'Triển khai thành công hệ thống tối ưu tuyển sinh và phân loại lead thông minh, tích hợp chatbot tự động hỗ trợ tư vấn học viên 24/7.' },
+    { date: '12/07/2026', title: 'Tích hợp trợ lý AI Teacher Assistant', desc: 'Ra mắt bộ công cụ hỗ trợ giáo viên soạn giáo án bài bản tự động và chấm điểm kỹ năng Writing/Speaking tiếng Anh chi tiết.' },
+    { date: 'Hiện tại (14/07/2026)', title: 'Tinh chỉnh LMS & AI Learning Companion', desc: 'Tối ưu hóa các lớp học trực tuyến, bảng theo dõi năng lực cá nhân và trợ lý ảo giao tiếp đàm thoại giọng nói hai chiều thời gian thực.' },
+    { date: 'Tháng 08/2026 (Kế hoạch)', title: 'Phát hành chính thức SeduAi v1.0', desc: 'Mở rộng quy mô phục vụ diện rộng trên production, kết nối đồng bộ dữ liệu tài khoản từ hệ thống quản trị NKS để phục vụ hàng ngàn học viên.' },
   ];
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-24 overflow-x-hidden">
+    <div className="bg-slate-50 min-h-screen pb-24 overflow-x-hidden relative">
       {/* Hero Banner with Premium Grid and Particle Effects */}
       <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-primary-dark py-28 text-white relative overflow-hidden">
         {/* Decorative Grid Overlays */}
@@ -214,7 +215,11 @@ export default function AboutPage() {
         </div>
       </div>
 
-      <div ref={sectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 space-y-28">
+      {/* Background Decorative Blurs for Main Content */}
+      <div className="absolute top-[25%] left-10 w-96 h-96 bg-primary/5 rounded-full blur-[100px] -z-10 pointer-events-none" />
+      <div className="absolute top-[60%] right-10 w-96 h-96 bg-accent/5 rounded-full blur-[100px] -z-10 pointer-events-none" />
+
+      <div ref={sectionRef} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 space-y-20 relative z-10">
         
         {/* Mission & Vision Section */}
         <div className="reveal-section grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -411,46 +416,59 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Timeline Story */}
-        <div className="reveal-section space-y-12">
-          <div className="text-center space-y-3 scroll-reveal">
-            <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3.5 py-1.5 rounded-lg inline-block">Lịch sử phát triển</span>
-            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Hành Trình Kiến Tạo SeduAi</h2>
-            <p className="text-slate-500 max-w-xl mx-auto text-sm">Đi qua các cột mốc quan trọng, nỗ lực không ngừng nghỉ để hoàn thiện chất lượng công nghệ giáo dục.</p>
-          </div>
-          <div className="relative">
-            {/* Vertical glowing line */}
-            <div className="absolute left-4 md:left-1/2 top-4 bottom-4 w-0.5 bg-gradient-to-b from-primary via-blue-400 to-accent hidden md:block -translate-x-1/2" />
-            
-            <div className="space-y-12">
-              {timeline.map((item, i) => {
-                const isEven = i % 2 === 0;
-                return (
-                  <div 
-                    key={i} 
-                    className={`flex flex-col md:flex-row gap-6 md:gap-12 items-start scroll-reveal relative`}
-                    style={{ transitionDelay: `${i * 120}ms` }}
-                  >
-                    {/* Timeline Node dot */}
-                    <div className="absolute left-4 md:left-1/2 w-8 h-8 rounded-full bg-white border-4 border-primary flex items-center justify-center z-20 -translate-x-1/2 shadow-lg hidden md:flex">
-                      <div className="w-2.5 h-2.5 rounded-full bg-accent animate-ping" />
-                    </div>
-
-                    {/* Timeline card left/right */}
-                    <div className={`w-full md:w-[45%] ${isEven ? 'md:text-right md:ml-auto' : 'md:mr-auto'}`}>
-                      <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-md hover-lift-glow card-shine group">
-                        <div className={`flex items-center gap-3 mb-3 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
-                          {!isEven && <span className="text-xs font-extrabold text-primary bg-primary-light px-2.5 py-1 rounded-lg">{item.year}</span>}
-                          <h3 className="font-bold text-slate-900 text-lg group-hover:text-primary transition-colors duration-200">{item.title}</h3>
-                          {isEven && <span className="text-xs font-extrabold text-primary bg-primary-light px-2.5 py-1 rounded-lg">{item.year}</span>}
-                        </div>
-                        <p className="text-slate-500 text-sm leading-relaxed">{item.desc}</p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+        {/* Timeline Roadmap Section (Double-Column Spacing Fix) */}
+        <div className="reveal-section grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          {/* Timeline Info left column (4 cols) */}
+          <div className="lg:col-span-4 space-y-5 scroll-reveal">
+            <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3.5 py-1.5 rounded-lg inline-block">
+              Lộ trình & Cột mốc
+            </span>
+            <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+              Hành Trình Kiến Tạo <br />
+              <span className="gradient-text">SeduAi Platform</span>
+            </h2>
+            <p className="text-slate-600 text-sm leading-relaxed">
+              Bắt đầu từ đầu tháng 7 năm 2026, dự án SeduAi đã trải qua các chu kỳ phát triển và hoàn thiện thần tốc nhằm đưa giải pháp giáo dục AI tốt nhất tới người dạy và người học.
+            </p>
+            <div className="p-5 bg-white border border-slate-150 rounded-2xl shadow-sm space-y-2">
+              <h4 className="font-bold text-slate-900 text-xs sm:text-sm flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-primary" />
+                Chu kỳ Phát triển Thần tốc
+              </h4>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Các cấu phần tuyển sinh (CRM), trợ giảng (Teacher Assistant) và đồng hành học tập (Learning Companion) được hoàn thành liên tục chỉ trong 2 tuần.
+              </p>
             </div>
+          </div>
+
+          {/* Timeline Node List right column (8 cols) */}
+          <div className="lg:col-span-8 relative pl-6 md:pl-8 border-l-2 border-slate-200/80 space-y-8 scroll-reveal delay-200">
+            {timeline.map((item, i) => (
+              <div 
+                key={i} 
+                className="relative group transition-all duration-300"
+              >
+                {/* Node indicator */}
+                <div className="absolute -left-[31px] md:-left-[39px] top-1.5 w-[10px] h-[10px] md:w-[14px] md:h-[14px] rounded-full bg-white border-[3px] md:border-4 border-primary flex items-center justify-center z-20 group-hover:scale-125 transition-transform duration-300">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-ping opacity-0 group-hover:opacity-100" />
+                </div>
+
+                {/* Event Card */}
+                <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-md hover-lift-glow card-shine">
+                  <div className="flex flex-wrap items-center gap-3 mb-2">
+                    <span className="text-[10px] font-extrabold text-primary bg-primary-light px-2.5 py-1 rounded-lg">
+                      {item.date}
+                    </span>
+                    <h3 className="font-bold text-slate-900 text-base group-hover:text-primary transition-colors duration-200">
+                      {item.title}
+                    </h3>
+                  </div>
+                  <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
