@@ -1,20 +1,13 @@
 import type { Metadata } from 'next';
-import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
+import { Outfit } from 'next/font/google';
 import './globals.css';
 import Providers from '@/components/Providers';
 import LayoutWrapper from '@/components/LayoutWrapper';
 
-const inter = Inter({
-  subsets: ['latin', 'vietnamese'],
+const outfit = Outfit({
+  subsets: ['latin'],
   display: 'swap',
   variable: '--font-sans',
-  preload: false,
-});
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ['latin', 'vietnamese'],
-  display: 'swap',
-  variable: '--font-heading',
   preload: false,
 });
 
@@ -29,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className={`${inter.variable} ${plusJakartaSans.variable} h-full scroll-smooth`}>
+    <html lang="vi" className={`${outfit.variable} h-full scroll-smooth`}>
       <body className="font-sans antialiased text-slate-800 bg-slate-50 min-h-full flex flex-col">
         <Providers>
           <LayoutWrapper>{children}</LayoutWrapper>
