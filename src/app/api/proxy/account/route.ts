@@ -14,7 +14,9 @@ function asObject(value: unknown): JsonObject {
 }
 
 function stringValue(value: unknown): string | null {
-  return typeof value === 'string' && value.trim() ? value.trim() : null;
+  if (value === null || value === undefined) return null;
+  const str = typeof value === 'string' ? value.trim() : String(value).trim();
+  return str ? str : null;
 }
 
 function extractToken(value: unknown): string | null {
@@ -164,6 +166,13 @@ export async function POST(req: NextRequest) {
     const responseStatus = upstreamResponse.ok
       ? (operationSucceeded ? 200 : (action === '' || action === 'login' ? 401 : 400))
       : upstreamResponse.status;
+    if (upstreamResponse.ok && !operationSucceeded) {
+      console.warn(
+        `[Proxy Account] Upstream OK but validation failed for action "${action}". account:`,
+        JSON.stringify(account),
+        `hasToken: ${Boolean(responseToken)}`
+      );
+    }
     const response = NextResponse.json(json, { status: responseStatus });
 
     if (action === 'login') {
