@@ -8,7 +8,7 @@ import LMSSidebar from '@/components/lms/LMSSidebar';
 export default function LMSLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { accessToken, isLoading, lmsRole, lmsUserId } = useAuth();
+  const { accessToken, isLoading, lmsRole, lmsUserId, lmsIdentityLoading, lmsIdentityError, logout } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !accessToken) {
@@ -26,7 +26,7 @@ export default function LMSLayout({ children }: { children: React.ReactNode }) {
     }
   }, [isLoading, accessToken, pathname, lmsRole, lmsUserId, router]);
 
-  if (isLoading || (accessToken && !lmsUserId)) {
+  if (isLoading || lmsIdentityLoading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -38,6 +38,28 @@ export default function LMSLayout({ children }: { children: React.ReactNode }) {
   }
 
   if (!accessToken) return null;
+
+  if (!lmsUserId) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
+        <div className="w-full max-w-md rounded-2xl border border-rose-500/20 bg-slate-900 p-7 text-center shadow-2xl">
+          <h1 className="text-xl font-black text-white">Không thể truy cập LMS</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-400">
+            {lmsIdentityError || 'Tài khoản chưa được cấp vai trò trong hệ thống LMS.'}
+          </p>
+          <button
+            onClick={() => {
+              logout();
+              router.replace('/login');
+            }}
+            className="mt-6 w-full rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white hover:bg-blue-700"
+          >
+            Đăng nhập lại
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-50">

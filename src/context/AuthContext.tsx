@@ -17,6 +17,8 @@ interface AuthContextType {
   isLoading: boolean;
   lmsRole: UserRole;
   lmsUserId: string | null;
+  lmsIdentityLoading: boolean;
+  lmsIdentityError: string | null;
   login: (token: string, userInfo: UserInfo) => void;
   logout: () => void;
   updateUser: (data: Partial<UserInfo>) => void;
@@ -39,6 +41,8 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   lmsRole: 'STUDENT',
   lmsUserId: null,
+  lmsIdentityLoading: true,
+  lmsIdentityError: null,
   login: () => {},
   logout: () => {},
   updateUser: () => {},
@@ -59,6 +63,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return 'STUDENT';
   });
   const [lmsUserId, setLmsUserId] = useState<string | null>(null);
+  const [lmsIdentityLoading, setLmsIdentityLoading] = useState(true);
+  const [lmsIdentityError, setLmsIdentityError] = useState<string | null>(null);
 
   // Sync state từ localStorage khi mount
   useEffect(() => {
@@ -114,29 +120,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Resolve the authenticated NKS account to its LMS identity once per login.
   useEffect(() => {
-    if (!user?.username || !accessToken) return;
+    if (isLoading) return;
+    if (!user?.username || !accessToken) {
+      setLmsIdentityLoading(false);
+      setLmsIdentityError(accessToken ? 'Tài khoản NKS không có username hợp lệ.' : null);
+      return;
+    }
 
     let cancelled = false;
-    fetch(`/api/lms/users?username=${encodeURIComponent(user.username)}`)
-      .then((response) => response.json())
-      .then((result) => {
-        if (cancelled || !result.success || !result.data?.[0]) return;
+    setLmsIdentityLoading(true);
+    setLmsIdentityError(null);
+    fetch(`/api/lms/users?username=${encodeURIComponent(user.username)}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+      .then(async (response) => ({ response, result: await response.json() }))
+      .then(({ response, result }) => {
+        if (cancelled) return;
+        if (!response.ok || !result.success || !result.data?.[0]) {
+          setLmsUserId(null);
+          setLmsIdentityError(result.error || 'Tài khoản chưa được cấp quyền sử dụng LMS.');
+          return;
+        }
         const lmsUser = result.data[0];
         setLmsUserId(lmsUser.id);
         setLmsRoleState(lmsUser.role);
         localStorage.setItem('seduai_lms_user_id', lmsUser.id);
         localStorage.setItem('seduai_lms_role', lmsUser.role);
       })
-      .catch((error) => console.error('Không thể đồng bộ tài khoản LMS:', error));
+      .catch((error) => {
+        if (!cancelled) {
+          console.error('Không thể đồng bộ tài khoản LMS:', error);
+          setLmsUserId(null);
+          setLmsIdentityError('Không thể kết nối dịch vụ xác thực LMS. Vui lòng thử đăng nhập lại.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLmsIdentityLoading(false);
+      });
 
     return () => {
       cancelled = true;
     };
-  }, [user?.username, accessToken]);
+  }, [user?.username, accessToken, isLoading]);
 
   const login = (token: string, userInfo: UserInfo) => {
     setAccessToken(token);
     setUser(userInfo);
+    setLmsIdentityLoading(true);
+    setLmsIdentityError(null);
     localStorage.setItem('seduai_access_token', token);
     localStorage.setItem('seduai_user_info', JSON.stringify(userInfo));
 
@@ -160,6 +191,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLocalSync(defaultLocalSync);
     setLmsRoleState('STUDENT');
     setLmsUserId(null);
+    setLmsIdentityLoading(false);
+    setLmsIdentityError(null);
     localStorage.removeItem('seduai_access_token');
     localStorage.removeItem('seduai_user_info');
     localStorage.removeItem('seduai_local_sync');
@@ -201,6 +234,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         lmsRole,
         lmsUserId,
+        lmsIdentityLoading,
+        lmsIdentityError,
         login,
         logout,
         updateUser,
