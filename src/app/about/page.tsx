@@ -28,6 +28,10 @@ export default function AboutPage() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
+            // Also reveal the section element itself if it has scroll-reveal class
+            if (entry.target.classList.contains('scroll-reveal')) {
+              entry.target.classList.add('revealed');
+            }
             entry.target.querySelectorAll('.scroll-reveal').forEach((el, i) => {
               setTimeout(() => el.classList.add('revealed'), i * 120);
             });
@@ -265,14 +269,14 @@ export default function AboutPage() {
         </div>
 
         {/* Ecosystem Section (Interactive Tabs) */}
-        <div id="ecosystem" className="reveal-section space-y-10 scroll-reveal">
-          <div className="text-center space-y-3">
+        <div id="ecosystem" className="reveal-section space-y-10">
+          <div className="text-center space-y-3 scroll-reveal">
             <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3.5 py-1.5 rounded-lg inline-block">Hệ sinh thái công nghệ</span>
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Hạ Tầng Giáo Dục Số SeduAi</h2>
             <p className="text-slate-500 max-w-xl mx-auto text-sm">Chúng tôi phát triển và tích hợp 3 trụ cột công nghệ cốt lõi giúp kết nối nhà trường, giáo viên và học viên hiệu quả.</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start scroll-reveal delay-200">
             {/* Tab selection triggers */}
             <div className="lg:col-span-4 flex flex-col gap-3">
               {[
@@ -538,8 +542,8 @@ export default function AboutPage() {
         </div>
 
         {/* Action CTA Section */}
-        <div className="reveal-section scroll-reveal">
-          <div className="bg-slate-900 rounded-3xl py-14 px-8 sm:px-16 text-center text-white relative overflow-hidden shadow-2xl border border-slate-800">
+        <div className="reveal-section">
+          <div className="bg-slate-900 rounded-3xl py-14 px-8 sm:px-16 text-center text-white relative overflow-hidden shadow-2xl border border-slate-800 scroll-reveal">
             {/* Grid Pattern overlays */}
             <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:3rem_3rem]" />
             <div className="absolute -right-10 -bottom-10 w-80 h-80 bg-primary/20 rounded-full blur-[100px] animate-blob" style={{ animationDelay: '2s' }} />
