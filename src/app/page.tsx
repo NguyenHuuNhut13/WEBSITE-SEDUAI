@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ArrowRight,
   Bot,
@@ -476,7 +477,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ====== Grayscale Partner Logos Marquee with Custom SVG Icons ====== */}
+      {/* ====== Grayscale Partner Logos Marquee ====== */}
       <section className="py-14 bg-white border-t border-slate-100 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-8">
@@ -489,7 +490,13 @@ export default async function Home() {
                   key={i}
                   className="flex-shrink-0 flex items-center px-6 py-3.5 bg-white border border-slate-200/80 rounded-2xl text-xs font-bold text-slate-500 hover:text-primary hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-md cursor-default group"
                 >
-                  {partner.logo}
+                  <Image
+                    src={partner.logo}
+                    alt={`Logo ${partner.name}`}
+                    width={96}
+                    height={40}
+                    className="mr-3 h-8 w-20 object-contain grayscale opacity-70 transition-all duration-300 group-hover:grayscale-0 group-hover:opacity-100"
+                  />
                   <span>{partner.name}</span>
                 </div>
               ))}
