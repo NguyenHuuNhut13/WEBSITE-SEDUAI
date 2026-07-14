@@ -8,7 +8,7 @@ import LMSSidebar from '@/components/lms/LMSSidebar';
 export default function LMSLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { accessToken, isLoading, lmsRole, lmsUserId, lmsIdentityLoading, lmsIdentityError, logout } = useAuth();
+  const { accessToken, isLoading, lmsRole, lmsUserId, lmsIdentityLoading, lmsIdentityError } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !accessToken) {
@@ -47,15 +47,21 @@ export default function LMSLayout({ children }: { children: React.ReactNode }) {
           <p className="mt-3 text-sm leading-6 text-slate-400">
             {lmsIdentityError || 'Tài khoản chưa được cấp vai trò trong hệ thống LMS.'}
           </p>
-          <button
-            onClick={() => {
-              logout();
-              router.replace('/login');
-            }}
-            className="mt-6 w-full rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white hover:bg-blue-700"
-          >
-            Đăng nhập lại
-          </button>
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <button
+              onClick={() => window.location.reload()}
+              className="rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white hover:bg-blue-700"
+            >
+              Thử lại
+            </button>
+            <button
+              onClick={() => router.replace('/profile')}
+              className="rounded-xl bg-slate-800 px-4 py-3 text-sm font-bold text-slate-200 hover:bg-slate-700"
+            >
+              Về trang cá nhân
+            </button>
+          </div>
+          <p className="mt-4 text-xs text-slate-500">Phiên đăng nhập NKS của bạn vẫn được giữ nguyên.</p>
         </div>
       </div>
     );

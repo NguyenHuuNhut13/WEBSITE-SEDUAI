@@ -29,8 +29,30 @@ export async function requireLmsUser(request: NextRequest, roles?: UserRole[]): 
   const username = account?.username;
   if (!username) throw new LmsAuthError('Không xác định được tài khoản NKS', 401);
 
-  const user = await prisma.lmsUser.findUnique({ where: { username } });
-  if (!user) throw new LmsAuthError('Tài khoản chưa được cấp quyền vào LMS', 403);
+  // Every verified NKS account receives a least-privilege LMS identity.
+  // Existing ADMIN/TEACHER roles are preserved because role is never updated here.
+  const displayName = account.name
+    || `${account.lastname || ''} ${account.firstname || ''}`.trim()
+    || username;
+  const user = await prisma.lmsUser.upsert({
+    where: { username },
+    update: {
+      name: displayName,
+      email: account.email || undefined,
+      phone: account.phone || undefined,
+      avatar: account.avatar || undefined,
+      nksUserId: account.id !== undefined && account.id !== null ? String(account.id) : undefined,
+    },
+    create: {
+      username,
+      name: displayName,
+      email: account.email || undefined,
+      phone: account.phone || undefined,
+      avatar: account.avatar || undefined,
+      nksUserId: account.id !== undefined && account.id !== null ? String(account.id) : undefined,
+      role: 'STUDENT',
+    },
+  });
   if (roles && !roles.includes(user.role)) throw new LmsAuthError('Bạn không có quyền thực hiện thao tác này', 403);
   return user;
 }
