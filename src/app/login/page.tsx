@@ -88,12 +88,13 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-primary-dark flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Decorative patterns */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-15"></div>
-      <div className="absolute top-1/4 left-10 w-96 h-96 bg-primary/20 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl"></div>
+      {/* Animated Blob Backgrounds */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-10" />
+      <div className="absolute top-1/4 left-10 w-96 h-96 bg-primary/25 rounded-full blur-3xl animate-blob" />
+      <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl animate-blob" style={{ animationDelay: '4s' }} />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-500/15 rounded-full blur-3xl animate-blob" style={{ animationDelay: '8s' }} />
 
-      <div className="max-w-md w-full bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 p-8 relative z-10 animate-scale-up">
+      <div className="max-w-md w-full bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl shadow-black/30 border border-white/30 p-8 relative z-10 animate-slide-up-fade">
         {/* Logo & Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2.5 mb-4 group">
@@ -149,7 +150,7 @@ export default function LoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Nhập tên đăng nhập hoặc email..."
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-xs text-slate-800 bg-slate-50 transition"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-white focus:shadow-sm focus:shadow-primary/10 text-xs text-slate-800 bg-slate-50/80 transition-all duration-200"
               />
             </div>
           )}
@@ -169,21 +170,24 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••••"
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-xs text-slate-800 bg-slate-50 transition"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-white focus:shadow-sm focus:shadow-primary/10 text-xs text-slate-800 bg-slate-50/80 transition-all duration-200"
             />
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3.5 bg-primary hover:bg-primary-dark disabled:bg-slate-300 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-primary/25 transition flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-3.5 bg-gradient-to-r from-primary to-blue-600 hover:from-primary-dark hover:to-primary disabled:from-slate-300 disabled:to-slate-300 disabled:cursor-not-allowed text-white font-extrabold text-xs rounded-xl shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer animate-gradient-shift"
           >
             {isLoading ? (
-              <span>Đang kết nối API...</span>
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>Đang kết nối API...</span>
+              </>
             ) : (
               <>
                 <span>Đăng nhập hệ thống</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </>
             )}
           </button>

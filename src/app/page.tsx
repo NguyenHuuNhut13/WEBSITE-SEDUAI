@@ -161,7 +161,7 @@ export default async function Home() {
                 href={`/courses?category=${encodeURIComponent(cat.title.split(' & ')[0])}`}
                 className={`border rounded-2xl p-6 text-center space-y-3 transition-all duration-300 group card-hover-lift ${cat.color} ${cat.hoverColor}`}
               >
-                <div className="w-16 h-16 rounded-2xl bg-white/80 flex items-center justify-center mx-auto shadow-sm group-hover:bg-white/20 transition duration-300">
+                <div className="w-16 h-16 rounded-2xl bg-white/80 flex items-center justify-center mx-auto shadow-sm group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300">
                   {cat.icon}
                 </div>
                 <h3 className="font-bold text-sm">{cat.title}</h3>
@@ -186,16 +186,18 @@ export default async function Home() {
             </div>
             <Link
               href="/courses"
-              className="px-5 py-2.5 rounded-full border border-slate-200 hover:border-primary hover:text-primary text-slate-600 font-semibold text-sm transition duration-200 flex items-center gap-2 cursor-pointer bg-white shadow-sm"
+              className="px-5 py-2.5 rounded-full border border-primary/30 hover:bg-primary hover:text-white text-primary font-semibold text-sm transition-all duration-300 flex items-center gap-2 cursor-pointer bg-primary-light shadow-sm hover:shadow-primary/30 hover:shadow-md group"
             >
               Xem tất cả khóa học
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
             </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredCourses.map((course) => (
-              <CourseCard key={course.slug} course={course} />
+            {featuredCourses.map((course, idx) => (
+              <div key={course.slug} className="animate-fade-in-up" style={{ animationDelay: `${idx * 80}ms`, animationFillMode: 'both' }}>
+                <CourseCard course={course} />
+              </div>
             ))}
           </div>
         </div>
@@ -217,12 +219,13 @@ export default async function Home() {
             {whyChooseUs.map((item, index) => (
               <div
                 key={index}
-                className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 card-hover-lift group text-center"
+                className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 hover-lift-glow glow-border card-shine group text-center animate-fade-in-up"
+                style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'both' }}
               >
-                <div className="w-14 h-14 rounded-2xl bg-primary-light text-primary flex items-center justify-center mx-auto group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-sm">
+                <div className="w-14 h-14 rounded-2xl bg-primary-light text-primary flex items-center justify-center mx-auto group-hover:bg-primary group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-sm">
                   {item.icon}
                 </div>
-                <h3 className="font-bold text-slate-900 text-base">{item.title}</h3>
+                <h3 className="font-bold text-slate-900 text-base group-hover:text-primary transition-colors duration-200">{item.title}</h3>
                 <p className="text-xs text-slate-500 leading-relaxed">{item.desc}</p>
               </div>
             ))}

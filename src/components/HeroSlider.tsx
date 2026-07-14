@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Search, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ArrowRight, ChevronLeft, ChevronRight, Zap, Users, ThumbsUp, Building2 } from 'lucide-react';
 
 const slides = [
   {
@@ -28,28 +28,74 @@ const slides = [
   },
 ];
 
+const typingWords = ['Cá nhân hóa', 'Tự động hóa', 'Nâng tầm', 'Tối ưu hóa'];
+
 export default function HeroSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [progress, setProgress] = useState(0);
+  const [typingIndex, setTypingIndex] = useState(0);
+  const [typingText, setTypingText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
+    setProgress(0);
   }, []);
 
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    setProgress(0);
   };
 
-  // Auto-rotate slides
+  // Auto-rotate slides with progress
   useEffect(() => {
-    const timer = setInterval(nextSlide, 6000);
-    return () => clearInterval(timer);
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          nextSlide();
+          return 0;
+        }
+        return prev + 100 / 60;
+      });
+    }, 100);
+    return () => clearInterval(progressInterval);
   }, [nextSlide]);
+
+  // Typing effect
+  useEffect(() => {
+    const word = typingWords[typingIndex];
+    const timeout = setTimeout(
+      () => {
+        if (!isDeleting) {
+          if (typingText.length < word.length) {
+            setTypingText(word.slice(0, typingText.length + 1));
+          } else {
+            setTimeout(() => setIsDeleting(true), 1500);
+          }
+        } else {
+          if (typingText.length > 0) {
+            setTypingText(typingText.slice(0, -1));
+          } else {
+            setIsDeleting(false);
+            setTypingIndex((prev) => (prev + 1) % typingWords.length);
+          }
+        }
+      },
+      isDeleting ? 60 : 100
+    );
+    return () => clearTimeout(timeout);
+  }, [typingText, isDeleting, typingIndex]);
 
   const slide = slides[currentSlide];
 
   return (
-    <section className="relative h-[600px] lg:h-[680px] overflow-hidden">
+    <section className="relative h-[620px] lg:h-[700px] overflow-hidden">
+      {/* Floating Glow Orbs */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-blob pointer-events-none z-0" />
+      <div className="absolute bottom-1/3 right-1/4 w-64 h-64 bg-blue-400/15 rounded-full blur-3xl animate-blob pointer-events-none z-0" style={{ animationDelay: '4s' }} />
+      <div className="absolute top-1/2 left-2/3 w-48 h-48 bg-accent/10 rounded-full blur-3xl animate-blob pointer-events-none z-0" style={{ animationDelay: '8s' }} />
+
       {/* Background Images */}
       {slides.map((s, index) => (
         <div
@@ -63,39 +109,42 @@ export default function HeroSlider() {
             alt={s.title}
             className="w-full h-full object-cover animate-hero-zoom"
             loading="eager"
-            fetchPriority={index === 0 ? 'high' : 'auto'}
             decoding="async"
           />
         </div>
       ))}
 
       {/* Overlay */}
-      <div className="absolute inset-0 hero-overlay"></div>
+      <div className="absolute inset-0 hero-overlay" />
 
       {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-10"></div>
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-[0.07]" />
 
       {/* Content */}
       <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center">
         <div className="max-w-3xl space-y-6">
           {/* Subtitle badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-xs font-semibold uppercase tracking-wider animate-fade-in">
-            <span className="flex h-2 w-2 rounded-full bg-primary animate-ping"></span>
+            <span className="flex h-2 w-2 rounded-full bg-accent animate-ping" />
             {slide.subtitle}
           </div>
 
-          {/* Title */}
+          {/* Title with Typing Effect */}
           <h1
             key={`title-${currentSlide}`}
             className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight animate-fade-in-up"
           >
+            <span className="block text-white/90 text-2xl sm:text-3xl font-bold mb-2 flex items-center gap-2">
+              <span className="shimmer-text">{typingText}</span>
+              <span className="inline-block w-0.5 h-7 bg-accent ml-1" style={{ animation: 'typing-cursor 0.8s ease-in-out infinite' }} />
+            </span>
             {slide.title}
           </h1>
 
           {/* Description */}
           <p
             key={`desc-${currentSlide}`}
-            className="text-slate-200 text-lg max-w-2xl animate-fade-in-up delay-200"
+            className="text-slate-200 text-base sm:text-lg max-w-2xl animate-fade-in-up delay-200"
             style={{ animationFillMode: 'both' }}
           >
             {slide.description}
@@ -103,7 +152,7 @@ export default function HeroSlider() {
 
           {/* Search Bar */}
           <div className="animate-fade-in-up delay-300" style={{ animationFillMode: 'both' }}>
-            <div className="flex max-w-lg bg-white rounded-full overflow-hidden shadow-2xl shadow-black/20">
+            <div className="flex max-w-lg bg-white/95 backdrop-blur-sm rounded-full overflow-hidden shadow-2xl shadow-black/30 border border-white/40 transition-all duration-300 hover:shadow-primary/20 hover:shadow-2xl focus-within:ring-2 focus-within:ring-primary/30">
               <div className="flex-grow flex items-center px-5">
                 <Search className="w-5 h-5 text-slate-400 flex-shrink-0" />
                 <input
@@ -116,7 +165,7 @@ export default function HeroSlider() {
               </div>
               <Link
                 href={searchQuery ? `/courses?q=${encodeURIComponent(searchQuery)}` : '/courses'}
-                className="px-6 py-4 bg-primary hover:bg-primary-dark text-white font-bold text-sm transition-colors duration-200 flex items-center gap-2"
+                className="px-6 py-4 bg-gradient-to-r from-primary to-blue-600 hover:from-primary-dark hover:to-primary text-white font-bold text-sm transition-all duration-300 flex items-center gap-2"
               >
                 Tìm kiếm
                 <ArrowRight className="w-4 h-4" />
@@ -125,21 +174,24 @@ export default function HeroSlider() {
           </div>
 
           {/* Quick Stats */}
-          <div className="flex items-center gap-8 pt-2 animate-fade-in-up delay-400" style={{ animationFillMode: 'both' }}>
-            <div className="text-white">
-              <span className="text-2xl font-extrabold">15,000+</span>
-              <p className="text-xs text-slate-300 font-medium">Học viên</p>
-            </div>
-            <div className="w-px h-10 bg-white/20"></div>
-            <div className="text-white">
-              <span className="text-2xl font-extrabold">250+</span>
-              <p className="text-xs text-slate-300 font-medium">Đối tác</p>
-            </div>
-            <div className="w-px h-10 bg-white/20"></div>
-            <div className="text-white">
-              <span className="text-2xl font-extrabold">98%</span>
-              <p className="text-xs text-slate-300 font-medium">Hài lòng</p>
-            </div>
+          <div className="flex flex-wrap items-center gap-6 pt-2 animate-fade-in-up delay-400" style={{ animationFillMode: 'both' }}>
+            {[
+              { icon: <Users className="w-3.5 h-3.5" />, value: '15,000+', label: 'Học viên' },
+              { icon: <Building2 className="w-3.5 h-3.5" />, value: '250+', label: 'Đối tác' },
+              { icon: <ThumbsUp className="w-3.5 h-3.5" />, value: '98%', label: 'Hài lòng' },
+              { icon: <Zap className="w-3.5 h-3.5" />, value: '24/7', label: 'AI Support' },
+            ].map((stat, i) => (
+              <div key={i} className="flex items-center gap-2 text-white group">
+                {i > 0 && <div className="w-px h-8 bg-white/20 mr-4 hidden sm:block" />}
+                <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-accent group-hover:bg-white/20 transition-colors duration-200">
+                  {stat.icon}
+                </div>
+                <div>
+                  <span className="text-xl font-extrabold block leading-none">{stat.value}</span>
+                  <p className="text-[10px] text-slate-300 font-medium">{stat.label}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -147,29 +199,34 @@ export default function HeroSlider() {
       {/* Navigation Arrows */}
       <button
         onClick={prevSlide}
-        className="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200 flex items-center justify-center cursor-pointer"
+        className="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full glass-card-dark border border-white/20 text-white hover:bg-white/20 hover:scale-110 transition-all duration-300 flex items-center justify-center cursor-pointer group"
       >
-        <ChevronLeft className="w-5 h-5" />
+        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all duration-200 flex items-center justify-center cursor-pointer"
+        className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full glass-card-dark border border-white/20 text-white hover:bg-white/20 hover:scale-110 transition-all duration-300 flex items-center justify-center cursor-pointer group"
       >
-        <ChevronRight className="w-5 h-5" />
+        <ChevronRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
       </button>
 
-      {/* Dot Indicators */}
+      {/* Progress Dot Indicators */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
         {slides.map((_, index) => (
           <button
             key={index}
-            onClick={() => setCurrentSlide(index)}
-            className={`transition-all duration-300 rounded-full cursor-pointer ${
-              index === currentSlide
-                ? 'w-8 h-3 bg-primary'
-                : 'w-3 h-3 bg-white/40 hover:bg-white/60'
+            onClick={() => { setCurrentSlide(index); setProgress(0); }}
+            className={`relative transition-all duration-400 rounded-full cursor-pointer overflow-hidden ${
+              index === currentSlide ? 'w-10 h-3 bg-white/30' : 'w-3 h-3 bg-white/40 hover:bg-white/60'
             }`}
-          />
+          >
+            {index === currentSlide && (
+              <span
+                className="absolute inset-y-0 left-0 bg-accent rounded-full transition-none"
+                style={{ width: `${progress}%` }}
+              />
+            )}
+          </button>
         ))}
       </div>
     </section>
