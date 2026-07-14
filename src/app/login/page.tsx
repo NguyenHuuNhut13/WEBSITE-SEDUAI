@@ -70,7 +70,7 @@ export default function LoginPage() {
         localStorage.setItem('seduai_remembered_user', username);
         router.push('/profile');
       } else {
-        setError(res.error || res.message || 'Tài khoản hoặc mật khẩu API không chính xác.');
+        setError(res.error || res.message || 'Tài khoản hoặc mật khẩu không chính xác.');
       }
     } catch (err: any) {
       setError('Đã xảy ra lỗi kết nối. Vui lòng thử lại sau.');
@@ -108,7 +108,7 @@ export default function LoginPage() {
           </Link>
           <h1 className="text-xl font-extrabold text-slate-900">Đăng Nhập Thành Viên</h1>
           <p className="text-xs text-slate-500 mt-1">
-            Hệ sinh thái AI dành cho giáo dục - Kết nối API NKS
+            Hệ sinh thái AI dành cho giáo dục - Kết nối NKS
           </p>
         </div>
 
@@ -183,11 +183,11 @@ export default function LoginPage() {
             {isLoading ? (
               <>
                 <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                <span>Đang kết nối API...</span>
+                <span>Đang kết nối...</span>
               </>
             ) : (
               <>
-                <span>Đăng nhập hệ thống</span>
+                <span>Đăng nhập</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </>
             )}
@@ -197,7 +197,7 @@ export default function LoginPage() {
         {/* Security note */}
         <div className="mt-6 pt-6 border-t border-slate-100 text-center">
           <p className="text-[11px] text-slate-400">
-            Dữ liệu tài khoản được bảo mật và đồng bộ từ hệ thống quản trị NKS Account API.
+            Dữ liệu tài khoản được bảo mật và đồng bộ từ hệ thống quản trị NKS Account.
           </p>
         </div>
       </div>
