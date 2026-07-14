@@ -7,7 +7,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const teacherId = searchParams.get('teacherId');
 
-    const where = teacherId ? { teacherId } : {};
+    const where = (teacherId && teacherId !== 'null' && teacherId !== 'undefined' && teacherId.trim() !== '')
+      ? { teacherId }
+      : {};
     const classes = await prisma.lmsClass.findMany({
       where,
       include: {
@@ -19,7 +21,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
-    const data = classes.map((c) => ({
+    const data = classes.map((c: any) => ({
       ...c,
       studentCount: c._count.students,
       subjectCount: c._count.subjects,
@@ -48,13 +50,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Giáo viên không tồn tại hoặc không có quyền' }, { status: 400 });
     }
 
+    // Lọc các môn học hợp lệ (tối đa 4 môn, không rỗng)
+    const validSubjects = (subjects || [])
+      .map((s: any) => (typeof s === 'string' ? s.trim() : ''))
+      .filter(Boolean);
+
     // Tạo lớp + 4 môn học
     const newClass = await prisma.lmsClass.create({
       data: {
         name,
         teacherId,
         subjects: {
-          create: (subjects || []).slice(0, 4).map((subjectName: string) => ({
+          create: validSubjects.slice(0, 4).map((subjectName: string) => ({
             name: subjectName,
           })),
         },

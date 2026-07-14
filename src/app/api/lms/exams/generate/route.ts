@@ -11,6 +11,8 @@ export async function POST(request: NextRequest) {
     let questionCount = body.questionCount;
     let subjectName = body.subjectName || 'Môn học';
 
+    let configSubjectId: string | undefined = undefined;
+
     // Nếu có examConfigId, lấy config từ DB
     if (examConfigId) {
       const config = await prisma.lmsExamConfig.findUnique({
@@ -24,6 +26,7 @@ export async function POST(request: NextRequest) {
 
       questionCount = config.questionCount;
       subjectName = config.subject.name;
+      configSubjectId = config.subjectId;
     }
 
     if (!questionCount) {
@@ -32,14 +35,14 @@ export async function POST(request: NextRequest) {
 
     // Lấy nội dung bài học để AI sinh câu hỏi
     let lessonContents: string[] = [];
-    const targetSubjectId = subjectId || (examConfigId ? undefined : null);
+    const targetSubjectId = subjectId || configSubjectId;
 
     if (targetSubjectId) {
       const lessons = await prisma.lmsLesson.findMany({
         where: { subjectId: targetSubjectId },
         select: { content: true },
       });
-      lessonContents = lessons.map((l) => l.content || '').filter(Boolean);
+      lessonContents = lessons.map((l: { content: string | null }) => l.content || '').filter(Boolean);
     }
 
     // AI sinh câu hỏi realtime
