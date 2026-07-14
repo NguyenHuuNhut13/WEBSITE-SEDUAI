@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Menu,
   X,
@@ -56,6 +56,7 @@ export default function Navbar() {
   const [mobileCourseOpen, setMobileCourseOpen] = useState(false);
   const [mobileSearchQuery, setMobileSearchQuery] = useState('');
   const pathname = usePathname();
+  const router = useRouter();
   const { accessToken, localSync, logout } = useAuth();
 
   const [isSticky, setIsSticky] = useState(false);
@@ -391,7 +392,10 @@ export default function Navbar() {
                       </Link>
                       <button
                         onClick={async () => {
-                          if (await logout()) setShowUserMenu(false);
+                          if (await logout()) {
+                            setShowUserMenu(false);
+                            router.push('/');
+                          }
                         }}
                         className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition text-left cursor-pointer mt-1 border-t border-slate-100 pt-2"
                       >
@@ -574,7 +578,10 @@ export default function Navbar() {
                       </Link>
                       <button
                         onClick={async () => {
-                          if (await logout()) setIsOpen(false);
+                          if (await logout()) {
+                            setIsOpen(false);
+                            router.push('/');
+                          }
                         }}
                         className="py-2.5 px-3 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
                       >

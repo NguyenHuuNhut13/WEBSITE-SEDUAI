@@ -41,7 +41,7 @@ import {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, accessToken, localSync, updateUser, logout } = useAuth();
+  const { user, accessToken, localSync, updateUser, logout, isLoading: authLoading } = useAuth();
 
   const [activeTab, setActiveTab] = useState<'info' | 'password' | 'avatar' | 'cccd'>('info');
   const [provinces, setProvinces] = useState<Province[]>([]);
@@ -142,6 +142,12 @@ export default function ProfilePage() {
       }
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!authLoading && !accessToken) {
+      router.replace('/');
+    }
+  }, [authLoading, accessToken, router]);
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setToast({ type, message });
@@ -723,7 +729,7 @@ export default function ProfilePage() {
               <div className="pt-3 border-t border-slate-100 mt-2">
                 <button
                   onClick={async () => {
-                    if (await logout()) router.push('/login');
+                    if (await logout()) router.push('/');
                   }}
                   className="w-full px-4 py-3 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-3 transition cursor-pointer"
                 >
