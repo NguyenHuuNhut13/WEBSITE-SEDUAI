@@ -103,19 +103,10 @@ export default function CreateClassPage() {
       const res = await fetch('/api/lms/classes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, teacherId, subjects: validSubjects }),
+        body: JSON.stringify({ name, teacherId, subjects: validSubjects, studentIds: selectedStudents }),
       });
       const json = await res.json();
       if (!json.success) { setError(json.error); setSaving(false); return; }
-
-      // 2. Thêm học sinh
-      if (selectedStudents.length > 0) {
-        await fetch(`/api/lms/classes/${json.data.id}/students`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ studentIds: selectedStudents }),
-        });
-      }
 
       router.push('/lms/admin');
     } catch (e: any) {

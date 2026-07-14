@@ -34,7 +34,22 @@ export async function POST(req: Request) {
       });
     }
 
-    return NextResponse.json(json);
+    const response = NextResponse.json(json);
+    if (action === 'login' && res.ok) {
+      const data = json.data || {};
+      const token = json.access_token || json.token || data.access_token || data.token;
+      if (token) {
+        response.cookies.set('seduai_access_token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/',
+          maxAge: 60 * 60 * 24 * 7,
+        });
+      }
+    }
+    if (action === 'logout') response.cookies.delete('seduai_access_token');
+    return response;
   } catch (error: any) {
     console.error('[Proxy Account] Error:', error.message);
     return NextResponse.json({

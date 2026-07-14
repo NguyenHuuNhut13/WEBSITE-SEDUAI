@@ -3,11 +3,11 @@
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { ArrowLeft, Send, Sparkles, Loader2, Star, CheckCircle, FileText } from 'lucide-react';
+import { ArrowLeft, Send, Sparkles, Loader2, Star, FileText } from 'lucide-react';
 
 export default function StudentAssignmentSubmission({ params }: { params: Promise<{ assignmentId: string }> }) {
   const { assignmentId } = use(params);
-  const { user } = useAuth();
+  const { lmsUserId } = useAuth();
   const [assignment, setAssignment] = useState<any>(null);
   const [submission, setSubmission] = useState<any>(null);
   const [content, setContent] = useState('');
@@ -17,26 +17,18 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
   const [success, setSuccess] = useState('');
 
   const loadAssignmentAndSubmission = async () => {
-    if (!user) return;
+    if (!lmsUserId) return;
     try {
       const assRes = await fetch(`/api/lms/assignments?id=${assignmentId}`);
       const assJson = await assRes.json();
       if (assJson.success) setAssignment(assJson.data);
 
-      // Find db student user id
-      const userRes = await fetch('/api/lms/users');
-      const userJson = await userRes.json();
-      if (userJson.success) {
-        const dbUser = userJson.data.find((u: any) => u.username === user.username);
-        if (dbUser) {
-          const subRes = await fetch(`/api/lms/submissions?assignmentId=${assignmentId}&studentId=${dbUser.id}`);
-          const subJson = await subRes.json();
-          if (subJson.success && subJson.data.length > 0) {
-            const sub = subJson.data[0];
-            setSubmission(sub);
-            setContent(sub.content || '');
-          }
-        }
+      const subRes = await fetch(`/api/lms/submissions?assignmentId=${assignmentId}&studentId=${lmsUserId}`);
+      const subJson = await subRes.json();
+      if (subJson.success && subJson.data.length > 0) {
+        const sub = subJson.data[0];
+        setSubmission(sub);
+        setContent(sub.content || '');
       }
     } catch (e) {
       console.error(e);
@@ -47,7 +39,7 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
 
   useEffect(() => {
     loadAssignmentAndSubmission();
-  }, [assignmentId, user]);
+  }, [assignmentId, lmsUserId]);
 
   const handleSub = async () => {
     setError('');
@@ -59,19 +51,14 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
 
     setSubmitting(true);
     try {
-      const userRes = await fetch('/api/lms/users');
-      const userJson = await userRes.json();
-      if (!userJson.success) throw new Error('Không thể xác thực tài khoản.');
-
-      const dbUser = userJson.data.find((u: any) => u.username === user?.username);
-      if (!dbUser) throw new Error('Không tìm thấy tài khoản trong LMS.');
+      if (!lmsUserId) throw new Error('Không tìm thấy tài khoản trong LMS.');
 
       const res = await fetch('/api/lms/submissions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           assignmentId,
-          studentId: dbUser.id,
+          studentId: lmsUserId,
           content,
         }),
       });

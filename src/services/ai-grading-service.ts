@@ -177,40 +177,74 @@ export async function gradeAssignment(
   assignmentDescription: string,
   submissionContent: string
 ): Promise<{ grade: number; aiReview: string }> {
-  // TODO: Thay bằng OpenAI/Gemini API thật
-  // Mock AI grading logic
+  const prompt = `Bạn là SEDUAI, trợ lý chấm bài cho giáo viên. Hãy đánh giá bài làm theo thang 10 dựa trên đúng yêu cầu đề bài, không suy diễn kiến thức không có trong bài.
 
-  // Simulate AI processing delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
+Đề bài: ${assignmentTitle}
+Yêu cầu: ${assignmentDescription || 'Giáo viên chưa cung cấp rubric chi tiết.'}
+Bài làm của học sinh:
+${submissionContent}
 
-  const contentLength = submissionContent.length;
-  let grade: number;
-  let aiReview: string;
+Trả về duy nhất JSON hợp lệ theo cấu trúc:
+{"grade": 0-10, "strengths": ["..."], "issues": ["..."], "suggestions": ["..."], "summary": "..."}`;
 
-  if (contentLength < 50) {
-    grade = 4.0 + Math.random() * 2;
-    aiReview = `📝 **Nhận xét AI cho bài "${assignmentTitle}":**\n\n` +
-      `- **Nội dung**: Bài làm còn quá ngắn, chưa đáp ứng yêu cầu đề bài.\n` +
-      `- **Phân tích**: Cần bổ sung thêm chi tiết và lập luận.\n` +
-      `- **Đề xuất**: Đọc lại đề bài và phát triển ý tưởng rõ ràng hơn.\n` +
-      `- **Điểm mạnh**: Có nỗ lực hoàn thành bài.\n`;
-  } else if (contentLength < 200) {
-    grade = 6.0 + Math.random() * 1.5;
-    aiReview = `📝 **Nhận xét AI cho bài "${assignmentTitle}":**\n\n` +
-      `- **Nội dung**: Bài làm đạt yêu cầu cơ bản, có đề cập đến các ý chính.\n` +
-      `- **Phân tích**: Lập luận khá rõ ràng nhưng cần bổ sung ví dụ minh hoạ.\n` +
-      `- **Đề xuất**: Thêm ví dụ thực tế và phân tích sâu hơn.\n` +
-      `- **Điểm mạnh**: Trình bày mạch lạc, đúng hướng.\n`;
-  } else {
-    grade = 7.5 + Math.random() * 2.5;
-    aiReview = `📝 **Nhận xét AI cho bài "${assignmentTitle}":**\n\n` +
-      `- **Nội dung**: Bài làm xuất sắc, trả lời đầy đủ và chi tiết các yêu cầu.\n` +
-      `- **Phân tích**: Lập luận logic, có ví dụ minh hoạ rõ ràng.\n` +
-      `- **Đề xuất**: Có thể mở rộng thêm phần ứng dụng thực tế.\n` +
-      `- **Điểm mạnh**: Tư duy tốt, trình bày chuyên nghiệp, bao quát vấn đề.\n`;
+  try {
+    const raw = await callSeduAiGrader(prompt);
+    const parsed = parseGradingJson(raw);
+    const grade = Math.min(10, Math.max(0, Math.round(Number(parsed.grade) * 10) / 10));
+    const list = (items: unknown) => Array.isArray(items) ? items.map(String).slice(0, 5).map((item) => `- ${item}`).join('\n') : '- Chưa có nhận xét.';
+    return {
+      grade,
+      aiReview: `**Tóm tắt:** ${String(parsed.summary || 'SEDUAI đã phân tích bài làm.')}\n\n**Điểm mạnh**\n${list(parsed.strengths)}\n\n**Điểm cần cải thiện**\n${list(parsed.issues)}\n\n**Đề xuất**\n${list(parsed.suggestions)}\n\n*Điểm SEDUAI chỉ là đề xuất; giáo viên quyết định điểm cuối cùng.*`,
+    };
+  } catch (error) {
+    console.error('SEDUAI grading provider failed:', error);
+    const hasEnoughContent = submissionContent.trim().length >= 120;
+    return {
+      grade: hasEnoughContent ? 6.5 : 4,
+      aiReview: `SEDUAI chưa kết nối được nhà cung cấp AI nên chỉ thực hiện kiểm tra sơ bộ. Bài làm ${hasEnoughContent ? 'có độ dài cơ bản' : 'còn ngắn'}, giáo viên cần đọc và quyết định điểm cuối cùng.`,
+    };
+  }
+}
+
+async function callSeduAiGrader(prompt: string): Promise<string> {
+  if (process.env.GEMINI_API_KEY) {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.1, responseMimeType: 'application/json', maxOutputTokens: 1200 },
+      }),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) return text;
+    }
   }
 
-  grade = Math.round(grade * 10) / 10; // Round to 1 decimal
+  if (process.env.GROQ_API_KEY) {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        temperature: 0.1,
+        response_format: { type: 'json_object' },
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      const text = data.choices?.[0]?.message?.content;
+      if (text) return text;
+    }
+  }
 
-  return { grade, aiReview };
+  throw new Error('Không có nhà cung cấp AI khả dụng');
+}
+
+function parseGradingJson(raw: string): Record<string, unknown> {
+  const normalized = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+  return JSON.parse(normalized) as Record<string, unknown>;
 }

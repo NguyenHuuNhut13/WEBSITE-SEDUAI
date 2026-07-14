@@ -4,12 +4,11 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import LMSSidebar from '@/components/lms/LMSSidebar';
-import type { UserRole } from '@/types/lms-types';
 
 export default function LMSLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { accessToken, isLoading, setLmsRole, lmsRole } = useAuth();
+  const { accessToken, isLoading, lmsRole, lmsUserId } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !accessToken) {
@@ -17,20 +16,17 @@ export default function LMSLayout({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    let targetRole: UserRole | null = null;
-    if (pathname?.startsWith('/lms/admin')) targetRole = 'ADMIN';
-    else if (pathname?.startsWith('/lms/teacher')) targetRole = 'TEACHER';
-    else if (pathname?.startsWith('/lms/student')) targetRole = 'STUDENT';
-
+    if (!lmsUserId) return;
+    const targetRole = pathname?.startsWith('/lms/admin') ? 'ADMIN'
+      : pathname?.startsWith('/lms/teacher') ? 'TEACHER'
+        : pathname?.startsWith('/lms/student') ? 'STUDENT' : null;
     if (targetRole && targetRole !== lmsRole) {
-      const timer = setTimeout(() => {
-        setLmsRole(targetRole);
-      }, 0);
-      return () => clearTimeout(timer);
+      const homeByRole = { ADMIN: '/lms/admin', TEACHER: '/lms/teacher', STUDENT: '/lms/student' } as const;
+      router.replace(homeByRole[lmsRole]);
     }
-  }, [isLoading, accessToken, pathname, lmsRole, setLmsRole, router]);
+  }, [isLoading, accessToken, pathname, lmsRole, lmsUserId, router]);
 
-  if (isLoading) {
+  if (isLoading || (accessToken && !lmsUserId)) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">

@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { lmsErrorResponse, requireLmsUser } from '@/lib/lms-auth';
 
 // GET /api/lms/classes?teacherId=xxx
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const teacherId = searchParams.get('teacherId');
-
-    const where = (teacherId && teacherId !== 'null' && teacherId !== 'undefined' && teacherId.trim() !== '')
-      ? { teacherId }
-      : {};
+    const actor = await requireLmsUser(request);
+    const where = actor.role === 'ADMIN'
+      ? {}
+      : actor.role === 'TEACHER'
+        ? { teacherId: actor.id }
+        : { students: { some: { studentId: actor.id } } };
     const classes = await prisma.lmsClass.findMany({
       where,
       include: {
@@ -30,15 +31,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
     console.error('LMS Classes GET error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return lmsErrorResponse(error);
   }
 }
 
 // POST /api/lms/classes — Admin tạo lớp mới
 export async function POST(request: NextRequest) {
   try {
+    await requireLmsUser(request, ['ADMIN']);
     const body = await request.json();
-    const { name, teacherId, subjects } = body;
+    const { name, teacherId, subjects, studentIds = [] } = body;
 
     if (!name || !teacherId) {
       return NextResponse.json({ success: false, error: 'name và teacherId là bắt buộc' }, { status: 400 });
@@ -55,6 +57,15 @@ export async function POST(request: NextRequest) {
       .map((s: any) => (typeof s === 'string' ? s.trim() : ''))
       .filter(Boolean);
 
+    const uniqueStudentIds: string[] = [...new Set(Array.isArray(studentIds) ? studentIds : [])] as string[];
+    if (uniqueStudentIds.length > 25) {
+      return NextResponse.json({ success: false, error: 'Một lớp có tối đa 25 học sinh' }, { status: 400 });
+    }
+    const studentCount = await prisma.lmsUser.count({ where: { id: { in: uniqueStudentIds }, role: 'STUDENT' } });
+    if (studentCount !== uniqueStudentIds.length) {
+      return NextResponse.json({ success: false, error: 'Danh sách lớp có tài khoản không phải học sinh' }, { status: 400 });
+    }
+
     // Tạo lớp + 4 môn học
     const newClass = await prisma.lmsClass.create({
       data: {
@@ -65,16 +76,20 @@ export async function POST(request: NextRequest) {
             name: subjectName,
           })),
         },
+        students: {
+          create: uniqueStudentIds.map((studentId) => ({ studentId })),
+        },
       },
       include: {
         teacher: true,
         subjects: true,
+        students: { include: { student: true } },
       },
     });
 
     return NextResponse.json({ success: true, data: newClass });
   } catch (error: any) {
     console.error('LMS Classes POST error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return lmsErrorResponse(error);
   }
 }

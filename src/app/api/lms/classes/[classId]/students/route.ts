@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { lmsErrorResponse, requireLmsUser } from '@/lib/lms-auth';
 
 type RouteContext = { params: Promise<{ classId: string }> };
 
 // POST /api/lms/classes/[classId]/students — Thêm HS vào lớp
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
+    await requireLmsUser(request, ['ADMIN']);
     const { classId } = await context.params;
     const body = await request.json();
     const { studentId, studentIds } = body;
@@ -21,7 +23,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     // Xử lý thêm 1 hoặc nhiều HS
-    const idsToAdd: string[] = studentIds || (studentId ? [studentId] : []);
+    const requestedIds = Array.isArray(studentIds) ? studentIds : (studentId ? [studentId] : []);
+    const idsToAdd = [...new Set(requestedIds.filter((id): id is string => typeof id === 'string' && id.trim() !== ''))];
 
     if (idsToAdd.length === 0) {
       return NextResponse.json({ success: false, error: 'Cần cung cấp studentId hoặc studentIds' }, { status: 400 });
@@ -33,6 +36,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
         success: false,
         error: `Lớp đã có ${classData._count.students}/${classData.maxStudents} học sinh. Không thể thêm ${idsToAdd.length} HS nữa.`,
       }, { status: 400 });
+    }
+
+    const validStudents = await prisma.lmsUser.count({ where: { id: { in: idsToAdd }, role: 'STUDENT' } });
+    if (validStudents !== idsToAdd.length) {
+      return NextResponse.json({ success: false, error: 'Danh sách có tài khoản không phải học sinh' }, { status: 400 });
     }
 
     // Thêm từng HS (skip nếu đã tồn tại)
@@ -55,13 +63,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
     });
   } catch (error: any) {
     console.error('LMS Students POST error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return lmsErrorResponse(error);
   }
 }
 
 // DELETE /api/lms/classes/[classId]/students — Xoá HS khỏi lớp
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
+    await requireLmsUser(request, ['ADMIN']);
     const { classId } = await context.params;
     const body = await request.json();
     const { studentId } = body;
@@ -77,6 +86,6 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     return NextResponse.json({ success: true, message: 'Đã xoá học sinh khỏi lớp' });
   } catch (error: any) {
     console.error('LMS Students DELETE error:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return lmsErrorResponse(error);
   }
 }

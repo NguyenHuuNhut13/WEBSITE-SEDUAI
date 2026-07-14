@@ -3,24 +3,20 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { BookOpen, GraduationCap, ChevronRight, AlertCircle } from 'lucide-react';
+import { BookOpen, ChevronRight, AlertCircle } from 'lucide-react';
 
 export default function StudentSubjectsList() {
-  const { user } = useAuth();
+  const { lmsUserId } = useAuth();
   const [subjects, setSubjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadSubjects = async () => {
-    if (!user) return;
+    if (!lmsUserId) return;
     try {
-      const classRes = await fetch('/api/lms/classes');
+      const classRes = await fetch(`/api/lms/classes?studentId=${encodeURIComponent(lmsUserId)}`);
       const classJson = await classRes.json();
       if (classJson.success) {
-        // Find classes where student is enrolled
-        const studentClasses = classJson.data.filter((c: any) =>
-          c.students?.some((s: any) => s.student.username === user.username)
-        );
-        const allSubjects = studentClasses.flatMap((c: any) =>
+        const allSubjects = classJson.data.flatMap((c: any) =>
           (c.subjects || []).map((s: any) => ({ ...s, className: c.name }))
         );
         setSubjects(allSubjects);
@@ -34,7 +30,7 @@ export default function StudentSubjectsList() {
 
   useEffect(() => {
     loadSubjects();
-  }, [user]);
+  }, [lmsUserId]);
 
   if (loading) {
     return (

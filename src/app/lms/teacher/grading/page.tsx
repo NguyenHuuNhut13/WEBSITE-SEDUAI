@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { Sparkles, Loader2, CheckCircle, Eye, Star } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function TeacherGradingPage() {
+  const { lmsUserId } = useAuth();
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [gradingId, setGradingId] = useState<string | null>(null);
@@ -11,14 +13,14 @@ export default function TeacherGradingPage() {
 
   const loadSubmissions = async () => {
     try {
-      const res = await fetch('/api/lms/submissions');
+      const res = await fetch(`/api/lms/submissions?teacherId=${encodeURIComponent(lmsUserId || '')}`);
       const json = await res.json();
       if (json.success) setSubmissions(json.data);
     } catch (e) { console.error(e); }
     setLoading(false);
   };
 
-  useEffect(() => { loadSubmissions(); }, []);
+  useEffect(() => { if (lmsUserId) loadSubmissions(); }, [lmsUserId]);
 
   const aiGrade = async (id: string) => {
     setGradingId(id);

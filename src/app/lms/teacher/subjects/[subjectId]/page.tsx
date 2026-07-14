@@ -12,6 +12,10 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
   const [lessonTitle, setLessonTitle] = useState('');
   const [lessonContent, setLessonContent] = useState('');
   const [saving, setSaving] = useState(false);
+  const [assignmentLessonId, setAssignmentLessonId] = useState<string | null>(null);
+  const [assignmentTitle, setAssignmentTitle] = useState('');
+  const [assignmentDescription, setAssignmentDescription] = useState('');
+  const [assignmentDueDate, setAssignmentDueDate] = useState('');
 
   const loadSubject = async () => {
     try {
@@ -55,6 +59,34 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
     setEditingLesson(lesson.id);
     setLessonTitle(lesson.title);
     setLessonContent(lesson.content || '');
+  };
+
+  const createAssignment = async (lessonId: string) => {
+    if (!assignmentTitle.trim()) return;
+    setSaving(true);
+    try {
+      const response = await fetch('/api/lms/assignments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lessonId,
+          title: assignmentTitle.trim(),
+          description: assignmentDescription.trim(),
+          dueDate: assignmentDueDate || undefined,
+        }),
+      });
+      const result = await response.json();
+      if (!result.success) throw new Error(result.error || 'Không thể tạo bài tập');
+      setAssignmentLessonId(null);
+      setAssignmentTitle('');
+      setAssignmentDescription('');
+      setAssignmentDueDate('');
+      await loadSubject();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) return <div className="flex items-center justify-center min-h-[50vh]"><div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
@@ -113,6 +145,37 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
                 className="w-full flex items-center justify-center gap-2 py-2 text-sm text-slate-400 hover:text-primary transition cursor-pointer">
                 <Plus className="w-4 h-4" /> Tạo buổi {order}
               </button>
+            )}
+            {lesson && !isEditing && (
+              <div className="mt-3 border-t border-slate-100 pt-3">
+                <div className="space-y-2">
+                  {lesson.assignments?.map((assignment: any) => (
+                    <div key={assignment.id} className="flex items-center justify-between rounded-lg bg-amber-50 px-3 py-2 text-xs">
+                      <span className="font-semibold text-amber-900">{assignment.title}</span>
+                      <span className="text-amber-700">{assignment._count?.submissions || 0} bài nộp</span>
+                    </div>
+                  ))}
+                </div>
+                {assignmentLessonId === lesson.id ? (
+                  <div className="mt-3 space-y-2 rounded-xl bg-slate-50 p-3">
+                    <input value={assignmentTitle} onChange={(event) => setAssignmentTitle(event.target.value)} placeholder="Tên bài tập *"
+                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+                    <textarea value={assignmentDescription} onChange={(event) => setAssignmentDescription(event.target.value)} placeholder="Yêu cầu và tiêu chí chấm bài"
+                      rows={3} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+                    <input type="datetime-local" value={assignmentDueDate} onChange={(event) => setAssignmentDueDate(event.target.value)}
+                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+                    <div className="flex gap-2">
+                      <button onClick={() => createAssignment(lesson.id)} disabled={saving || !assignmentTitle.trim()}
+                        className="rounded-lg bg-amber-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">Tạo bài tập</button>
+                      <button onClick={() => setAssignmentLessonId(null)} className="rounded-lg bg-white px-3 py-2 text-xs font-bold text-slate-600">Hủy</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button onClick={() => setAssignmentLessonId(lesson.id)} className="mt-2 flex items-center gap-1 text-xs font-bold text-amber-700">
+                    <FileText className="h-3.5 w-3.5" /> Thêm bài tập
+                  </button>
+                )}
+              </div>
             )}
           </div>
         );

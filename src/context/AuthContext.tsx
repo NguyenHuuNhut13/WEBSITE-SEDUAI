@@ -71,17 +71,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lmsRole, setLmsRoleState] = useState<UserRole>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('seduai_lms_role') as UserRole) || 'STUDENT';
-    }
     return 'STUDENT';
   });
-  const [lmsUserId, setLmsUserId] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('seduai_lms_user_id');
-    }
-    return null;
-  });
+  const [lmsUserId, setLmsUserId] = useState<string | null>(null);
 
   // Sync state từ localStorage khi mount
   useEffect(() => {
@@ -125,6 +117,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, 0);
   }, []);
 
+  // Resolve the authenticated NKS account to its LMS identity once per login.
+  useEffect(() => {
+    if (!user?.username || !accessToken) return;
+
+    let cancelled = false;
+    fetch(`/api/lms/users?username=${encodeURIComponent(user.username)}`)
+      .then((response) => response.json())
+      .then((result) => {
+        if (cancelled || !result.success || !result.data?.[0]) return;
+        const lmsUser = result.data[0];
+        setLmsUserId(lmsUser.id);
+        setLmsRoleState(lmsUser.role);
+        localStorage.setItem('seduai_lms_user_id', lmsUser.id);
+        localStorage.setItem('seduai_lms_role', lmsUser.role);
+      })
+      .catch((error) => console.error('Không thể đồng bộ tài khoản LMS:', error));
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.username, accessToken]);
+
   const login = (token: string, userInfo: UserInfo) => {
     setAccessToken(token);
     setUser(userInfo);
@@ -141,6 +155,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    void fetch('/api/proxy/account', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'logout' }),
+    });
     setAccessToken(null);
     setUser(null);
     setLocalSync(defaultLocalSync);

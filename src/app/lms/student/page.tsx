@@ -3,28 +3,26 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { BookOpen, GraduationCap, Clock, FileText, ClipboardCheck, AlertCircle, ChevronRight } from 'lucide-react';
+import { ClipboardCheck, AlertCircle, ChevronRight } from 'lucide-react';
 
 export default function StudentDashboard() {
-  const { user } = useAuth();
+  const { lmsUserId } = useAuth();
   const [classes, setClasses] = useState<any[]>([]);
   const [exams, setExams] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadStudentData = async () => {
+    if (!lmsUserId) return;
     try {
       // Fetch classes for the student. Since user.id might be the lmsUser id or NKS user id,
       // let's fetch all classes and filter client-side or use a dedicated endpoint if available.
       // In this setup, GET /api/lms/classes returns all classes with their students.
-      const classRes = await fetch('/api/lms/classes');
+      const classRes = await fetch(`/api/lms/classes?studentId=${encodeURIComponent(lmsUserId)}`);
       const classJson = await classRes.json();
       
-      if (classJson.success && user) {
-        // Filter classes where the student is enrolled
-        const studentClasses = classJson.data.filter((c: any) => 
-          c.students?.some((s: any) => s.student.username === user.username)
-        );
+      if (classJson.success) {
+        const studentClasses = classJson.data;
         setClasses(studentClasses);
 
         if (studentClasses.length > 0) {
@@ -37,20 +35,9 @@ export default function StudentDashboard() {
             setExams(examJson.data);
           }
 
-          // Fetch submissions/assignments for this student
-          // We can fetch submissions for the student to see status
-          const userRes = await fetch(`/api/lms/users`);
-          const userJson = await userRes.json();
-          if (userJson.success) {
-            const dbUser = userJson.data.find((u: any) => u.username === user.username);
-            if (dbUser) {
-              const subResReal = await fetch(`/api/lms/submissions?studentId=${dbUser.id}`);
-              const subJsonReal = await subResReal.json();
-              if (subJsonReal.success) {
-                setAssignments(subJsonReal.data);
-              }
-            }
-          }
+          const assignmentResponse = await fetch(`/api/lms/assignments?studentId=${encodeURIComponent(lmsUserId)}`);
+          const assignmentResult = await assignmentResponse.json();
+          if (assignmentResult.success) setAssignments(assignmentResult.data);
         }
       }
     } catch (e) {
@@ -62,7 +49,7 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     loadStudentData();
-  }, []);
+  }, [lmsUserId]);
 
   if (loading) {
     return (
@@ -134,34 +121,36 @@ export default function StudentDashboard() {
                 </div>
               ) : (
                 <div className="bg-white rounded-xl border border-slate-200 divide-y divide-slate-100 overflow-hidden">
-                  {assignments.slice(0, 5).map((sub: any) => (
+                  {assignments.slice(0, 5).map((assignment: any) => {
+                    const sub = assignment.submissions?.[0];
+                    return (
                     <Link
-                      key={sub.id}
-                      href={`/lms/student/assignments/${sub.assignmentId}`}
+                      key={assignment.id}
+                      href={`/lms/student/assignments/${assignment.id}`}
                       className="p-4 flex items-center justify-between hover:bg-slate-50 transition block"
                     >
                       <div>
-                        <p className="text-sm font-bold text-slate-900">{sub.assignment?.title}</p>
-                        <p className="text-xs text-slate-500 mt-0.5">Môn: {sub.assignment?.lesson?.subject?.name}</p>
+                        <p className="text-sm font-bold text-slate-900">{assignment.title}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Môn: {assignment.lesson?.subject?.name}</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        {sub.grade !== null && (
+                        {sub?.grade !== null && sub?.grade !== undefined && (
                           <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
                             {sub.grade}đ
                           </span>
                         )}
                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                          sub.status === 'REVIEWED' ? 'bg-emerald-50 text-emerald-700' :
-                          sub.status === 'AI_GRADED' ? 'bg-blue-50 text-blue-700' :
+                          sub?.status === 'REVIEWED' ? 'bg-emerald-50 text-emerald-700' :
+                          sub?.status === 'AI_GRADED' ? 'bg-blue-50 text-blue-700' :
                           'bg-amber-50 text-amber-700'
                         }`}>
-                          {sub.status === 'REVIEWED' ? 'Đã duyệt' :
-                           sub.status === 'AI_GRADED' ? 'AI đã chấm' :
-                           'Chờ chấm'}
+                          {sub?.status === 'REVIEWED' ? 'Đã duyệt' :
+                           sub?.status === 'AI_GRADED' ? 'AI đã chấm' :
+                           sub ? 'Chờ chấm' : 'Chưa nộp'}
                         </span>
                       </div>
                     </Link>
-                  ))}
+                  );})}
                 </div>
               )}
             </div>

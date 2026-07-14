@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { BookOpen, ClipboardCheck, BarChart3, Users, Clock, FileText, ChevronRight, AlertCircle } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { BookOpen, ClipboardCheck, BarChart3, Users, FileText, ChevronRight, AlertCircle } from 'lucide-react';
 
 export default function TeacherDashboard() {
+  const { lmsUserId } = useAuth();
   const [classes, setClasses] = useState<any[]>([]);
   const [pendingSubmissions, setPendingSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -12,8 +14,8 @@ export default function TeacherDashboard() {
   const loadData = async () => {
     try {
       const [classRes, subRes] = await Promise.all([
-        fetch('/api/lms/classes'),
-        fetch('/api/lms/submissions?status=PENDING'),
+        fetch(`/api/lms/classes?teacherId=${encodeURIComponent(lmsUserId || '')}`),
+        fetch(`/api/lms/submissions?status=PENDING&teacherId=${encodeURIComponent(lmsUserId || '')}`),
       ]);
       const classJson = await classRes.json();
       const subJson = await subRes.json();
@@ -24,8 +26,8 @@ export default function TeacherDashboard() {
   };
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (lmsUserId) loadData();
+  }, [lmsUserId]);
 
   if (loading) {
     return (

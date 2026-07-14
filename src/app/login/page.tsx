@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Brain, Lock, User, ArrowRight, ShieldCheck, AlertCircle, RefreshCw } from 'lucide-react';
+import { Brain, Lock, User, ArrowRight, AlertCircle, RefreshCw } from 'lucide-react';
 import { loginUser } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 
@@ -44,35 +44,18 @@ export default function LoginPage() {
 
       // 1. Kiểm tra nếu máy chủ NKS trả về thành công (200 OK / success: true / có token hoặc userInfo)
       const dataPayload = res.data as Record<string, any> | undefined;
-      const isApiSuccess =
-        res.success === true ||
-        res.code === 200 ||
-        res.status === 200 ||
-        Boolean(res.access_token) ||
-        Boolean(res.token) ||
-        (Boolean(res.userInfo) && !res.error) ||
-        (Boolean(res.user) && !res.error) ||
-        (dataPayload !== undefined && (dataPayload.access_token || dataPayload.token || dataPayload.userInfo || dataPayload.user || dataPayload.id));
+      const realToken = res.access_token || res.token || dataPayload?.access_token || dataPayload?.token;
+      const rawUser = res.userInfo || res.user || dataPayload?.userInfo || dataPayload?.user || (dataPayload?.username ? dataPayload : null);
+      const isApiSuccess = Boolean(realToken && rawUser && !res.error);
 
       if (isApiSuccess) {
-        const token = res.access_token || res.token || dataPayload?.access_token || dataPayload?.token || `seduai_nks_token_${Date.now()}`;
-        const rawUser = res.userInfo || res.user || dataPayload?.userInfo || dataPayload?.user || (dataPayload?.id || dataPayload?.username ? dataPayload : null);
-        const info = rawUser || {
-          username,
-          name: username === 'demo_student' ? 'Học viên Demo SeduAi' : username,
-          point: 500,
-          email: `${username}@seduai.edu.vn`,
-          phone: '0901234567',
-          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=80',
-        };
-
-        login(token, info);
+        login(realToken, rawUser);
         localStorage.setItem('seduai_remembered_user', username);
         router.push('/profile');
       } else {
         setError(res.error || res.message || 'Tài khoản hoặc mật khẩu không chính xác.');
       }
-    } catch (err: any) {
+    } catch {
       setError('Đã xảy ra lỗi kết nối. Vui lòng thử lại sau.');
     } finally {
       setIsLoading(false);
