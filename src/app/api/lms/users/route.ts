@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const user = await prisma.$transaction(async (tx) => {
       // Serialize role changes so two requests cannot demote the final admins
       // at the same time.
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('lms-user-role-management'))`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('lms-user-role-management')) IS NULL`;
       const existing = await tx.lmsUser.findUnique({
         where: { username },
         select: {

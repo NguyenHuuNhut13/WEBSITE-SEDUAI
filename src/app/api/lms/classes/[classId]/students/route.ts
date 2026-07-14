@@ -20,10 +20,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const ids = stringIdList(requestedIds, 'Danh sách học sinh', 25);
 
     const added = await prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('lms-user-role-management'))`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('lms-user-role-management')) IS NULL`;
       // Serialize roster changes for this class so concurrent requests cannot
       // both pass the capacity check and exceed maxStudents.
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${classId}))`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${classId})) IS NULL`;
       const classData = await tx.lmsClass.findUnique({
         where: { id: classId },
         include: { _count: { select: { students: true } } },

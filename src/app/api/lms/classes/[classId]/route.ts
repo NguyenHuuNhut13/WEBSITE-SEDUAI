@@ -70,8 +70,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     if (!name && !teacherId && !status) throw new LmsRequestError('Không có dữ liệu lớp cần cập nhật');
 
     const updated = await prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('lms-user-role-management'))`;
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${classId}))`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('lms-user-role-management')) IS NULL`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${classId})) IS NULL`;
       if (teacherId) {
         const teacher = await tx.lmsUser.findUnique({ where: { id: teacherId }, select: { role: true } });
         if (!teacher || teacher.role !== 'TEACHER') {

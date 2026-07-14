@@ -226,7 +226,7 @@ export async function POST(request: NextRequest) {
     const studentAnswers = parseAnswers(answers, questions);
     const graded = gradeQuizAnswers(questions, studentAnswers);
     const saved = await prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${config.classId}))`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${config.classId})) IS NULL`;
       const [activeClass, activeEnrollment] = await Promise.all([
         tx.lmsClass.findFirst({
           where: { id: config.classId, status: 'ACTIVE' },

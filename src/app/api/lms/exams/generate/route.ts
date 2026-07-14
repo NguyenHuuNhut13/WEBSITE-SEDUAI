@@ -100,8 +100,8 @@ export async function POST(request: NextRequest) {
     verifyExamPassword(config.password, password);
 
     const decision = await prisma.$transaction<AttemptDecision>(async (tx) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${config.classId}))`;
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`exam-bank:${config.id}`}))`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${config.classId})) IS NULL`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`exam-bank:${config.id}`})) IS NULL`;
 
       const [lockedClass, enrollment] = await Promise.all([
         tx.lmsClass.findUnique({ where: { id: config.classId }, select: { status: true } }),
@@ -220,8 +220,8 @@ export async function POST(request: NextRequest) {
       try {
         questions = await buildExamQuestions(config);
         const startedAt = await prisma.$transaction(async (tx) => {
-          await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${config.classId}))`;
-          await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`exam-bank:${config.id}`}))`;
+          await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${config.classId})) IS NULL`;
+          await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`exam-bank:${config.id}`})) IS NULL`;
           const [activeClass, activeEnrollment] = await Promise.all([
             tx.lmsClass.findFirst({
               where: { id: config.classId, status: 'ACTIVE' },

@@ -89,7 +89,7 @@ export async function syncLmsUser(account: any): Promise<LmsUser> {
       ...(nksUserId ? [`lms-user:nks:${nksUserId}`] : []),
     ].sort();
     for (const identityLockKey of identityLockKeys) {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${identityLockKey}))`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${identityLockKey})) IS NULL`;
     }
 
     const [byNksId, byUsername] = await Promise.all([
@@ -177,7 +177,7 @@ export async function withClassLock<T>(
   operation: (tx: Prisma.TransactionClient) => Promise<T>,
 ) {
   return prisma.$transaction(async (tx) => {
-    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${classId}))`;
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${classId})) IS NULL`;
     return operation(tx);
   });
 }

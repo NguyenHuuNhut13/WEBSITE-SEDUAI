@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     const uniqueStudentIds = body.studentIds === undefined ? [] : stringIdList(body.studentIds, 'Danh sách học sinh', 25);
     const newClass = await prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('lms-user-role-management'))`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('lms-user-role-management')) IS NULL`;
       const teacher = await tx.lmsUser.findUnique({ where: { id: teacherId }, select: { role: true } });
       if (!teacher || teacher.role !== 'TEACHER') {
         throw new LmsRequestError('Giáo viên không tồn tại hoặc chưa có vai trò TEACHER');
