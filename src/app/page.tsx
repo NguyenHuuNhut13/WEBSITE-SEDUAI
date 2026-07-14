@@ -32,86 +32,37 @@ import { getEduCourses, ApiCourse } from '@/services/api';
 
 const partners = [
   {
-    name: 'Đại học Bách Khoa',
-    logo: (
-      <svg className="w-5 h-5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="3" />
-        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-        <path d="M12 8v8M8 12h8" />
-      </svg>
-    )
+    name: 'ĐH Bách Khoa',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/HCMUT_official_logo.png/200px-HCMUT_official_logo.png',
   },
   {
-    name: 'Đại học FPT',
-    logo: (
-      <svg className="w-5 h-5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 2L2 22h20L12 2z" />
-        <path d="M12 7l6 11H6l6-11z" />
-      </svg>
-    )
+    name: 'ĐH FPT',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/FPT_logo_2010.svg/200px-FPT_logo_2010.svg.png',
   },
   {
     name: 'Google for Education',
-    logo: (
-      <svg className="w-4.5 h-4.5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-      </svg>
-    )
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/200px-Google_2015_logo.svg.png',
   },
   {
     name: 'Microsoft Learn',
-    logo: (
-      <svg className="w-4.5 h-4.5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="currentColor">
-        <rect x="1" y="1" width="10" height="10" />
-        <rect x="13" y="1" width="10" height="10" />
-        <rect x="1" y="13" width="10" height="10" />
-        <rect x="13" y="13" width="10" height="10" />
-      </svg>
-    )
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/200px-Microsoft_logo.svg.png',
   },
   {
     name: 'AWS Academy',
-    logo: (
-      <svg className="w-5 h-5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M18 10h-1.26A8 8 0 109 15h9a3 3 0 000-6z" />
-        <path d="M6 19c3 3 9 3 12 0" />
-        <path d="M18 19l-1-2.5 M18 19l-2.5 1" />
-      </svg>
-    )
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Amazon_Web_Services_Logo.svg/200px-Amazon_Web_Services_Logo.svg.png',
   },
   {
     name: 'British Council',
-    logo: (
-      <svg className="w-4.5 h-4.5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <circle cx="6" cy="6" r="2" />
-        <circle cx="18" cy="6" r="2" />
-        <circle cx="6" cy="18" r="2" />
-        <circle cx="18" cy="18" r="2" />
-        <path d="M6 8v8 M18 8v8 M8 6h8 M8 18h8" />
-      </svg>
-    )
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/British_Council_logo.svg/200px-British_Council_logo.svg.png',
   },
   {
     name: 'VNUHCM',
-    logo: (
-      <svg className="w-5 h-5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
-        <circle cx="12" cy="9" r="3" />
-      </svg>
-    )
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Logo_%C4%90HQG_TP.HCM.png/200px-Logo_%C4%90HQG_TP.HCM.png',
   },
   {
-    name: 'Đại học Kinh tế',
-    logo: (
-      <svg className="w-4.5 h-4.5 mr-2 text-slate-400 group-hover:text-primary transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M3 22h18 M6 18V7 M12 18V7 M18 18V7 M3 7h18 M12 2L3 7h18z" />
-      </svg>
-    )
-  }
+    name: 'ĐH Kinh tế (UEH)',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Logo_UEH_xanh.png/200px-Logo_UEH_xanh.png',
+  },
 ];
 
 export default async function Home() {
