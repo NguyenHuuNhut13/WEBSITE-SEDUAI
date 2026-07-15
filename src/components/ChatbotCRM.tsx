@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Bot, CheckCircle2, Send, Loader2, Sparkles, BookOpen, ArrowRight } from 'lucide-react';
+import { Bot, CheckCircle2, Send, Loader2, Sparkles, BookOpen, ArrowRight, RefreshCw } from 'lucide-react';
 import { createLead, getEduCourses, ApiCourse } from '@/services/api';
 import { htmlToPlainText } from '@/lib/plain-text';
 
@@ -40,7 +40,7 @@ export default function ChatbotCRM() {
   });
   const [step, setStep] = useState<'age' | 'subject' | 'budget' | 'location' | 'phone' | 'completed'>('age');
   const [isThinking, setIsThinking] = useState(false);
-  const [phoneInput, setPhoneInput] = useState('');
+  const [chatInput, setChatInput] = useState('');
   const [allApiCourses, setAllApiCourses] = useState<ApiCourse[]>([]);
   const chatMessagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -65,112 +65,124 @@ export default function ChatbotCRM() {
     ]);
   };
 
-  const handleOption = (option: string) => {
-    // 1. Append user message
-    addMessage('User', option);
+  const handleReset = () => {
+    setLead({
+      age: '',
+      subject: '',
+      budget: '',
+      location: '',
+      phone: '',
+    });
+    setStep('age');
+    setChatInput('');
+    setMessages([
+      {
+        id: '1',
+        sender: 'AI',
+        text: 'Xin kính chào quý phụ huynh! Tôi là trợ lý tư vấn tuyển sinh AI của SeduAi. Quý phụ huynh đang quan tâm tìm khoá học cho con đúng không ạ? Xin hỏi bé nhà mình năm nay bao nhiêu tuổi rồi ạ?',
+      },
+    ]);
+  };
 
-    // 2. Set thinking state
+  const handleTextSubmit = (text: string) => {
+    const val = text.trim();
+    if (!val) return;
+
+    addMessage('User', val);
     setIsThinking(true);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsThinking(false);
 
       if (step === 'age') {
-        setLead((prev) => ({ ...prev, age: option }));
+        setLead((prev) => ({ ...prev, age: val }));
         addMessage(
           'AI',
-          `Dạ ghi nhận bé ở độ tuổi <strong>${option}</strong>. Quý phụ huynh đang muốn hướng cho con học môn học gì ạ?`,
+          `Dạ ghi nhận bé ở độ tuổi <strong>${val}</strong>. Quý phụ huynh đang muốn hướng cho con học môn học gì ạ?`,
           true
         );
         setStep('subject');
       } else if (step === 'subject') {
-        setLead((prev) => ({ ...prev, subject: option }));
+        setLead((prev) => ({ ...prev, subject: val }));
         addMessage(
           'AI',
-          `Dạ bé học môn <strong>${option}</strong> rất tốt ạ. Phụ huynh dự kiến chi phí đầu tư học phí hàng tháng cho bé khoảng bao nhiêu để tôi lọc khóa học phù hợp ạ?`,
+          `Dạ môn <strong>${val}</strong> rất tốt ạ. Phụ huynh dự kiến chi phí đầu tư học phí hàng tháng cho bé khoảng bao nhiêu để tôi lọc khóa học phù hợp ạ?`,
           true
         );
         setStep('budget');
       } else if (step === 'budget') {
-        setLead((prev) => ({ ...prev, budget: option }));
+        setLead((prev) => ({ ...prev, budget: val }));
         addMessage(
           'AI',
-          `Dạ mức ngân sách <strong>${option}</strong> rất phù hợp với nhiều chương trình đào tạo tối ưu của SeduAi. Phụ huynh muốn tìm lớp học Online hay tại khu vực nào để thuận tiện cho bé học ạ?`,
+          `Dạ mức ngân sách <strong>${val}</strong> rất phù hợp với nhiều chương trình đào tạo tối ưu của SeduAi. Phụ huynh muốn tìm lớp học Online hay tại khu vực nào để thuận tiện cho bé học ạ?`,
           true
         );
         setStep('location');
       } else if (step === 'location') {
-        setLead((prev) => ({ ...prev, location: option }));
+        setLead((prev) => ({ ...prev, location: val }));
         addMessage(
           'AI',
-          `Tuyệt vời! Tôi đã chọn lọc được các khoá học phù hợp nhất với con tại <strong>${option}</strong>. Để chuyên viên tuyển sinh của SeduAi gửi chi tiết lộ trình học và ưu đãi học phí lên đến 30% cho phụ huynh, xin phụ huynh cho hỏi số điện thoại liên hệ là gì ạ?`,
+          `Tuyệt vời! Tôi đã chọn lọc được các khoá học phù hợp nhất với con tại <strong>${val}</strong>. Để chuyên viên tuyển sinh của SeduAi gửi chi tiết lộ trình học và ưu đãi học phí lên đến 30% cho phụ huynh, xin phụ huynh cho hỏi số điện thoại liên hệ là gì ạ?`,
           true
         );
         setStep('phone');
+      } else if (step === 'phone') {
+        // Validate phone
+        if (val.length < 9 || !/^\+?[0-9\s-]{9,15}$/.test(val)) {
+          addMessage('AI', 'Dạ số điện thoại có vẻ chưa đúng định dạng. Phụ huynh vui lòng nhập lại số điện thoại chính xác (ví dụ: 0912345678) để hệ thống ghi nhận ưu đãi học phí nhé!');
+          return;
+        }
+
+        setLead((prev) => ({ ...prev, phone: val }));
+        setIsThinking(true);
+
+        // 1. Call API to save Lead on actual NKS CRM
+        const leadResponse = await createLead({
+          name: `Khách hàng AI Chatbot (${val})`,
+          phone: val,
+          email: `chatbot_${val}@seduai.edu.vn`,
+          demand: `${lead.subject || 'Chưa rõ'} | Tuổi: ${lead.age || 'Chưa rõ'}`,
+          note: `Ngân sách: ${lead.budget || 'Chưa rõ'} - Địa điểm: ${lead.location || 'Chưa rõ'}`,
+        });
+
+        if (leadResponse.success && leadResponse.id) {
+          setLead((prev) => ({ ...prev, leadId: leadResponse.id }));
+        }
+
+        // 2. Filter courses dynamically based on API list
+        let matchingCourses: ApiCourse[] = [];
+        if (allApiCourses.length > 0) {
+          const kw = (lead.subject || '').toLowerCase();
+          matchingCourses = allApiCourses.filter((c) => {
+            const title = (c.title || '').toLowerCase();
+            const desc = (c.acf?.description || '').toLowerCase();
+            if (kw.includes('tiếng anh') || kw.includes('ielts') || kw.includes('anh')) {
+              return title.includes('anh') || title.includes('ielts') || desc.includes('anh') || desc.includes('ielts');
+            }
+            if (kw.includes('lập trình') || kw.includes('máy tính') || kw.includes('code')) {
+              return title.includes('web') || title.includes('python') || title.includes('code') || title.includes('lập trình');
+            }
+            if (kw.includes('ai') || kw.includes('công nghệ') || kw.includes('bot')) {
+              return title.includes('ai') || title.includes('chatbot') || title.includes('tự động');
+            }
+            return true;
+          }).slice(0, 2);
+
+          if (matchingCourses.length === 0) {
+            matchingCourses = allApiCourses.slice(0, 2);
+          }
+        }
+
+        setIsThinking(false);
+        setStep('completed');
+        addMessage(
+          'AI',
+          `Dạ xin cảm ơn phụ huynh! Thông tin liên hệ đã được <strong>lưu trực tiếp vào Hệ thống AI Admissions CRM</strong> (Mã Lead ID: #${leadResponse.id || 'NKS_2026'}). Dưới đây là danh sách các khóa học SeduAi phù hợp nhất được đề xuất tự động từ API cho con:`,
+          true,
+          matchingCourses
+        );
       }
     }, 1000);
-  };
-
-  const handlePhoneSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    const phone = phoneInput.trim();
-    if (!phone || phone.length < 9) {
-      alert('Vui lòng nhập số điện thoại hợp lệ!');
-      return;
-    }
-
-    // Append user phone
-    addMessage('User', phone);
-    setLead((prev) => ({ ...prev, phone }));
-    setIsThinking(true);
-    setPhoneInput('');
-
-    // 1. Gọi API Lưu thông tin Lead lên CRM thật
-    const leadResponse = await createLead({
-      name: `Khách hàng AI Chatbot (${phone})`,
-      phone: phone,
-      email: `chatbot_${phone}@seduai.edu.vn`,
-      demand: `${lead.subject} | Tuổi: ${lead.age}`,
-      note: `Ngân sách: ${lead.budget} - Địa điểm: ${lead.location}`,
-    });
-
-    if (leadResponse.success && leadResponse.id) {
-      setLead((prev) => ({ ...prev, leadId: leadResponse.id }));
-    }
-
-    // 2. Lọc Khóa học phù hợp theo API EduCourses
-    let matchingCourses: ApiCourse[] = [];
-    if (allApiCourses.length > 0) {
-      const kw = lead.subject.toLowerCase();
-      matchingCourses = allApiCourses.filter((c) => {
-        const title = (c.title || '').toLowerCase();
-        const desc = (c.acf?.description || '').toLowerCase();
-        if (kw.includes('tiếng anh') || kw.includes('ielts')) {
-          return title.includes('anh') || title.includes('ielts') || desc.includes('anh') || desc.includes('ielts');
-        }
-        if (kw.includes('lập trình') || kw.includes('máy tính')) {
-          return title.includes('web') || title.includes('python') || title.includes('code') || title.includes('lập trình');
-        }
-        if (kw.includes('ai') || kw.includes('công nghệ')) {
-          return title.includes('ai') || title.includes('chatbot') || title.includes('tự động');
-        }
-        return true;
-      }).slice(0, 2);
-
-      // Nếu không khớp từ khóa cụ thể, lấy 2 khóa đầu tiên của API
-      if (matchingCourses.length === 0) {
-        matchingCourses = allApiCourses.slice(0, 2);
-      }
-    }
-
-    setIsThinking(false);
-    setStep('completed');
-    addMessage(
-      'AI',
-      `Dạ xin cảm ơn phụ huynh! Thông tin liên hệ đã được <strong>lưu trực tiếp vào Hệ thống AI Admissions CRM</strong> (Mã Lead ID: #${leadResponse.id || 'NKS_2026'}). Dưới đây là danh sách các khóa học SeduAi phù hợp nhất được đề xuất tự động từ API cho con:`,
-      true,
-      matchingCourses
-    );
   };
 
   return (
@@ -192,6 +204,13 @@ export default function ChatbotCRM() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleReset}
+            className="p-2 rounded-xl hover:bg-white/10 text-white/80 hover:text-white transition cursor-pointer"
+            title="Bắt đầu tư vấn mới"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
           <Link
             href="/ai-assistant"
             className="bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-xl shadow transition flex items-center gap-1 cursor-pointer transform hover:scale-105"
@@ -291,101 +310,118 @@ export default function ChatbotCRM() {
       </div>
 
       {/* Actions and inputs */}
-      <div className="p-4 border-t border-slate-100 bg-white">
-        {step === 'age' && (
-          <div className="flex flex-wrap gap-2 justify-center">
-            {['Dưới 6 tuổi', 'Từ 6 - 10 tuổi', 'Từ 11 - 15 tuổi', 'Trên 15 tuổi'].map((opt) => (
-              <button
-                key={opt}
-                onClick={() => handleOption(opt)}
-                className="px-4 py-2 text-xs font-semibold rounded-full border border-primary text-primary bg-primary-light hover:bg-primary hover:text-white transition duration-200 shadow-sm cursor-pointer"
-              >
-                {opt}
-              </button>
-            ))}
+      <div className="p-4 border-t border-slate-100 bg-white space-y-3">
+        
+        {/* Quick Option Suggestions */}
+        {step !== 'completed' && step !== 'phone' && (
+          <div className="space-y-1.5">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider pl-1">Gợi ý chọn nhanh:</p>
+            <div className="flex flex-wrap gap-2">
+              {step === 'age' && ['Dưới 6 tuổi', 'Từ 6 - 10 tuổi', 'Từ 11 - 15 tuổi', 'Trên 15 tuổi'].map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => handleTextSubmit(opt)}
+                  className="px-3.5 py-2 text-xs font-semibold rounded-xl border border-primary/20 text-primary bg-primary-light/50 hover:bg-primary hover:text-white transition duration-200 shadow-sm cursor-pointer"
+                >
+                  {opt}
+                </button>
+              ))}
+              {step === 'subject' && ['Tiếng Anh & IELTS', 'Lập trình & Máy tính', 'AI & Công nghệ', 'Kỹ năng mềm'].map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => handleTextSubmit(opt)}
+                  className="px-3.5 py-2 text-xs font-semibold rounded-xl border border-primary/20 text-primary bg-primary-light/50 hover:bg-primary hover:text-white transition duration-200 shadow-sm cursor-pointer"
+                >
+                  {opt}
+                </button>
+              ))}
+              {step === 'budget' && ['Dưới 1 triệu/tháng', 'Từ 1 - 2 triệu/tháng', 'Trên 2 triệu/tháng'].map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => handleTextSubmit(opt)}
+                  className="px-3.5 py-2 text-xs font-semibold rounded-xl border border-primary/20 text-primary bg-primary-light/50 hover:bg-primary hover:text-white transition duration-200 shadow-sm cursor-pointer"
+                >
+                  {opt}
+                </button>
+              ))}
+              {step === 'location' && ['Học Online tại nhà', 'Quận 10, TP. HCM', 'Cầu Giấy, Hà Nội'].map((opt) => (
+                <button
+                  key={opt}
+                  onClick={() => handleTextSubmit(opt)}
+                  className="px-3.5 py-2 text-xs font-semibold rounded-xl border border-primary/20 text-primary bg-primary-light/50 hover:bg-primary hover:text-white transition duration-200 shadow-sm cursor-pointer"
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
-        {step === 'subject' && (
-          <div className="flex flex-wrap gap-2 justify-center">
-            {['Tiếng Anh & IELTS', 'Lập trình & Máy tính', 'AI & Công nghệ', 'Kỹ năng mềm'].map((opt) => (
-              <button
-                key={opt}
-                onClick={() => handleOption(opt)}
-                className="px-4 py-2 text-xs font-semibold rounded-full border border-primary text-primary bg-primary-light hover:bg-primary hover:text-white transition duration-200 shadow-sm cursor-pointer"
-              >
-                {opt}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {step === 'budget' && (
-          <div className="flex flex-wrap gap-2 justify-center">
-            {['Dưới 1 triệu/tháng', 'Từ 1 - 2 triệu/tháng', 'Trên 2 triệu/tháng'].map((opt) => (
-              <button
-                key={opt}
-                onClick={() => handleOption(opt)}
-                className="px-4 py-2 text-xs font-semibold rounded-full border border-primary text-primary bg-primary-light hover:bg-primary hover:text-white transition duration-200 shadow-sm cursor-pointer"
-              >
-                {opt}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {step === 'location' && (
-          <div className="flex flex-wrap gap-2 justify-center">
-            {['Học Online tại nhà', 'Quận 10, TP. HCM', 'Cầu Giấy, Hà Nội'].map((opt) => (
-              <button
-                key={opt}
-                onClick={() => handleOption(opt)}
-                className="px-4 py-2 text-xs font-semibold rounded-full border border-primary text-primary bg-primary-light hover:bg-primary hover:text-white transition duration-200 shadow-sm cursor-pointer"
-              >
-                {opt}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {step === 'phone' && (
-          <form onSubmit={handlePhoneSubmit} className="flex gap-2">
+        {/* Input Form */}
+        {step !== 'completed' ? (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (chatInput.trim()) {
+                handleTextSubmit(chatInput);
+                setChatInput('');
+              }
+            }}
+            className="flex gap-2"
+          >
             <input
-              type="tel"
-              value={phoneInput}
-              onChange={(e) => setPhoneInput(e.target.value)}
-              placeholder="Nhập số điện thoại của phụ huynh..."
-              className="flex-grow px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              placeholder={
+                step === 'age'
+                  ? 'Nhập tuổi của con (ví dụ: 8 tuổi)...'
+                  : step === 'subject'
+                    ? 'Nhập môn học quan tâm (ví dụ: Lập trình)...'
+                    : step === 'budget'
+                      ? 'Nhập ngân sách (ví dụ: 1.5 triệu)...'
+                      : step === 'location'
+                        ? 'Nhập địa điểm học (ví dụ: Online)...'
+                        : 'Nhập số điện thoại (ví dụ: 0912345678)...'
+              }
+              className="flex-grow px-4 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50/50"
               autoFocus
             />
             <button
               type="submit"
-              className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white font-bold text-sm rounded-xl transition duration-200 flex items-center gap-1.5 cursor-pointer"
+              disabled={!chatInput.trim()}
+              className="px-5 py-3 bg-primary hover:bg-primary-dark disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold text-sm rounded-xl transition duration-200 flex items-center gap-1.5 cursor-pointer"
             >
               Gửi <Send className="w-3.5 h-3.5" />
             </button>
           </form>
-        )}
-
-        {step === 'completed' && (
-          <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-800 space-y-1.5 shadow-inner animate-scale-up">
-            <div className="flex items-center justify-between font-bold">
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Đã lưu thông tin Lead vào CRM API!
-              </span>
-              {lead.leadId && (
-                <span className="bg-emerald-600 text-white px-2 py-0.5 rounded text-[10px]">
-                  ID #{lead.leadId}
+        ) : (
+          <div className="space-y-3">
+            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-800 space-y-1.5 shadow-inner animate-scale-up">
+              <div className="flex items-center justify-between font-bold">
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Đã lưu thông tin tư vấn thành công!
                 </span>
-              )}
+                {lead.leadId && (
+                  <span className="bg-emerald-600 text-white px-2 py-0.5 rounded text-[10px]">
+                    ID #{lead.leadId}
+                  </span>
+                )}
+              </div>
+              <ul className="list-disc pl-4 space-y-0.5 font-semibold text-slate-700 mt-2">
+                <li>Độ tuổi: {lead.age}</li>
+                <li>Nhu cầu: {lead.subject}</li>
+                <li>Ngân sách: {lead.budget}</li>
+                <li>Địa điểm: {lead.location}</li>
+                <li>Số điện thoại: {lead.phone}</li>
+              </ul>
             </div>
-            <ul className="list-disc pl-4 space-y-0.5 font-semibold text-slate-700">
-              <li>Độ tuổi: {lead.age}</li>
-              <li>Nhu cầu: {lead.subject}</li>
-              <li>Ngân sách: {lead.budget}</li>
-              <li>Địa điểm: {lead.location}</li>
-              <li>Số điện thoại: {lead.phone}</li>
-            </ul>
+            <button
+              onClick={handleReset}
+              className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/50"
+            >
+              <RefreshCw className="w-4 h-4 text-slate-500" /> Nhập yêu cầu tư vấn mới
+            </button>
           </div>
         )}
       </div>
