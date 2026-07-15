@@ -779,7 +779,7 @@ export default function ProfilePage() {
             {activeTab === 'info' && (
               <div className="space-y-6 animate-fadeInUp">
                 <div className="border-b border-slate-100 pb-4">
-                  <h2 className="text-lg font-black text-slate-900">Cập nhật thông tin User</h2>
+                  <h2 className="text-lg font-black text-slate-900">Cập nhật thông tin cá nhân</h2>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Quản lý thông tin định danh và địa chỉ trên hệ sinh thái SeduAi
                   </p>
@@ -788,7 +788,7 @@ export default function ProfilePage() {
                 <form onSubmit={handleSaveInfo} className="space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700">Họ (Lastname) *</label>
+                      <label className="text-xs font-bold text-slate-700">Họ và tên đệm *</label>
                       <input
                         type="text"
                         required
@@ -798,7 +798,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700">Tên (Firstname) *</label>
+                      <label className="text-xs font-bold text-slate-700">Tên *</label>
                       <input
                         type="text"
                         required
@@ -820,18 +820,18 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700">Giới tính (`gender`)</label>
+                      <label className="text-xs font-bold text-slate-700">Giới tính</label>
                       <select
                         value={infoForm.gender}
                         onChange={(e) => setInfoForm({ ...infoForm, gender: Number(e.target.value) })}
                         className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50 font-semibold"
                       >
-                        <option value={1}>Nam (1)</option>
-                        <option value={0}>Nữ (0)</option>
+                        <option value={1}>Nam</option>
+                        <option value={0}>Nữ</option>
                       </select>
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-slate-700">Ngày sinh (`dob`)</label>
+                      <label className="text-xs font-bold text-slate-700">Ngày sinh</label>
                       <input
                         type="date"
                         value={infoForm.dob}
@@ -843,7 +843,7 @@ export default function ProfilePage() {
 
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-primary" /> Tỉnh / Thành phố (`province` - API `nks/provinces`)
+                      <MapPin className="w-3.5 h-3.5 text-primary" /> Tỉnh / Thành phố
                     </label>
                     <select
                       value={infoForm.province}
@@ -853,14 +853,14 @@ export default function ProfilePage() {
                       <option value="">-- Chọn Tỉnh / Thành phố --</option>
                       {provinces.map((prov) => (
                         <option key={prov.id} value={prov.id}>
-                          {prov.name || prov.title || `Tỉnh ID: ${prov.id}`}
+                          {prov.name || prov.title}
                         </option>
                       ))}
                     </select>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700">Giới thiệu bản thân (`intro`)</label>
+                    <label className="text-xs font-bold text-slate-700">Giới thiệu bản thân</label>
                     <textarea
                       rows={3}
                       value={infoForm.intro}
@@ -875,7 +875,7 @@ export default function ProfilePage() {
                       disabled={isLoading}
                       className="px-6 py-3 bg-primary hover:bg-primary-dark disabled:bg-slate-300 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer"
                     >
-                      <Save className="w-4 h-4" /> {isLoading ? 'Đang cập nhật...' : 'Cập nhật thông tin User'}
+                      <Save className="w-4 h-4" /> {isLoading ? 'Đang cập nhật...' : 'Cập nhật thông tin cá nhân'}
                     </button>
                   </div>
                 </form>
@@ -886,7 +886,7 @@ export default function ProfilePage() {
             {activeTab === 'password' && (
               <div className="space-y-8 animate-fadeInUp">
                 <div className="border-b border-slate-100 pb-4">
-                  <h2 className="text-lg font-black text-slate-900">Cập nhật mật khẩu (`User Update Pass`)</h2>
+                  <h2 className="text-lg font-black text-slate-900">Cập nhật mật khẩu</h2>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Tăng cường bảo mật hoặc tạo nhanh mật khẩu ngẫu nhiên đạt chuẩn an toàn cao
                   </p>
@@ -896,9 +896,9 @@ export default function ProfilePage() {
                 <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-6 shadow-lg border border-slate-700 space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-extrabold flex items-center gap-2 text-amber-400">
-                      <Sparkles className="w-4 h-4" /> Trình tạo mật khẩu ngẫu nhiên SeduAi
+                      <Sparkles className="w-4 h-4" /> Trình tạo mật khẩu ngẫu nhiên
                     </h3>
-                    <span className="text-[11px] text-slate-300 font-semibold">Độ dài: {pwdLength} ký tự</span>
+                    <span className="text-[11px] text-slate-300 font-semibold font-sans">Độ dài: {pwdLength} ký tự</span>
                   </div>
 
                   {/* Slider & Options */}
@@ -984,7 +984,7 @@ export default function ProfilePage() {
                 {/* Password Form */}
                 <form onSubmit={handleSavePassword} className="space-y-4 max-w-xl">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700">Mật khẩu hiện tại (Old Pass) *</label>
+                    <label className="text-xs font-bold text-slate-700">Mật khẩu hiện tại *</label>
                     <input
                       type="password"
                       required
@@ -996,7 +996,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700">Mật khẩu mới (New Pass) *</label>
+                    <label className="text-xs font-bold text-slate-700">Mật khẩu mới *</label>
                     <input
                       type="password"
                       required
@@ -1008,7 +1008,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700">Xác nhận mật khẩu mới (Confirm New Pass) *</label>
+                    <label className="text-xs font-bold text-slate-700">Nhập lại mật khẩu mới *</label>
                     <input
                       type="password"
                       required
@@ -1038,7 +1038,7 @@ export default function ProfilePage() {
                 <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                      <Sliders className="w-5 h-5 text-primary" /> Cập nhật & Căn chỉnh ảnh đại diện (`Avatar Studio`)
+                      <Sliders className="w-5 h-5 text-primary" /> Cập nhật & Căn chỉnh ảnh đại diện
                     </h2>
                     <p className="text-xs text-slate-500 mt-0.5">
                       Giao diện hiện đại cho phép <strong>Kéo thả trực tiếp trên ảnh</strong> để di chuyển tâm mặt và <strong>Thu phóng nhanh</strong>
@@ -1103,16 +1103,16 @@ export default function ProfilePage() {
                         htmlFor="avatar-upload-modern"
                         className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary hover:bg-primary-dark text-white font-black text-xs rounded-2xl shadow-xl shadow-primary/25 hover:-translate-y-0.5 transition cursor-pointer duration-200"
                       >
-                        <Upload className="w-4 h-4" /> Tải lên ảnh mới & Căn chỉnh (`Browse & Adjust`)...
+                        <Upload className="w-4 h-4" /> Tải lên ảnh mới và căn chỉnh...
                       </label>
                     </div>
                   </div>
                 ) : (
-                  /* STATE 2: Modern Interactive Studio Card (`Drag to Pan + Zoom Slider`) */
+                  /* STATE 2: Modern Interactive Studio Card */
                   <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 text-white shadow-2xl space-y-8 max-w-2xl mx-auto animate-fadeIn">
                     <div className="text-center space-y-1">
                       <span className="inline-block px-3 py-1 bg-primary/20 text-primary-light font-extrabold text-[10px] uppercase tracking-wider rounded-full border border-primary/30">
-                        Chế độ Phòng thu (`Studio Mode`)
+                        Chế độ căn chỉnh ảnh
                       </span>
                       <h3 className="text-base font-black text-white mt-1">Kéo thả trực tiếp trên khung ảnh tròn</h3>
                       <p className="text-xs text-slate-400">
@@ -1152,7 +1152,7 @@ export default function ProfilePage() {
                       </div>
 
                       <p className="text-[11px] text-slate-400 font-medium mt-3.5 flex items-center gap-1.5 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700/60">
-                        <Sliders className="w-3.5 h-3.5 text-primary-light" /> Nhấn & Kéo chuột/tay trong hình tròn để chỉnh vị trí (`Click & Drag`)
+                        <Sliders className="w-3.5 h-3.5 text-primary-light" /> Nhấn & Kéo chuột/tay trong hình tròn để chỉnh vị trí
                       </p>
                     </div>
 
@@ -1164,13 +1164,13 @@ export default function ProfilePage() {
                           type="button"
                           onClick={() => setAvatarZoom((z) => Math.max(0.2, +(z - 0.1).toFixed(2)))}
                           className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-slate-300 hover:text-white transition cursor-pointer shrink-0"
-                          title="Thu nhỏ (`Zoom Out`)"
+                          title="Thu nhỏ"
                         >
                           <ZoomOut className="w-4 h-4" />
                         </button>
                         <div className="flex-grow space-y-1">
                           <div className="flex justify-between items-center text-[11px] font-bold text-slate-300 px-1">
-                            <span>Thu phóng (`Zoom`)</span>
+                            <span>Thu phóng</span>
                             <span className="text-primary-light font-mono font-black">{avatarZoom.toFixed(2)}x</span>
                           </div>
                           <input
@@ -1187,7 +1187,7 @@ export default function ProfilePage() {
                           type="button"
                           onClick={() => setAvatarZoom((z) => Math.min(5, +(z + 0.1).toFixed(2)))}
                           className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-slate-300 hover:text-white transition cursor-pointer shrink-0"
-                          title="Phóng to (`Zoom In`)"
+                          title="Phóng to"
                         >
                           <ZoomIn className="w-4 h-4" />
                         </button>
@@ -1205,7 +1205,7 @@ export default function ProfilePage() {
                         </button>
                         <div className="flex-grow space-y-1">
                           <div className="flex justify-between items-center text-[11px] font-bold text-slate-300 px-1">
-                            <span>Góc xoay (`Rotation`)</span>
+                            <span>Góc xoay</span>
                             <span className="text-primary-light font-mono font-black">{avatarRotate}°</span>
                           </div>
                           <input
@@ -1269,7 +1269,7 @@ export default function ProfilePage() {
                         disabled={isLoading}
                         className="w-full sm:w-auto min-w-[240px] px-8 py-4 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-light hover:to-primary disabled:from-slate-700 disabled:to-slate-700 text-white font-black text-xs rounded-2xl shadow-xl shadow-primary/30 transition flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02]"
                       >
-                        <CheckCircle className="w-4 h-4" /> {isLoading ? 'Đang cập nhật Avatar lên API...' : 'Hoàn tất & Cập nhật Avatar ngay (`Save & Apply`)'}
+                        <CheckCircle className="w-4 h-4" /> {isLoading ? 'Đang cập nhật...' : 'Hoàn tất & Cập nhật ảnh đại diện'}
                       </button>
                       <button
                         type="button"
@@ -1418,7 +1418,7 @@ export default function ProfilePage() {
               <div className="space-y-6 animate-fadeInUp">
                 <div className="border-b border-slate-100 pb-4">
                   <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                    <Scan className="w-5 h-5 text-primary" /> Xác thực CCCD & Quét AI OCR Tự động điền (`CCCD AI OCR`)
+                    <Scan className="w-5 h-5 text-primary" /> Xác thực CCCD & Quét AI OCR Tự động điền
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Hệ thống tự động phân tích và trích xuất thông tin sang các trường ngay khi tải ảnh <strong>Mặt trước</strong>
@@ -1463,8 +1463,8 @@ export default function ProfilePage() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
-                        <span>Số CCCD (`number`) *</span>
-                        {cccdForm.number && <span className="text-[10px] text-emerald-600 font-extrabold flex items-center gap-0.5"><Check className="w-3 h-3" /> OCR Auto-filled</span>}
+                        <span>Số CCCD *</span>
+                        {cccdForm.number && <span className="text-[10px] text-emerald-600 font-extrabold flex items-center gap-0.5"><Check className="w-3 h-3" /> Tự động điền OCR</span>}
                       </label>
                       <input
                         type="text"
@@ -1477,8 +1477,8 @@ export default function ProfilePage() {
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
-                        <span>Ngày cấp (`date`) *</span>
-                        {cccdForm.date && <span className="text-[10px] text-emerald-600 font-extrabold flex items-center gap-0.5"><Check className="w-3 h-3" /> OCR Auto-filled</span>}
+                        <span>Ngày cấp *</span>
+                        {cccdForm.date && <span className="text-[10px] text-emerald-600 font-extrabold flex items-center gap-0.5"><Check className="w-3 h-3" /> Tự động điền OCR</span>}
                       </label>
                       <input
                         type="date"
@@ -1490,8 +1490,8 @@ export default function ProfilePage() {
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
-                        <span>Nơi cấp (`place`) *</span>
-                        {cccdForm.place && <span className="text-[10px] text-emerald-600 font-extrabold flex items-center gap-0.5"><Check className="w-3 h-3" /> OCR Auto-filled</span>}
+                        <span>Nơi cấp *</span>
+                        {cccdForm.place && <span className="text-[10px] text-emerald-600 font-extrabold flex items-center gap-0.5"><Check className="w-3 h-3" /> Tự động điền OCR</span>}
                       </label>
                       <input
                         type="text"
