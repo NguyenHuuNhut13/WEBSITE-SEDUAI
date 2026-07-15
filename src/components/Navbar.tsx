@@ -6,7 +6,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import {
   Menu,
   X,
-  Brain,
   Phone,
   Mail,
   MapPin,
@@ -19,7 +18,7 @@ import {
   LogIn,
   Sparkles,
   ArrowRight,
-  ShieldCheck,
+  GraduationCap,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -43,10 +42,9 @@ const LinkedinIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-const YoutubeIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
-    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
+const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path d="M12.24 10.285V13.4h6.887c-.648 2.41-2.519 4.113-5.211 4.113a5.83 5.83 0 1 1 0-11.66c1.61 0 2.978.579 4.024 1.543l2.42-2.42C18.89 3.58 15.86 2.457 12.24 2.457a9.543 9.543 0 1 0 0 19.086c5.28 0 9.543-3.83 9.543-9.543 0-.663-.07-1.3-.2-1.915H12.24Z" />
   </svg>
 );
 
@@ -60,7 +58,6 @@ export default function Navbar() {
   const { accessToken, localSync, logout } = useAuth();
 
   const [isSticky, setIsSticky] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Close mobile menu & reset dropdowns on path changes
@@ -88,7 +85,7 @@ export default function Navbar() {
   }, []);
 
   const handleLinkClick = (href: string) => {
-    if (href.includes('#')) return; // Allow hash links to anchor scroll
+    if (href.includes('#')) return;
     const targetPath = href.split('?')[0];
     if (pathname === targetPath) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -98,12 +95,13 @@ export default function Navbar() {
   const navLinks: {
     name: string;
     href: string;
-    isSpecial?: boolean;
     submenu?: { name: string; href: string }[];
   }[] = [
-    { name: 'Giới thiệu', href: '/about' },
+    { name: 'HOME', href: '/' },
+    { name: 'ABOUT', href: '/about' },
+    { name: 'EVENT', href: '/events' },
     {
-      name: 'Khóa học',
+      name: 'COURSES',
       href: '/courses',
       submenu: [
         { name: 'Tất cả khóa học', href: '/courses' },
@@ -114,369 +112,262 @@ export default function Navbar() {
         { name: 'Lập trình Python Trẻ Em', href: '/courses/lap-trinh-python-cho-tre-em' },
       ],
     },
-    { name: 'Tính năng CRM', href: '/#ai-crm-demo' },
-    ...(accessToken ? [{ name: 'Hệ thống LMS', href: '/lms' }] : []),
-    { name: 'Sự kiện', href: '/events' },
-    { name: 'Tin tức', href: '/blog' },
-    { name: 'Liên hệ', href: '/contact' },
+    { name: 'FEATURES', href: '/#ai-crm-demo' },
+    { name: 'BLOG', href: '/blog' },
+    { name: 'CONTACT', href: '/contact' },
+    ...(accessToken ? [
+      { name: 'LMS', href: '/lms' },
+      { name: 'PROFILE', href: '/profile' }
+    ] : []),
   ];
 
   return (
     <>
-      {/* Top Utility Bar - Clean Dark Slate */}
-      <div className="bg-slate-950 text-slate-300 py-2.5 border-b border-slate-800/80 hidden lg:block text-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          {/* Left info with circular outline icons */}
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 group cursor-default">
-              <div className="w-7 h-7 rounded-full bg-slate-900 border border-slate-700/80 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition">
-                <MapPin className="w-3.5 h-3.5" />
+      {!isSticky && (
+        <div className="bg-black/60 text-white/95 py-2.5 border-b border-white/10 hidden lg:block text-xs relative z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <div className="flex items-center gap-6 font-semibold">
+              <div className="flex items-center gap-2 group cursor-default">
+                <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#c91e1e] shadow-sm">
+                  <MapPin className="w-3.5 h-3.5" />
+                </div>
+                <span>45/12 Best Avenue Street, UK 2450, US</span>
               </div>
-              <span>
-                <span className="text-slate-500 font-medium">CS1: </span>
-                <strong className="text-slate-300 font-semibold group-hover:text-white transition">Quận 10, TP. Hồ Chí Minh</strong>
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 group">
-              <div className="w-7 h-7 rounded-full bg-slate-900 border border-slate-700/80 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition">
-                <Mail className="w-3.5 h-3.5" />
-              </div>
-              <span>
-                <span className="text-slate-500 font-medium">Email: </span>
-                <a href="mailto:contact@seduai.edu.vn" className="text-slate-300 font-semibold hover:text-primary transition">
-                  contact@seduai.edu.vn
+              <div className="flex items-center gap-2 group">
+                <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#c91e1e] shadow-sm">
+                  <Mail className="w-3.5 h-3.5" />
+                </div>
+                <a href="mailto:help@example.com" className="hover:text-white/80 transition">
+                  help@example.com
                 </a>
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 group">
-              <div className="w-7 h-7 rounded-full bg-slate-900 border border-slate-700/80 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition">
-                <Phone className="w-3.5 h-3.5" />
               </div>
-              <span>
-                <span className="text-slate-500 font-medium">Hotline 24/7: </span>
-                <strong className="text-amber-400 font-bold tracking-wide">1900 1234</strong>
-              </span>
+              <div className="flex items-center gap-2 group">
+                <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center text-[#c91e1e] shadow-sm">
+                  <Phone className="w-3.5 h-3.5" />
+                </div>
+                <span>+49-123-456-789</span>
+              </div>
             </div>
-          </div>
-
-          {/* Right Social icons & AI CRM Badge */}
-          <div className="flex items-center gap-4">
-            <span className="text-[11px] bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1.5">
-              <ShieldCheck className="w-3 h-3 text-emerald-400" /> Hệ thống AI EduTech Chuẩn 5 Sao
-            </span>
-            <div className="flex items-center gap-1.5">
-              <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
+            <div className="flex items-center gap-2.5">
+              <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full bg-white text-slate-800 flex items-center justify-center hover:bg-[#c91e1e] hover:text-white transition shadow-sm">
                 <FacebookIcon className="w-3.5 h-3.5" />
               </a>
-              <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
-                <TwitterIcon className="w-3.5 h-3.5" />
+              <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full bg-white text-slate-800 flex items-center justify-center hover:bg-[#c91e1e] hover:text-white transition shadow-sm">
+                <GoogleIcon className="w-3.5 h-3.5" />
               </a>
-              <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
+              <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full bg-white text-slate-800 flex items-center justify-center hover:bg-[#c91e1e] hover:text-white transition shadow-sm">
                 <LinkedinIcon className="w-3.5 h-3.5" />
               </a>
-              <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
-                <YoutubeIcon className="w-3.5 h-3.5" />
+              <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full bg-white text-slate-800 flex items-center justify-center hover:bg-[#c91e1e] hover:text-white transition shadow-sm">
+                <TwitterIcon className="w-3.5 h-3.5" />
               </a>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Main Header Navbar - Dynamic Gradient & Glassmorphism */}
-      <header className={`sticky top-0 z-50 transition-all duration-300 ${
+      <header className={`z-50 transition-all duration-300 ${
         isSticky 
-          ? 'stricky-fixed bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-lg' 
-          : 'bg-gradient-to-r from-primary via-blue-700 to-primary-dark border-b border-white/10 backdrop-blur-md'
+          ? 'sticky top-0 left-0 w-full bg-[#c91e1e] shadow-xl border-b border-red-800' 
+          : 'bg-transparent lg:absolute lg:top-[48px] lg:left-0 lg:right-0'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`flex items-center justify-between transition-all duration-300 ${
-            isSticky ? 'h-16' : 'h-18 sm:h-20'
-          }`}>
-            {/* Left: Premium Logo Link */}
-            <Link href="/" onClick={() => handleLinkClick('/')} className="flex items-center space-x-2.5 group cursor-pointer py-2">
-              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-md transition duration-300 group-hover:scale-105 ${
+        <div className={`mx-auto transition-all duration-300 ${
+          isSticky 
+            ? 'w-full px-0' 
+            : 'max-w-7xl px-4 sm:px-6 lg:px-8'
+        }`}>
+          <div className="flex items-stretch w-full">
+            <Link 
+              href="/" 
+              onClick={() => handleLinkClick('/')} 
+              className={`bg-white text-slate-900 transition-all duration-300 flex flex-col items-center justify-center shadow-lg border-b border-slate-200/80 shrink-0 ${
                 isSticky 
-                  ? 'bg-primary text-white shadow-primary/20' 
-                  : 'bg-white text-primary shadow-black/10'
+                  ? 'h-16 px-6' 
+                  : 'h-20 lg:h-24 px-8 mt-0 lg:-mt-2 rounded-b-xl lg:rounded-b-2xl'
+              }`}
+            >
+              <div className={`bg-[#c91e1e] text-white flex items-center justify-center rounded transition-all duration-300 ${
+                isSticky ? 'w-8 h-8' : 'w-10 h-10 lg:w-12 lg:h-12'
               }`}>
-                <Brain className="w-5 h-5 sm:w-6 sm:h-6" />
+                <GraduationCap className={isSticky ? 'w-5 h-5' : 'w-6 h-6 lg:w-7.5 lg:h-7.5'} />
               </div>
-              <div className="flex flex-col">
-                <span className={`text-lg sm:text-xl font-black tracking-tight leading-none transition duration-300 ${
-                  isSticky ? 'text-slate-900' : 'text-white'
-                }`}>
-                  Sedu<span className={isSticky ? 'text-primary' : 'text-amber-400'}>Ai</span>
-                </span>
-                <span className={`text-[8px] sm:text-[9px] font-bold uppercase tracking-widest mt-0.5 transition duration-300 ${
-                  isSticky ? 'text-slate-500' : 'text-white/60'
-                }`}>
-                  EduCenter
-                </span>
-              </div>
+              <span className={`font-black uppercase tracking-widest text-[#222] transition-all duration-300 ${
+                isSticky ? 'text-[9px] mt-1' : 'text-[10px] lg:text-xs mt-2'
+              }`}>
+                EDUTECH
+              </span>
             </Link>
 
-            {/* Center: Desktop Navigation Links */}
-            <nav className={`hidden lg:flex space-x-2.5 xl:space-x-4 text-xs font-bold uppercase tracking-wider items-center h-full transition duration-300 ${
-              isSticky ? 'text-slate-700' : 'text-white/90'
+            <div className={`bg-[#c91e1e] text-white flex items-center justify-between flex-grow transition-all duration-300 shadow-md ${
+              isSticky 
+                ? 'h-16 px-4 lg:px-8' 
+                : 'h-18 lg:h-20 px-6 lg:px-10 rounded-r-xl lg:rounded-r-2xl'
             }`}>
-              {navLinks.map((link) => {
-                if (link.submenu) {
-                  return (
-                    <div key={link.name} className="relative group flex items-center h-full cursor-pointer py-4">
-                      <span className={`transition duration-150 flex items-center gap-1 py-1 px-2 rounded-lg ${
-                        isSticky 
-                          ? 'hover:text-primary hover:bg-slate-100 text-slate-700' 
-                          : 'hover:text-white hover:bg-white/10 text-white/90'
-                      }`}>
-                        {link.name}{' '}
-                        <ChevronDown className={`w-3.5 h-3.5 transition duration-200 group-hover:rotate-180 ${
-                          isSticky ? 'text-slate-400 group-hover:text-primary' : 'text-white/70 group-hover:text-white'
-                        }`} />
-                      </span>
-                      {/* Dropdown Menu - Sleek Glassmorphic Style */}
-                      <div className="absolute top-full left-0 w-64 bg-white/95 backdrop-blur-xl border border-slate-100 rounded-2xl shadow-2xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 transform translate-y-2 group-hover:translate-y-0">
-                        {link.submenu.map((sub) => (
-                          <Link
-                            key={sub.name}
-                            href={sub.href}
-                            onClick={() => handleLinkClick(sub.href)}
-                            className="block px-4 py-2.5 text-[11px] font-bold text-slate-700 hover:bg-primary/10 hover:text-primary rounded-xl transition"
-                          >
-                            {sub.name}
-                          </Link>
-                        ))}
+              <nav className="hidden lg:flex space-x-4 xl:space-x-6 text-xs sm:text-sm font-extrabold uppercase tracking-wider items-center h-full">
+                {navLinks.map((link) => {
+                  if (link.submenu) {
+                    return (
+                      <div key={link.name} className="relative group flex items-center h-full cursor-pointer py-4">
+                        <span className="hover:text-white/80 transition duration-150 flex items-center gap-1">
+                          {link.name}{' '}
+                          <ChevronDown className="w-3.5 h-3.5 transition duration-200 group-hover:rotate-180 text-white/70 group-hover:text-white" />
+                        </span>
+                        <div className="absolute top-full left-0 w-60 bg-white rounded-xl shadow-2xl border border-slate-100 p-1.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 transform translate-y-2 group-hover:translate-y-0 text-slate-800">
+                          {link.submenu.map((sub) => (
+                            <Link
+                              key={sub.name}
+                              href={sub.href}
+                              onClick={() => handleLinkClick(sub.href)}
+                              className="block px-3 py-2 text-[11px] font-bold text-slate-700 hover:bg-rose-50 hover:text-[#c91e1e] rounded-lg transition"
+                            >
+                              {sub.name}
+                            </Link>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  );
-                }
+                    );
+                  }
 
-                const isActive = pathname?.startsWith(link.href);
+                  const isActive = pathname === link.href || (link.href !== '/' && pathname?.startsWith(link.href));
 
-                if (link.isSpecial) {
                   return (
                     <Link
                       key={link.name}
                       href={link.href}
                       onClick={() => handleLinkClick(link.href)}
-                      className="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black px-3.5 py-2 rounded-xl shadow-lg shadow-amber-500/25 transition duration-200 transform hover:scale-105 flex items-center gap-1.5"
+                      className={`transition duration-150 py-1 border-b-2 ${
+                        isActive
+                          ? 'border-white text-white font-black'
+                          : 'border-transparent text-white/90 hover:text-white hover:border-white/40'
+                      }`}
                     >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>{link.name}</span>
+                      {link.name}
                     </Link>
                   );
-                }
+                })}
+              </nav>
 
-                return (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    onClick={() => handleLinkClick(link.href)}
-                    className={`px-2.5 py-1.5 rounded-lg transition duration-150 ${
-                      isActive
-                        ? isSticky
-                          ? 'text-primary font-black bg-primary/10 border-b-2 border-primary'
-                          : 'text-white font-black bg-white/15 border-b-2 border-white'
-                        : isSticky
-                          ? 'hover:text-primary hover:bg-slate-100 text-slate-600'
-                          : 'hover:text-white hover:bg-white/10 text-white/90'
-                    }`}
+              <div className="hidden lg:flex items-center gap-3 xl:gap-4">
+                {accessToken ? (
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      className="flex items-center gap-2 border border-white/30 px-3 py-1.5 rounded-xl hover:bg-white/10 transition text-xs font-bold text-white cursor-pointer"
+                    >
+                      <img
+                        src={localSync.avatar}
+                        alt={localSync.name}
+                        className="w-5.5 h-5.5 rounded-full object-cover border border-white/60"
+                        loading="eager"
+                        decoding="async"
+                      />
+                      <span className="max-w-[80px] truncate">{localSync.name}</span>
+                      <span className="bg-amber-400 text-slate-950 font-black px-1.5 py-0.5 rounded text-[10px]">{localSync.point}p</span>
+                    </button>
+                    {showUserMenu && (
+                      <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-2xl border border-slate-100 p-1.5 text-slate-800 z-50 animate-scale-up">
+                        <div className="px-2.5 py-2 bg-slate-50 rounded-lg mb-1 border border-slate-100">
+                          <p className="text-[11px] font-black text-slate-900 truncate">{localSync.name}</p>
+                        </div>
+                        <Link
+                          href="/profile"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-2 px-2.5 py-2 text-[11px] font-bold text-slate-700 hover:bg-primary/10 hover:text-primary rounded-lg transition"
+                        >
+                          <User className="w-3.5 h-3.5 text-primary" /> Hồ sơ VIP
+                        </Link>
+                        <button
+                          onClick={async () => {
+                            if (await logout()) {
+                              setShowUserMenu(false);
+                              router.push('/');
+                            }
+                          }}
+                          className="w-full flex items-center gap-2 px-2.5 py-2 text-[11px] font-bold text-rose-600 hover:bg-rose-50 rounded-lg transition text-left cursor-pointer"
+                        >
+                          <LogOut className="w-3.5 h-3.5" /> Đăng xuất
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link 
+                    href="/login"
+                    className="border border-white/40 hover:bg-white hover:text-[#c91e1e] text-white font-black px-3.5 py-2 rounded-xl text-xs tracking-wider uppercase transition flex items-center gap-1 shrink-0"
                   >
-                    {link.name}
+                    <LogIn className="w-4 h-4" />
+                    <span>Đăng Nhập</span>
                   </Link>
-                );
-              })}
-            </nav>
-
-            {/* Right: Search box, AI Assistant, and User Profile / Login */}
-            <div className="hidden lg:flex items-center gap-3.5 xl:gap-5">
-              
-              {/* Collapsible Search Icon & Input */}
-              <div className="relative flex items-center">
-                <div className={`overflow-hidden transition-all duration-300 flex items-center ${
-                  isSearchOpen ? 'w-[160px] xl:w-[200px] opacity-100 mr-2' : 'w-0 opacity-0 pointer-events-none'
-                }`}>
+                )}
+                <Link 
+                  href="/ai-assistant"
+                  className="border border-white/40 hover:bg-white/10 text-white font-black px-3 py-2 rounded-xl text-xs tracking-wider uppercase transition flex items-center gap-1.5 shrink-0"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  <span>AI Assistant</span>
+                </Link>
+                <div className="relative flex items-center border border-white/40 rounded-xl bg-transparent px-3 py-1.5 focus-within:border-white focus-within:ring-1 focus-within:ring-white/20 transition">
                   <input
                     type="text"
+                    placeholder="Search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Tìm khóa học..."
-                    className={`w-full border rounded-xl pl-3 pr-3 py-1.5 text-xs focus:outline-none focus:ring-2 ${
-                      isSticky 
-                        ? 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-primary/20' 
-                        : 'bg-white/15 hover:bg-white/20 focus:bg-white/25 border-white/20 text-white placeholder-white/70 focus:ring-white/30'
-                    }`}
-                    autoFocus={isSearchOpen}
+                    className="bg-transparent text-xs text-white placeholder-white/60 outline-none w-28 sm:w-36 focus:w-44 transition-all"
                   />
+                  <Search className="w-3.5 h-3.5 text-white/80 shrink-0 ml-2" />
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsSearchOpen(!isSearchOpen)}
-                  className={`p-2 rounded-xl transition duration-200 flex items-center justify-center cursor-pointer ${
-                    isSticky 
-                      ? 'hover:bg-slate-100 text-slate-600 hover:text-primary' 
-                      : 'hover:bg-white/10 text-white/95 hover:text-white'
-                  }`}
-                  title="Tìm kiếm"
-                >
-                  {isSearchOpen ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
-                </button>
               </div>
 
-              {/* AI Assistant Icon-only Glowy Button */}
-              <Link
-                href="/ai-assistant"
-                onClick={() => handleLinkClick('/ai-assistant')}
-                className={`p-2 rounded-xl transition duration-200 flex items-center justify-center relative cursor-pointer group ${
-                  isSticky 
-                    ? 'hover:bg-slate-100 text-amber-500 hover:text-amber-600' 
-                    : 'hover:bg-white/10 text-amber-400 hover:text-amber-300'
-                }`}
-                title="Mở AI Assistant"
-              >
-                <Sparkles className="w-4 h-4 animate-pulse" />
-                <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
-                </span>
-              </Link>
-
-              {/* User Menu / Login Badge */}
-              {accessToken ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setShowUserMenu(!showUserMenu)}
-                    className={`flex items-center gap-2 border px-3 py-1.5 rounded-xl transition text-xs font-semibold cursor-pointer shadow-inner ${
-                      isSticky 
-                        ? 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50' 
-                        : 'bg-white/15 hover:bg-white/25 border-white/30 text-white'
-                    }`}
+              <div className="flex items-center lg:hidden gap-3">
+                <Link
+                  href="/ai-assistant"
+                  className="bg-amber-400 text-slate-950 px-2.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-1 shadow-sm"
+                  title="Mở AI Assistant"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span className="hidden xs:inline">AI</span>
+                </Link>
+                {accessToken ? (
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-1 bg-white/20 hover:bg-white/30 text-white px-2 py-1 rounded-lg text-xs font-bold transition border border-white/20"
                   >
-                    <img
-                      src={localSync.avatar}
-                      alt={localSync.name}
-                      className="w-6 h-6 rounded-full object-cover border border-white/60"
-                      loading="eager"
-                      decoding="async"
-                    />
-                    <span className="max-w-[90px] truncate font-bold">{localSync.name}</span>
-                    <div className="flex items-center gap-0.5 bg-amber-400 text-slate-950 font-extrabold px-1.5 py-0.5 rounded text-[10px] shadow-sm">
-                      <Award className="w-3 h-3 text-slate-950" />
-                      <span>{localSync.point}</span>
-                    </div>
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  {showUserMenu && (
-                    <div className="absolute right-0 top-full mt-2 w-60 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 text-slate-800 z-50 animate-scale-up">
-                      <div className="px-3 py-2.5 bg-slate-50 rounded-xl mb-1 border border-slate-100">
-                        <p className="text-xs font-black text-slate-900 truncate">{localSync.name}</p>
-                        <p className="text-[11px] text-amber-600 font-bold flex items-center gap-1 mt-0.5">
-                          <Award className="w-3.5 h-3.5 fill-amber-400" /> Điểm VIP: {localSync.point} điểm
-                        </p>
-                      </div>
-                      <Link
-                        href="/profile"
-                        onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-primary/10 hover:text-primary rounded-xl transition"
-                      >
-                        <User className="w-4 h-4 text-primary" /> Quản lý tài khoản VIP
-                      </Link>
-                      <Link
-                        href="/ai-assistant"
-                        onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-amber-50 hover:text-amber-600 rounded-xl transition"
-                      >
-                        <Sparkles className="w-4 h-4 text-amber-500" /> Mở ChatGPT Assistant
-                      </Link>
-                      <button
-                        onClick={async () => {
-                          if (await logout()) {
-                            setShowUserMenu(false);
-                            router.push('/');
-                          }
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition text-left cursor-pointer mt-1 border-t border-slate-100 pt-2"
-                      >
-                        <LogOut className="w-4 h-4" /> Đăng xuất tài khoản
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link
-                  href="/login"
-                  className={`flex items-center gap-1.5 font-black px-4 py-2 rounded-xl text-xs transition duration-200 transform hover:scale-105 ${
-                    isSticky 
-                      ? 'bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/10' 
-                      : 'bg-white text-primary hover:bg-slate-100 shadow-lg shadow-white/10'
-                  }`}
+                    <img src={localSync.avatar} className="w-5 h-5 rounded-full object-cover border border-white" loading="eager" decoding="async" />
+                    <span className="text-amber-300 font-extrabold text-[10px]">{localSync.point}p</span>
+                  </Link>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="bg-white text-[#c91e1e] font-extrabold px-2.5 py-1.5 rounded-xl text-[10px] shadow-md uppercase tracking-wider"
+                  >
+                    Đăng nhập
+                  </Link>
+                )}
+                <button
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="inline-flex items-center justify-center p-2 rounded-xl text-white hover:bg-white/10 transition border border-white/20"
+                  aria-label="Toggle Menu"
                 >
-                  <LogIn className="w-3.5 h-3.5" /> Đăng nhập
-                </Link>
-              )}
-            </div>
-
-            {/* Mobile Controls (Trigger Buttons on Header Right) */}
-            <div className="flex items-center lg:hidden gap-2 sm:gap-3">
-              {/* AI Assistant Quick Pill on Mobile */}
-              <Link
-                href="/ai-assistant"
-                className="bg-amber-400 text-slate-950 px-2.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-1 shadow-sm"
-                title="Mở AI Assistant"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span className="hidden xs:inline">AI</span>
-              </Link>
-
-              {/* Mobile User Profile Pill or Login Button */}
-              {accessToken ? (
-                <Link
-                  href="/profile"
-                  className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white px-2.5 py-1.5 rounded-xl text-xs font-bold transition border border-white/20"
-                >
-                  <img src={localSync.avatar} className="w-5 h-5 rounded-full object-cover border border-white" loading="eager" decoding="async" />
-                  <span className="text-amber-300 font-extrabold">{localSync.point}p</span>
-                </Link>
-              ) : (
-                <Link
-                  href="/login"
-                  className="bg-white text-primary font-extrabold px-3 py-1.5 rounded-xl text-xs shadow-md"
-                >
-                  Đăng nhập
-                </Link>
-              )}
-
-              {/* Hamburger Button */}
-              <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-xl text-white hover:bg-white/15 focus:outline-none transition duration-200 border border-white/20"
-                aria-label="Toggle Menu"
-              >
-                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
+                  {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* MOBILE NAVIGATION DRAWER (Rich Interactive Mobile Layout) */}
         {isOpen && (
           <div className="lg:hidden border-b border-slate-200 bg-white text-slate-800 absolute top-full left-0 w-full shadow-2xl transition-all duration-300 max-h-[86vh] overflow-y-auto z-50">
             <div className="p-5 space-y-5">
-              {/* Mobile Search Input */}
               <div className="relative">
                 <input
                   type="text"
                   value={mobileSearchQuery}
                   onChange={(e) => setMobileSearchQuery(e.target.value)}
-                  placeholder="Tìm kiếm khóa học nhanh..."
-                  className="w-full bg-slate-100 focus:bg-white border border-slate-200 focus:border-primary rounded-xl pl-4 pr-10 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition font-medium"
+                  placeholder="Tìm kiếm..."
+                  className="w-full bg-slate-100 focus:bg-white border border-slate-200 focus:border-[#c91e1e] rounded-xl pl-4 pr-10 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#c91e1e]/20 transition font-medium"
                 />
                 <Search className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
               </div>
-
-              {/* Mobile Navigation Links */}
               <div className="space-y-1.5">
                 {navLinks.map((link) => {
                   if (link.submenu) {
@@ -488,12 +379,11 @@ export default function Navbar() {
                         >
                           <span>{link.name}</span>
                           {mobileCourseOpen ? (
-                            <ChevronUp className="w-4 h-4 text-primary" />
+                            <ChevronUp className="w-4 h-4 text-[#c91e1e]" />
                           ) : (
                             <ChevronDown className="w-4 h-4 text-slate-500" />
                           )}
                         </button>
-
                         {mobileCourseOpen && (
                           <div className="pt-1 pb-2 px-2 space-y-1 border-t border-slate-200/60 mt-1">
                             {link.submenu.map((sub) => (
@@ -501,7 +391,7 @@ export default function Navbar() {
                                 key={sub.name}
                                 href={sub.href}
                                 onClick={() => handleLinkClick(sub.href)}
-                                className="block px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-white hover:text-primary hover:shadow-sm transition"
+                                className="block px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-white hover:text-[#c91e1e] hover:shadow-sm transition"
                               >
                                 {sub.name}
                               </Link>
@@ -511,23 +401,7 @@ export default function Navbar() {
                       </div>
                     );
                   }
-
-                  const isActive = link.href === '/' ? pathname === '/' : pathname?.startsWith(link.href);
-
-                  if (link.isSpecial) {
-                    return (
-                      <Link
-                        key={link.name}
-                        href={link.href}
-                        onClick={() => handleLinkClick(link.href)}
-                        className="flex items-center justify-center gap-2 w-full px-4 py-3.5 rounded-2xl text-sm sm:text-base font-black bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 transform active:scale-98 transition"
-                      >
-                        <Sparkles className="w-4 h-4" />
-                        <span>{link.name} (ChatGPT Full Mode)</span>
-                      </Link>
-                    );
-                  }
-
+                  const isActive = pathname === link.href || (link.href !== '/' && pathname?.startsWith(link.href));
                   return (
                     <Link
                       key={link.name}
@@ -535,8 +409,8 @@ export default function Navbar() {
                       onClick={() => handleLinkClick(link.href)}
                       className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition ${
                         isActive
-                          ? 'bg-primary text-white shadow-md shadow-primary/20'
-                          : 'text-slate-700 hover:bg-slate-100 hover:text-primary'
+                          ? 'bg-[#c91e1e] text-white shadow-md shadow-red-600/20'
+                          : 'text-slate-700 hover:bg-slate-100 hover:text-[#c91e1e]'
                       }`}
                     >
                       <span>{link.name}</span>
@@ -545,8 +419,6 @@ export default function Navbar() {
                   );
                 })}
               </div>
-
-              {/* Mobile VIP User Section inside Drawer */}
               <div className="pt-3 border-t border-slate-200">
                 {accessToken ? (
                   <div className="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-xl">
@@ -555,14 +427,14 @@ export default function Navbar() {
                         <img
                           src={localSync.avatar}
                           alt={localSync.name}
-                          className="w-10 h-10 rounded-full object-cover border-2 border-primary shadow"
+                          className="w-10 h-10 rounded-full object-cover border-2 border-[#c91e1e] shadow"
                           loading="eager"
                           decoding="async"
                         />
                         <div>
                           <p className="text-xs font-black text-white">{localSync.name}</p>
                           <span className="inline-flex items-center gap-1 bg-amber-400 text-slate-950 font-extrabold px-2 py-0.5 rounded text-[10px] mt-1">
-                            <Award className="w-3 h-3 fill-slate-950" /> {localSync.point} điểm SeduAi
+                            <Award className="w-3 h-3 fill-slate-950" /> {localSync.point} điểm
                           </span>
                         </div>
                       </div>
@@ -592,14 +464,14 @@ export default function Navbar() {
                 ) : (
                   <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-center space-y-3">
                     <p className="text-xs text-slate-600 font-medium">
-                      Đăng nhập tài khoản thành viên để tích điểm & truy cập học tập với Giảng viên AI
+                      Đăng nhập để tích điểm & truy cập học tập với Giảng viên AI
                     </p>
                     <Link
                       href="/login"
                       onClick={() => setIsOpen(false)}
-                      className="w-full block py-3 bg-primary hover:bg-primary-dark text-white font-black rounded-xl text-xs shadow-md transition"
+                      className="w-full block py-3 bg-[#c91e1e] hover:bg-red-700 text-white font-black rounded-xl text-xs shadow-md transition"
                     >
-                      🚀 Đăng Nhập / Đăng Ký Thành Viên
+                      🚀 Đăng Nhập / Đăng Ký
                     </Link>
                   </div>
                 )}
