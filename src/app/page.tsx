@@ -30,6 +30,7 @@ import { events } from '@/data/events';
 import { instructors } from '@/data/instructors';
 import { testimonials } from '@/data/testimonials';
 import { getEduCourses, ApiCourse } from '@/services/api';
+import TeacherAssistantWrapper from '@/components/TeacherAssistantWrapper';
 
 const partners = [
   {
@@ -366,46 +367,48 @@ export default async function Home() {
       </section>
 
       {/* ====== AI Teacher Assistant Section ====== */}
-      <section className="py-16 bg-white border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Console */}
-            <div className="lg:col-span-7 order-last lg:order-first">
-              <TeacherConsole />
-            </div>
+      <TeacherAssistantWrapper>
+        <section className="py-16 bg-white border-t border-slate-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+              {/* Left Console */}
+              <div className="lg:col-span-7 order-last lg:order-first">
+                <TeacherConsole />
+              </div>
 
-            {/* Right Info */}
-            <div className="lg:col-span-5 space-y-6">
-              <div className="w-12 h-12 rounded-2xl bg-primary-light text-primary flex items-center justify-center shadow-sm">
-                <Users className="w-6 h-6" />
-              </div>
-              <div className="space-y-2">
-                <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Dành cho giáo viên</span>
-                <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-                  AI Teacher Assistant
-                </h2>
-              </div>
-              <p className="text-slate-600 text-sm leading-relaxed">
-                Giảm tải áp lực chuẩn bị bài học cho giáo viên. Chỉ với lệnh nói hoặc văn bản đơn giản, Trợ lý AI sẽ hỗ trợ đắc lực giáo viên trong việc: soạn thảo giáo án chi tiết theo chương trình, tạo kho đề thi phong phú đa dạng, hỗ trợ chấm điểm và viết nhận xét học sinh định kỳ chi tiết và ý nghĩa.
-              </p>
-              <div className="space-y-3 font-semibold text-xs sm:text-sm text-slate-700">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
-                  <span>Tiết kiệm 10+ giờ làm việc mỗi tuần cho giáo viên.</span>
+              {/* Right Info */}
+              <div className="lg:col-span-5 space-y-6">
+                <div className="w-12 h-12 rounded-2xl bg-primary-light text-primary flex items-center justify-center shadow-sm">
+                  <Users className="w-6 h-6" />
                 </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
-                  <span>Giáo án & Đề thi chuẩn hóa, tự động tạo ba-rem đáp án.</span>
+                <div className="space-y-2">
+                  <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Dành cho giáo viên</span>
+                  <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+                    AI Teacher Assistant
+                  </h2>
                 </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
-                  <span>Nhận xét cá nhân hóa bám sát quá trình học của học viên.</span>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  Giảm tải áp lực chuẩn bị bài học cho giáo viên. Chỉ với lệnh nói hoặc văn bản đơn giản, Trợ lý AI sẽ hỗ trợ đắc lực giáo viên trong việc: soạn thảo giáo án chi tiết theo chương trình, tạo kho đề thi phong phú đa dạng, hỗ trợ chấm điểm và viết nhận xét học sinh định kỳ chi tiết và ý nghĩa.
+                </p>
+                <div className="space-y-3 font-semibold text-xs sm:text-sm text-slate-700">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+                    <span>Tiết kiệm 10+ giờ làm việc mỗi tuần cho giáo viên.</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+                    <span>Giáo án & Đề thi chuẩn hóa, tự động tạo ba-rem đáp án.</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0" />
+                    <span>Nhận xét cá nhân hóa bám sát quá trình học của học viên.</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </TeacherAssistantWrapper>
 
       {/* ====== Animated Counters ====== */}
       <CounterSection />
