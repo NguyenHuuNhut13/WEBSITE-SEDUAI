@@ -42,11 +42,13 @@ export default function ChatbotCRM() {
   const [isThinking, setIsThinking] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [allApiCourses, setAllApiCourses] = useState<ApiCourse[]>([]);
-  const chatMessagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // Auto scroll to bottom of chat
   useEffect(() => {
-    chatMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages, isThinking]);
 
   // Load API courses in background on mount
@@ -222,7 +224,7 @@ export default function ChatbotCRM() {
       </div>
 
       {/* Message Area */}
-      <div className="flex-grow p-6 overflow-y-auto space-y-4 bg-slate-50/50">
+      <div ref={chatContainerRef} className="flex-grow p-6 overflow-y-auto space-y-4 bg-slate-50/50">
         {messages.map((msg) => {
           const isAI = msg.sender === 'AI';
           return (
@@ -306,7 +308,6 @@ export default function ChatbotCRM() {
             </div>
           </div>
         )}
-        <div ref={chatMessagesEndRef} />
       </div>
 
       {/* Actions and inputs */}

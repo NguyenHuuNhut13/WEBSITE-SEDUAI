@@ -21,11 +21,13 @@ export default function TeacherConsole() {
   ]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [input, setInput] = useState('');
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // Auto scroll to bottom
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages, isGenerating]);
 
   const handleAction = async (promptText: string) => {
@@ -149,7 +151,7 @@ export default function TeacherConsole() {
       </div>
 
       {/* Messages Log area */}
-      <div className="flex-grow p-5 overflow-y-auto space-y-4 bg-slate-950/50 scrollbar-thin text-slate-300 font-mono text-xs leading-relaxed">
+      <div ref={chatContainerRef} className="flex-grow p-5 overflow-y-auto space-y-4 bg-slate-950/50 scrollbar-thin text-slate-300 font-mono text-xs leading-relaxed">
         {messages.map((msg) => {
           const isAI = msg.sender === 'AI';
           return (
@@ -186,7 +188,6 @@ export default function TeacherConsole() {
             </div>
           </div>
         )}
-        <div ref={chatEndRef} />
       </div>
 
       {/* Input panel */}
