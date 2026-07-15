@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
     payload = asObject(requestBody.payload);
 
     if (!ALLOWED_ACTIONS.has(action)) {
+      console.warn(`[Proxy Account] Rejected unsupported action: "${action}"`);
       return NextResponse.json(
         { success: false, error: 'Thao tác tài khoản không được hỗ trợ' },
         { status: 400 },
@@ -86,6 +87,7 @@ export async function POST(req: NextRequest) {
         || 'unknown';
       const rateLimit = consumeRateLimit(`account-login:${clientAddress}`, 10, 5 * 60_000);
       if (!rateLimit.allowed) {
+        console.warn(`[Proxy Account] Login rate limit triggered for IP: ${clientAddress}`);
         return NextResponse.json(
           { success: false, error: `Đăng nhập quá nhiều lần. Vui lòng chờ ${rateLimit.retryAfterSeconds} giây.` },
           { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } },
@@ -98,11 +100,13 @@ export async function POST(req: NextRequest) {
     const logoutToken = cookieToken || suppliedToken;
 
     if (action === 'logout') {
+      console.log('[Proxy Account] Performing logout action');
       // Expire the browser session in the immediate response. Waiting for NKS
       // here could let a late logout response erase a newer login cookie.
       if (logoutToken) {
         after(async () => {
           try {
+            console.log('[Proxy Account] Revoking token upstream...');
             const revokeResponse = await fetch(`${ACCOUNT_API_BASE}/logout`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -112,6 +116,8 @@ export async function POST(req: NextRequest) {
             });
             if (!revokeResponse.ok) {
               console.warn('[Proxy Account] NKS token revocation was not confirmed:', revokeResponse.status);
+            } else {
+              console.log('[Proxy Account] NKS token revocation confirmed');
             }
           } catch (error) {
             console.warn(
@@ -134,6 +140,7 @@ export async function POST(req: NextRequest) {
     const upstreamPayload = payload;
     const targetUrl = action ? `${ACCOUNT_API_BASE}/${action}` : ACCOUNT_API_BASE;
 
+    console.log(`[Proxy Account] Forwarding action "${action}" to NKS: ${targetUrl}`);
     const upstreamResponse = await fetch(targetUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -142,6 +149,7 @@ export async function POST(req: NextRequest) {
       signal: AbortSignal.timeout(8000),
     });
 
+    console.log(`[Proxy Account] Upstream NKS responded with status: ${upstreamResponse.status}`);
     const text = await upstreamResponse.text();
     let json: unknown;
     let validJson = true;
@@ -149,9 +157,10 @@ export async function POST(req: NextRequest) {
       json = JSON.parse(text);
     } catch {
       validJson = false;
+      console.error(`[Proxy Account] Failed to parse upstream response as JSON. Status: ${upstreamResponse.status}. First 300 chars of body:`, text.slice(0, 300));
       json = {
         success: false,
-        error: 'Máy chủ NKS trả về phản hồi không hợp lệ',
+        error: 'Máy chủ NKS trả về phản hồi không hợp lệ (Không phải JSON)',
       };
     }
 
@@ -204,8 +213,7 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error('[Proxy Account] Error:', message);
+    console.error(`[Proxy Account] Catch block error during action "${action}":`, error);
     const response = NextResponse.json({
       success: false,
       error: 'Không thể kết nối đến máy chủ NKS (Timeout hoặc Network Error)',
