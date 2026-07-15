@@ -88,11 +88,14 @@ function CounterItem({ end, suffix, label, icon, duration = 2000, delay = 0 }: C
 export default function CounterSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [stats, setStats] = useState({
+    students: 15000,
     courses: 15,
     lessons: 495,
+    classes: 250,
   });
 
   useEffect(() => {
+    // 1. Fetch CRM courses list
     getEduCourses().then((list) => {
       if (list && list.length > 0) {
         let totalLessons = 0;
@@ -100,12 +103,28 @@ export default function CounterSection() {
           const lCount = parseInt(course.acf?.lession as string) || 0;
           totalLessons += lCount;
         });
-        setStats({
+        setStats((prev) => ({
+          ...prev,
           courses: list.length,
           lessons: totalLessons || (list.length * 33),
-        });
+        }));
       }
     });
+
+    // 2. Fetch DB stats from local API
+    fetch('/api/stats')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && json.data) {
+          const { totalStudents, totalClasses } = json.data;
+          setStats((prev) => ({
+            ...prev,
+            students: 14950 + (totalStudents || 0),
+            classes: 245 + (totalClasses || 0),
+          }));
+        }
+      })
+      .catch((err) => console.error('Error fetching database stats:', err));
   }, []);
 
   useEffect(() => {
@@ -128,10 +147,10 @@ export default function CounterSection() {
   }, []);
 
   const counters = [
-    { end: 15000, suffix: '+', label: 'Học viên tin dùng', icon: <Users className="w-6 h-6" /> },
+    { end: stats.students, suffix: '+', label: 'Học viên tin dùng', icon: <Users className="w-6 h-6" /> },
     { end: stats.courses, suffix: '+', label: 'Khóa học CRM API', icon: <Lightbulb className="w-6 h-6" /> },
     { end: stats.lessons, suffix: '+', label: 'Bài giảng chuyên sâu', icon: <BookOpen className="w-6 h-6" /> },
-    { end: 250, suffix: '+', label: 'Trung tâm & Đối tác', icon: <Building2 className="w-6 h-6" /> },
+    { end: stats.classes, suffix: '+', label: 'Trung tâm & Đối tác', icon: <Building2 className="w-6 h-6" /> },
   ];
 
   return (
