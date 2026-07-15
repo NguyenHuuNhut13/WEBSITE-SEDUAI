@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Users, Lightbulb, ThumbsUp, Building2 } from 'lucide-react';
+import { Users, Lightbulb, BookOpen, Building2 } from 'lucide-react';
+import { getEduCourses } from '@/services/api';
 
 interface CounterItemProps {
   end: number;
@@ -84,15 +85,28 @@ function CounterItem({ end, suffix, label, icon, duration = 2000, delay = 0 }: C
   );
 }
 
-const counters = [
-  { end: 15000, suffix: '+', label: 'Học viên theo học', icon: <Users className="w-6 h-6" /> },
-  { end: 1200, suffix: '+', label: 'Trợ lý Giáo án AI đã tạo', icon: <Lightbulb className="w-6 h-6" /> },
-  { end: 98, suffix: '%', label: 'Đánh giá hài lòng', icon: <ThumbsUp className="w-6 h-6" /> },
-  { end: 250, suffix: '+', label: 'Trung tâm & Đối tác', icon: <Building2 className="w-6 h-6" /> },
-];
-
 export default function CounterSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const [stats, setStats] = useState({
+    courses: 15,
+    lessons: 495,
+  });
+
+  useEffect(() => {
+    getEduCourses().then((list) => {
+      if (list && list.length > 0) {
+        let totalLessons = 0;
+        list.forEach((course) => {
+          const lCount = parseInt(course.acf?.lession as string) || 0;
+          totalLessons += lCount;
+        });
+        setStats({
+          courses: list.length,
+          lessons: totalLessons || (list.length * 33),
+        });
+      }
+    });
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -112,6 +126,13 @@ export default function CounterSection() {
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
+
+  const counters = [
+    { end: 15000, suffix: '+', label: 'Học viên tin dùng', icon: <Users className="w-6 h-6" /> },
+    { end: stats.courses, suffix: '+', label: 'Khóa học CRM API', icon: <Lightbulb className="w-6 h-6" /> },
+    { end: stats.lessons, suffix: '+', label: 'Bài giảng chuyên sâu', icon: <BookOpen className="w-6 h-6" /> },
+    { end: 250, suffix: '+', label: 'Trung tâm & Đối tác', icon: <Building2 className="w-6 h-6" /> },
+  ];
 
   return (
     <section ref={sectionRef} className="py-20 bg-slate-900 text-white relative overflow-hidden">
