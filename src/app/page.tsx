@@ -51,11 +51,11 @@ const partners = [
   },
   {
     name: 'OpenAI',
-    logo: 'https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/openai/default.svg',
+    logo: '/openai.svg',
   },
   {
     name: 'Groq',
-    logo: 'https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/groq/default.svg',
+    logo: '/groq.svg',
   },
   {
     name: 'Vercel',
