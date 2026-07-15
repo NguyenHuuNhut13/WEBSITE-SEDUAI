@@ -197,17 +197,23 @@ export default function Navbar() {
       <header className={`z-50 transition-[background-color,transform,box-shadow] duration-300 ease-in-out will-change-[background-color,transform] ${
         isSticky 
           ? 'sticky top-0 left-0 w-full bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-lg text-slate-800 py-0' 
-          : 'bg-transparent lg:absolute lg:top-[48px] lg:left-0 lg:right-0 py-0 text-white'
+          : pathname === '/'
+            ? 'bg-transparent lg:absolute lg:top-[48px] lg:left-0 lg:right-0 py-0 text-white'
+            : 'relative w-full bg-slate-950 text-white py-0 border-b border-slate-800'
       }`}>
         <div className={`mx-auto transition-[max-width,padding,margin] duration-300 ease-in-out ${
           isSticky 
             ? 'w-full px-4 lg:px-8' 
-            : 'max-w-7xl px-4 sm:px-6 lg:px-8 mt-3 lg:mt-5'
+            : pathname === '/'
+              ? 'max-w-7xl px-4 sm:px-6 lg:px-8 mt-3 lg:mt-5'
+              : 'max-w-7xl px-4 sm:px-6 lg:px-8'
         }`}>
           <div className={`flex items-center justify-between transition-[height,background-color,border-radius,padding] duration-300 ease-in-out ${
             isSticky 
               ? 'h-16 w-full' 
-              : 'h-18 lg:h-20 w-full bg-slate-950/60 backdrop-blur-xl border border-white/10 px-6 lg:px-8 rounded-2xl shadow-2xl'
+              : pathname === '/'
+                ? 'h-18 lg:h-20 w-full bg-slate-950/60 backdrop-blur-xl border border-white/10 px-6 lg:px-8 rounded-2xl shadow-2xl'
+                : 'h-16 w-full bg-transparent border-0 px-0'
           }`}>
             
             <Link href="/" onClick={() => handleLinkClick('/')} className="flex items-center space-x-2.5 group cursor-pointer py-2">
