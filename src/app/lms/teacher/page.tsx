@@ -3,10 +3,10 @@
 import { useCallback, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { BookOpen, ClipboardCheck, BarChart3, Users, FileText, ChevronRight, AlertCircle } from 'lucide-react';
+import { BookOpen, ClipboardCheck, Users, ChevronRight, AlertCircle, Sparkles, PenTool, BarChart3 } from 'lucide-react';
 
 export default function TeacherDashboard() {
-  const { lmsUserId } = useAuth();
+  const { lmsUserId, localSync } = useAuth();
   const [classes, setClasses] = useState<any[]>([]);
   const [pendingSubmissions, setPendingSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,96 +31,96 @@ export default function TeacherDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      <div className="space-y-6">
+        <div className="lms-shimmer h-32 rounded-2xl" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => <div key={i} className="lms-shimmer h-24 rounded-2xl" />)}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[1, 2].map((i) => <div key={i} className="lms-shimmer h-40 rounded-2xl" />)}
+        </div>
       </div>
     );
   }
 
+  const stats = [
+    { label: 'Lớp đang quản lý', value: classes.length, icon: <BookOpen className="w-6 h-6" />, bg: 'bg-blue-50', iconColor: 'text-blue-600' },
+    { label: 'Bài chờ chấm', value: pendingSubmissions.length, icon: <ClipboardCheck className="w-6 h-6" />, bg: 'bg-amber-50', iconColor: 'text-amber-600', highlight: pendingSubmissions.length > 0 },
+    { label: 'Tổng học sinh', value: classes.reduce((sum, c) => sum + (c._count?.students || 0), 0), icon: <Users className="w-6 h-6" />, bg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
+    { label: 'Tổng môn học', value: classes.reduce((sum, c) => sum + (c._count?.subjects || 0), 0), icon: <BarChart3 className="w-6 h-6" />, bg: 'bg-purple-50', iconColor: 'text-purple-600' },
+  ];
+
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-black text-slate-900">Dashboard Giáo viên</h1>
-        <p className="text-sm text-slate-500 mt-1">Quản lý lớp học, bài tập và đề thi</p>
+      {/* Hero */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-primary p-6 lg:p-8 text-white shadow-xl shadow-indigo-500/15">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/4" />
+        <div className="absolute bottom-0 left-1/4 w-24 h-24 bg-white/5 rounded-full translate-y-1/2" />
+        <div className="relative flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="w-5 h-5 text-amber-300" />
+              <span className="text-xs font-bold uppercase tracking-wider text-white/70">Dashboard giáo viên</span>
+            </div>
+            <h1 className="text-2xl lg:text-3xl font-black">Chào {localSync.name || 'Giáo viên'}! 🎓</h1>
+            <p className="text-sm text-white/75 mt-2">Quản lý lớp học, bài tập và đề thi</p>
+          </div>
+          <Link
+            href="/lms/teacher/exams/create"
+            className="hidden sm:flex items-center gap-2 px-5 py-3 bg-white/15 backdrop-blur-sm border border-white/20 hover:bg-white/25 text-white rounded-xl font-bold text-sm transition shadow-lg"
+          >
+            <PenTool className="w-4 h-4" /> Tạo đề mới
+          </Link>
+        </div>
       </div>
 
-      {/* Quick Stats */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-slate-900">{classes.length}</p>
-              <p className="text-xs text-slate-500 font-semibold">Lớp đang quản lý</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-              <ClipboardCheck className="w-5 h-5 text-amber-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-slate-900">{pendingSubmissions.length}</p>
-              <p className="text-xs text-slate-500 font-semibold">Bài chờ chấm</p>
+        {stats.map((stat, i) => (
+          <div key={stat.label} className={`lms-card bg-white rounded-2xl p-5 border shadow-sm lms-fade-up ${stat.highlight ? 'border-amber-200 ring-1 ring-amber-100' : 'border-slate-200/60'}`} style={{ animationDelay: `${i * 0.06}s` }}>
+            <div className="flex items-center gap-4">
+              <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center ${stat.iconColor}`}>
+                {stat.icon}
+              </div>
+              <div>
+                <p className="text-2xl font-black text-slate-900 lms-stat-number">{stat.value}</p>
+                <p className="text-xs text-slate-500 font-semibold">{stat.label}</p>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-              <Users className="w-5 h-5 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-slate-900">
-                {classes.reduce((sum, c) => sum + (c._count?.students || 0), 0)}
-              </p>
-              <p className="text-xs text-slate-500 font-semibold">Tổng học sinh</p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-purple-600" />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-slate-900">
-                {classes.reduce((sum, c) => sum + (c._count?.subjects || 0), 0)}
-              </p>
-              <p className="text-xs text-slate-500 font-semibold">Tổng môn học</p>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* Class Cards */}
       <div>
-        <h2 className="text-lg font-bold text-slate-900 mb-4">Lớp đang quản lý</h2>
+        <h2 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <BookOpen className="w-5 h-5 text-primary" />
+          Lớp đang quản lý
+        </h2>
         {classes.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center">
-            <AlertCircle className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 font-semibold">Chưa có lớp nào được giao</p>
+          <div className="bg-white rounded-2xl border border-slate-200/60 p-10 text-center shadow-sm">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
+              <AlertCircle className="w-7 h-7 text-slate-300" />
+            </div>
+            <p className="text-slate-600 font-bold">Chưa có lớp nào được giao</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {classes.map((cls) => (
               <Link key={cls.id} href={`/lms/teacher/classes/${cls.id}`}
-                className="bg-white rounded-2xl border border-slate-200 p-5 hover:shadow-md hover:border-primary/30 transition group">
+                className="lms-card bg-white rounded-2xl border border-slate-200/60 p-5 shadow-sm group lms-fade-up">
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-base font-bold text-slate-900 group-hover:text-primary transition">{cls.name}</h3>
                     <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
-                      <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {cls._count?.students || 0}/25 HS</span>
+                      <span className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /> {cls._count?.students || 0} HS</span>
                       <span className="flex items-center gap-1"><BookOpen className="w-3.5 h-3.5" /> {cls._count?.subjects || 0} môn</span>
                     </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-primary transition" />
+                  <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-primary transition" />
                 </div>
                 {/* Subject pills */}
-                <div className="flex flex-wrap gap-1.5 mt-3">
+                <div className="flex flex-wrap gap-1.5 mt-4">
                   {cls.subjects?.slice(0, 4).map((sub: any) => (
                     <span key={sub.id} className="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-semibold">
                       {sub.name}
@@ -137,43 +137,28 @@ export default function TeacherDashboard() {
       {pendingSubmissions.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-slate-900">Bài tập chờ chấm</h2>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <ClipboardCheck className="w-5 h-5 text-amber-500" />
+              Bài tập chờ chấm
+              <span className="ml-1 px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">{pendingSubmissions.length}</span>
+            </h2>
             <Link href="/lms/teacher/grading" className="text-primary text-sm font-bold hover:underline">Xem tất cả →</Link>
           </div>
-          <div className="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100">
+          <div className="bg-white rounded-2xl border border-slate-200/60 divide-y divide-slate-100 shadow-sm overflow-hidden">
             {pendingSubmissions.slice(0, 5).map((sub) => (
-              <div key={sub.id} className="p-4 flex items-center justify-between">
+              <div key={sub.id} className="p-4 flex items-center justify-between hover:bg-slate-50/80 transition">
                 <div>
                   <p className="text-sm font-bold text-slate-900">{sub.student?.name}</p>
                   <p className="text-xs text-slate-500">{sub.assignment?.title} · {new Date(sub.submittedAt).toLocaleDateString('vi-VN')}</p>
                 </div>
-                <span className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold">Chờ chấm</span>
+                <span className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-100">
+                  Chờ chấm
+                </span>
               </div>
             ))}
           </div>
         </div>
       )}
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Link href="/lms/teacher/grading" className="bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-2xl p-5 hover:shadow-lg transition">
-          <ClipboardCheck className="w-8 h-8 mb-2 opacity-80" />
-          <p className="font-bold text-sm">Chấm bài AI</p>
-          <p className="text-xs opacity-80 mt-1">Sử dụng SEDUAI để chấm bài tự động</p>
-        </Link>
-        <Link href="/lms/teacher/exams/create" className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white rounded-2xl p-5 hover:shadow-lg transition">
-          <FileText className="w-8 h-8 mb-2 opacity-80" />
-          <p className="font-bold text-sm">Tạo đề thi</p>
-          <p className="text-xs opacity-80 mt-1">AI sinh câu hỏi trắc nghiệm tự động</p>
-        </Link>
-        {classes[0] && (
-          <Link href={`/lms/teacher/dashboard/${classes[0].id}`} className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl p-5 hover:shadow-lg transition">
-            <BarChart3 className="w-8 h-8 mb-2 opacity-80" />
-            <p className="font-bold text-sm">Dashboard Realtime</p>
-            <p className="text-xs opacity-80 mt-1">Xem kết quả học tập theo thời gian thực</p>
-          </Link>
-        )}
-      </div>
     </div>
   );
 }

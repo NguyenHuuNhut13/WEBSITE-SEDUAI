@@ -567,26 +567,143 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.05em;
 }
 
-/* LMS Custom styles */
+/* ======================== */
+/* LMS System — Design System */
+/* ======================== */
+
+/* Sidebar */
 .lms-sidebar {
   flex-shrink: 0;
   z-index: 40;
+  position: relative;
 }
-.lms-sidebar-collapsed {
-  width: 72px !important;
+@media (max-width: 1023px) {
+  .lms-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 50;
+  }
+  .lms-sidebar.lms-sidebar-open {
+    transform: translateX(0);
+  }
 }
+
+/* Sidebar backdrop overlay on mobile */
+.lms-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 49;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.lms-sidebar-backdrop.lms-sidebar-backdrop-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Glassmorphism card */
+.lms-glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+/* Card hover lift */
 .lms-card {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .lms-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+  box-shadow:
+    0 20px 40px -12px rgba(0, 119, 187, 0.10),
+    0 8px 16px -8px rgba(0, 0, 0, 0.06);
 }
+
+/* Staggered fade-in for lists */
+@keyframes lmsFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.lms-fade-up {
+  animation: lmsFadeUp 0.5s ease-out both;
+}
+.lms-fade-up:nth-child(1) { animation-delay: 0.04s; }
+.lms-fade-up:nth-child(2) { animation-delay: 0.08s; }
+.lms-fade-up:nth-child(3) { animation-delay: 0.12s; }
+.lms-fade-up:nth-child(4) { animation-delay: 0.16s; }
+.lms-fade-up:nth-child(5) { animation-delay: 0.20s; }
+.lms-fade-up:nth-child(6) { animation-delay: 0.24s; }
+
+/* Gradient text */
+.lms-gradient-text {
+  background: linear-gradient(135deg, #0077bb 0%, #00b4d8 50%, #0077bb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow pulse for active nav item */
+@keyframes lmsGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(0, 119, 187, 0.4); }
+  50% { box-shadow: 0 0 16px rgba(0, 119, 187, 0.7); }
+}
+.lms-nav-active {
+  animation: lmsGlow 2.5s ease-in-out infinite;
+}
+
+/* Shimmer loading placeholder */
+@keyframes lmsShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.lms-shimmer {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: lmsShimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* Blink animation */
 @keyframes blink-slow {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
 }
 .animate-blink-slow {
   animation: blink-slow 2s infinite ease-in-out;
+}
+
+/* LMS dark scrollbar inside sidebar */
+.lms-sidebar ::-webkit-scrollbar {
+  width: 4px;
+}
+.lms-sidebar ::-webkit-scrollbar-track {
+  background: transparent;
+}
+.lms-sidebar ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 4px;
+}
+
+/* Stat counter number */
+@keyframes lmsCountUp {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+.lms-stat-number {
+  animation: lmsCountUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
