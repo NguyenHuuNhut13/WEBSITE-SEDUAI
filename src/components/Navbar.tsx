@@ -77,12 +77,21 @@ export default function Navbar() {
   useEffect(() => {
     let ticking = false;
     const handleScroll = () => {
-      const shouldBeSticky = window.scrollY > 80;
+      const scrollPos = window.scrollY;
       setIsSticky((prev) => {
-        if (prev !== shouldBeSticky) {
-          return shouldBeSticky;
+        if (prev) {
+          // If already sticky, only deactivate when scrolled back up close to the top
+          if (scrollPos < 40) {
+            return false;
+          }
+          return prev;
+        } else {
+          // If not sticky, only activate when scrolled down past a threshold
+          if (scrollPos > 120) {
+            return true;
+          }
+          return prev;
         }
-        return prev;
       });
       ticking = false;
     };
