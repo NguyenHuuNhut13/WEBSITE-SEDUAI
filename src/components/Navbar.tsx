@@ -73,18 +73,30 @@ export default function Navbar() {
     return () => clearTimeout(timer);
   }, [pathname]);
 
-  // Listen to scroll events to trigger sticky header class
+  // Listen to scroll events to trigger sticky header class with requestAnimationFrame throttling for lag-free performance
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      if (window.scrollY > 80) {
-        setIsSticky(true);
-      } else {
-        setIsSticky(false);
+      const shouldBeSticky = window.scrollY > 80;
+      setIsSticky((prev) => {
+        if (prev !== shouldBeSticky) {
+          return shouldBeSticky;
+        }
+        return prev;
+      });
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(handleScroll);
+        ticking = true;
       }
     };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
     handleScroll();
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   const handleLinkClick = (href: string) => {
@@ -182,17 +194,17 @@ export default function Navbar() {
         </div>
       )}
 
-      <header className={`z-50 transition-all duration-300 ${
+      <header className={`z-50 transition-[background-color,transform,box-shadow] duration-300 ease-in-out will-change-[background-color,transform] ${
         isSticky 
           ? 'sticky top-0 left-0 w-full bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-lg text-slate-800 py-0' 
           : 'bg-transparent lg:absolute lg:top-[48px] lg:left-0 lg:right-0 py-0 text-white'
       }`}>
-        <div className={`mx-auto transition-all duration-300 ${
+        <div className={`mx-auto transition-[max-width,padding,margin] duration-300 ease-in-out ${
           isSticky 
             ? 'w-full px-4 lg:px-8' 
             : 'max-w-7xl px-4 sm:px-6 lg:px-8 mt-3 lg:mt-5'
         }`}>
-          <div className={`flex items-center justify-between transition-all duration-300 ${
+          <div className={`flex items-center justify-between transition-[height,background-color,border-radius,padding] duration-300 ease-in-out ${
             isSticky 
               ? 'h-16 w-full' 
               : 'h-18 lg:h-20 w-full bg-slate-950/60 backdrop-blur-xl border border-white/10 px-6 lg:px-8 rounded-2xl shadow-2xl'
