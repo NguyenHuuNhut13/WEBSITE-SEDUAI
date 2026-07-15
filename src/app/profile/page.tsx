@@ -651,10 +651,20 @@ export default function ProfilePage() {
               <p className="text-[10px] text-slate-300 uppercase tracking-wider font-bold">Điểm Thưởng</p>
               <p className="text-xl font-black text-amber-400 mt-0.5">{localSync.point}</p>
             </div>
-            <div className="text-center px-4">
+            <div className="text-center px-4 border-r border-white/20">
               <p className="text-[10px] text-slate-300 uppercase tracking-wider font-bold">Trình Độ</p>
               <p className="text-sm font-extrabold text-white mt-1">Lập trình viên AI</p>
             </div>
+            <button
+              onClick={async () => {
+                if (await logout()) router.push('/');
+              }}
+              className="text-center px-4 text-rose-300 hover:text-white transition flex flex-col items-center justify-center cursor-pointer group"
+              title="Đăng xuất"
+            >
+              <LogOut className="w-4 h-4 text-rose-400 group-hover:scale-110 transition-transform" />
+              <p className="text-[9px] uppercase tracking-wider font-bold mt-1">Đăng xuất</p>
+            </button>
           </div>
         </div>
       </section>
@@ -672,75 +682,99 @@ export default function ProfilePage() {
       )}
 
       {/* Main Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Sidebar Navigation */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-2xl shadow-md border border-slate-200 p-3 space-y-1">
-              <button
-                onClick={() => setActiveTab('info')}
-                className={`w-full px-4 py-3 rounded-xl text-xs font-bold flex items-center gap-3 transition cursor-pointer ${
-                  activeTab === 'info'
-                    ? 'bg-primary text-white shadow-md shadow-primary/20'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-primary'
-                }`}
-              >
-                <User className="w-4 h-4" /> Thông tin thành viên
-              </button>
-
-              <button
-                onClick={() => setActiveTab('password')}
-                className={`w-full px-4 py-3 rounded-xl text-xs font-bold flex items-center justify-between transition cursor-pointer ${
-                  activeTab === 'password'
-                    ? 'bg-primary text-white shadow-md shadow-primary/20'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-primary'
-                }`}
-              >
-                <span className="flex items-center gap-3">
-                  <Lock className="w-4 h-4" /> Cập nhật mật khẩu
-                </span>
-                <span title="Tạo mật khẩu ngẫu nhiên">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                </span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('avatar')}
-                className={`w-full px-4 py-3 rounded-xl text-xs font-bold flex items-center gap-3 transition cursor-pointer ${
-                  activeTab === 'avatar'
-                    ? 'bg-primary text-white shadow-md shadow-primary/20'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-primary'
-                }`}
-              >
-                <Camera className="w-4 h-4" /> Đổi Avatar (Base64)
-              </button>
-
-              <button
-                onClick={() => setActiveTab('cccd')}
-                className={`w-full px-4 py-3 rounded-xl text-xs font-bold flex items-center gap-3 transition cursor-pointer ${
-                  activeTab === 'cccd'
-                    ? 'bg-primary text-white shadow-md shadow-primary/20'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-primary'
-                }`}
-              >
-                <CreditCard className="w-4 h-4" /> Xác thực CCCD (Base64)
-              </button>
-
-              <div className="pt-3 border-t border-slate-100 mt-2">
-                <button
-                  onClick={async () => {
-                    if (await logout()) router.push('/');
-                  }}
-                  className="w-full px-4 py-3 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 flex items-center gap-3 transition cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" /> Đăng xuất hệ thống
-                </button>
-              </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20 space-y-6">
+        
+        {/* Update Category Grid Boxes */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          {/* Box 1: Thông tin cá nhân */}
+          <button
+            onClick={() => setActiveTab('info')}
+            className={`p-5 rounded-2xl border text-left transition-all duration-300 hover:scale-102 hover:shadow-md cursor-pointer flex items-start gap-4 relative group ${
+              activeTab === 'info'
+                ? 'bg-white border-primary shadow-lg ring-1 ring-primary/20'
+                : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shrink-0 ${
+              activeTab === 'info' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-650 group-hover:bg-primary/10 group-hover:text-primary'
+            }`}>
+              <User className="w-5 h-5" />
             </div>
-          </div>
+            <div className="flex-grow">
+              <h3 className="text-xs font-bold text-slate-900">Thông tin cá nhân</h3>
+              <p className="text-[10px] text-slate-500 mt-1 leading-normal">Cập nhật họ tên, điện thoại, giới tính, tỉnh thành</p>
+            </div>
+            {activeTab === 'info' && <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-primary" />}
+          </button>
 
-          {/* Tab Contents */}
-          <div className="lg:col-span-9 bg-white rounded-3xl shadow-md border border-slate-200 p-6 sm:p-8">
+          {/* Box 2: Đổi mật khẩu */}
+          <button
+            onClick={() => setActiveTab('password')}
+            className={`p-5 rounded-2xl border text-left transition-all duration-300 hover:scale-102 hover:shadow-md cursor-pointer flex items-start gap-4 relative group ${
+              activeTab === 'password'
+                ? 'bg-white border-primary shadow-lg ring-1 ring-primary/20'
+                : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shrink-0 ${
+              activeTab === 'password' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-650 group-hover:bg-primary/10 group-hover:text-primary'
+            }`}>
+              <Lock className="w-5 h-5" />
+            </div>
+            <div className="flex-grow">
+              <h3 className="text-xs font-bold text-slate-900">Mật khẩu & Bảo mật</h3>
+              <p className="text-[10px] text-slate-500 mt-1 leading-normal">Đổi mật khẩu tài khoản và dùng AI Generator</p>
+            </div>
+            {activeTab === 'password' && <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-primary" />}
+          </button>
+
+          {/* Box 3: Đổi Avatar */}
+          <button
+            onClick={() => setActiveTab('avatar')}
+            className={`p-5 rounded-2xl border text-left transition-all duration-300 hover:scale-102 hover:shadow-md cursor-pointer flex items-start gap-4 relative group ${
+              activeTab === 'avatar'
+                ? 'bg-white border-primary shadow-lg ring-1 ring-primary/20'
+                : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shrink-0 ${
+              activeTab === 'avatar' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-650 group-hover:bg-primary/10 group-hover:text-primary'
+            }`}>
+              <Camera className="w-5 h-5" />
+            </div>
+            <div className="flex-grow">
+              <h3 className="text-xs font-bold text-slate-900">Ảnh đại diện</h3>
+              <p className="text-[10px] text-slate-500 mt-1 leading-normal">Đổi ảnh đại diện, phóng to, xoay góc avatar mới</p>
+            </div>
+            {activeTab === 'avatar' && <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-primary" />}
+          </button>
+
+          {/* Box 4: Xác thực CCCD */}
+          <button
+            onClick={() => setActiveTab('cccd')}
+            className={`p-5 rounded-2xl border text-left transition-all duration-300 hover:scale-102 hover:shadow-md cursor-pointer flex items-start gap-4 relative group ${
+              activeTab === 'cccd'
+                ? 'bg-white border-primary shadow-lg ring-1 ring-primary/20'
+                : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shrink-0 ${
+              activeTab === 'cccd' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-650 group-hover:bg-primary/10 group-hover:text-primary'
+            }`}>
+              <CreditCard className="w-5 h-5" />
+            </div>
+            <div className="flex-grow">
+              <h3 className="text-xs font-bold text-slate-900">Xác thực CCCD</h3>
+              <p className="text-[10px] text-slate-500 mt-1 leading-normal">Đăng ảnh CCCD và trích xuất quét bằng AI OCR</p>
+            </div>
+            {activeTab === 'cccd' && <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-primary" />}
+          </button>
+        </div>
+
+        {/* Dummy outer layout wrappers to preserve original closing tags nesting */}
+        <div className="w-full">
+          <div className="w-full bg-white rounded-3xl shadow-md border border-slate-200 p-6 sm:p-8">
             {/* TAB 1: User Info */}
             {activeTab === 'info' && (
               <div className="space-y-6 animate-fadeInUp">
