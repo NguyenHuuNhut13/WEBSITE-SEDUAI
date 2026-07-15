@@ -256,7 +256,7 @@ export default async function Home() {
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping flex-shrink-0" />
                   <span className="text-[10px] font-mono text-slate-400">AI Voice Model:</span>
                 </div>
-                <p className="text-xs text-slate-200 font-medium italic flex-grow">"Excellent pronunciation! Try stressing the second syllable of 'alternative'."</p>
+                <p className="text-xs text-slate-200 font-medium italic flex-grow">&quot;Excellent pronunciation! Try stressing the second syllable of &apos;alternative&apos;.&quot;</p>
                 <Volume2 className="w-4 h-4 text-accent animate-pulse" />
               </div>
             </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { 
   Brain, 
   Star, 
@@ -145,12 +146,12 @@ export default function AboutPage() {
                   Khám phá Giải pháp
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </a>
-                <a 
+                <Link 
                   href="/courses" 
                   className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-sm border border-white/10 hover:border-white/20 transition-all duration-300"
                 >
                   Trải nghiệm Khóa học
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -368,9 +369,9 @@ export default function AboutPage() {
                     </div>
                     <div className="space-y-1.5">
                       <p><strong>Đề tài:</strong> Environment vs Technology</p>
-                      <p className="text-slate-500 italic">"Technology plays a crucial role in protect the climate..."</p>
+                      <p className="text-slate-500 italic">&quot;Technology plays a crucial role in protect the climate...&quot;</p>
                       <div className="p-2 bg-purple-50 rounded border border-purple-100 text-[11px] text-purple-900">
-                        <strong>AI Feedback:</strong> Sai giới từ/dạng động từ tại cụm "in protect". Gợi ý sửa: <strong>"in protecting"</strong> (Sau giới từ dùng V-ing).
+                        <strong>AI Feedback:</strong> Sai giới từ/dạng động từ tại cụm &quot;in protect&quot;. Gợi ý sửa: <strong>&quot;in protecting&quot;</strong> (Sau giới từ dùng V-ing).
                       </div>
                     </div>
                   </div>
@@ -403,10 +404,10 @@ export default function AboutPage() {
                     <div className="space-y-2 text-[11px]">
                       <div className="flex gap-2">
                         <span className="font-extrabold text-emerald-600 flex-shrink-0">AI Chatbot:</span>
-                        <p className="bg-white px-2.5 py-1.5 rounded-lg border border-slate-100 shadow-sm">"Hello! What did you do to improve your English today?"</p>
+                        <p className="bg-white px-2.5 py-1.5 rounded-lg border border-slate-100 shadow-sm">&quot;Hello! What did you do to improve your English today?&quot;</p>
                       </div>
                       <div className="flex gap-2 justify-end">
-                        <p className="bg-emerald-500 text-white px-2.5 py-1.5 rounded-lg shadow-sm">"I practice speaking English with you, my friend!"</p>
+                        <p className="bg-emerald-500 text-white px-2.5 py-1.5 rounded-lg shadow-sm">&quot;I practice speaking English with you, my friend!&quot;</p>
                         <span className="font-extrabold text-slate-900 flex-shrink-0">Học viên:</span>
                       </div>
                       <div className="text-[10px] text-slate-500 text-right font-medium">
@@ -565,12 +566,12 @@ export default function AboutPage() {
                 >
                   Đăng Ký Tư Vấn
                 </a>
-                <a 
+                <Link 
                   href="/courses" 
                   className="px-8 py-3.5 rounded-xl bg-white/10 text-white border border-white/20 font-bold text-sm hover:bg-white/20 transition-all duration-300"
                 >
                   Xem Các Khóa Học
-                </a>
+                </Link>
               </div>
             </div>
           </div>

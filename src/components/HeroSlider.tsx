@@ -267,9 +267,9 @@ export default function HeroSlider() {
                   <div className="bg-slate-950/80 rounded-xl p-3 border border-white/5 flex-grow space-y-1.5 overflow-hidden">
                     <p className="text-slate-500">&gt; prompt: Soạn giáo án Lực Ma Sát lớp 8</p>
                     <p className="text-emerald-400 font-bold"># GIÁO ÁN: LỰC MA SÁT (VẬT LÝ 8)</p>
-                    <p className="text-slate-400">// Khởi động:</p>
+                    <p className="text-slate-400">{"// Khởi động:"}</p>
                     <p className="pl-3">- Thực nghiệm kéo khối gỗ trên 2 bề mặt khác nhau.</p>
-                    <p className="text-slate-400">// Hoạt động chính:</p>
+                    <p className="text-slate-400">{"// Hoạt động chính:"}</p>
                     <p className="pl-3">- AI phân tích lực cản tác động chuyển động...</p>
                     <div className="inline-block w-1.5 h-3 bg-purple-400 animate-pulse ml-1" />
                   </div>
@@ -297,12 +297,12 @@ export default function HeroSlider() {
                     <div className="flex items-start gap-2">
                       <div className="w-5 h-5 rounded-full bg-slate-800 text-[8px] flex items-center justify-center text-slate-300 font-bold flex-shrink-0">HV</div>
                       <p className="bg-white/5 border border-white/5 text-slate-300 p-2 rounded-xl rounded-tl-none leading-relaxed">
-                        "Em muốn học khóa Tiếng Anh giao tiếp công việc, lộ trình thế nào ạ?"
+                        &quot;Em muốn học khóa Tiếng Anh giao tiếp công việc, lộ trình thế nào ạ?&quot;
                       </p>
                     </div>
                     <div className="flex items-start gap-2 justify-end">
                       <p className="bg-primary text-white p-2 rounded-xl rounded-tr-none leading-relaxed max-w-[85%]">
-                        "Chào bạn! SeduAi có lộ trình Business English 12 tuần kết hợp luyện nói 24/7 cùng AI..."
+                        &quot;Chào bạn! SeduAi có lộ trình Business English 12 tuần kết hợp luyện nói 24/7 cùng AI...&quot;
                       </p>
                       <div className="w-5 h-5 rounded-full bg-accent text-[8px] flex items-center justify-center text-slate-950 font-bold flex-shrink-0"><Bot className="w-3 h-3" /></div>
                     </div>
