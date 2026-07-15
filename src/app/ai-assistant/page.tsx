@@ -50,7 +50,7 @@ interface Thread {
 }
 
 export default function AiAssistantPage() {
-  const { user, accessToken, localSync, isLoading: authLoading, logout } = useAuth();
+  const { user, accessToken, localSync, isLoading: authLoading, logout, lmsRole, lmsIdentityLoading } = useAuth();
   const router = useRouter();
 
   const [threads, setThreads] = useState<Thread[]>([]);
@@ -64,22 +64,8 @@ export default function AiAssistantPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Check role: teacher, giangvien, gv
-  const isTeacher = user && (
-    (user.username && (
-      user.username.toLowerCase().includes('teacher') ||
-      user.username.toLowerCase().includes('giangvien') ||
-      user.username.toLowerCase().includes('gv')
-    )) ||
-    (user.email && (
-      user.email.toLowerCase().includes('teacher') ||
-      user.email.toLowerCase().includes('giangvien') ||
-      user.email.toLowerCase().includes('gv')
-    )) ||
-    (user as any).role?.toLowerCase().includes('teacher') ||
-    (user as any).role?.toLowerCase().includes('giáo viên') ||
-    (user as any).group?.toLowerCase().includes('teacher')
-  );
+  // Check role using verified LMS database role
+  const isTeacherOrAdmin = lmsRole === 'TEACHER' || lmsRole === 'ADMIN';
 
   // Redirect to login if unauthenticated
   useEffect(() => {
@@ -87,6 +73,18 @@ export default function AiAssistantPage() {
       router.push('/login?redirect=/ai-assistant');
     }
   }, [authLoading, accessToken, router]);
+
+  // Loading screen during authentication and LMS identity sync
+  if (authLoading || lmsIdentityLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-12 h-12 animate-spin text-primary" />
+          <p className="text-slate-400 text-sm font-semibold">Đang xác thực quyền truy cập...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Tự động mở sidebar nếu ở màn hình lớn (Desktop >= 1024px)
   useEffect(() => {
@@ -303,8 +301,8 @@ export default function AiAssistantPage() {
     return null;
   }
 
-  // Access check: Only Teachers
-  if (!isTeacher) {
+  // Access check: Only Teachers or Admins
+  if (!isTeacherOrAdmin) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
         {/* Background decor */}
