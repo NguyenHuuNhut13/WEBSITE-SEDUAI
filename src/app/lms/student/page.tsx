@@ -24,15 +24,23 @@ export default function StudentDashboard() {
         setClasses(studentClasses);
 
         if (studentClasses.length > 0) {
-          const examRes = await fetch('/api/lms/exams/config');
-          const examJson = await examRes.json();
+          // Fetch exams and assignments concurrently in parallel
+          const [examRes, assignmentRes] = await Promise.all([
+            fetch('/api/lms/exams/config'),
+            fetch(`/api/lms/assignments?studentId=${encodeURIComponent(lmsUserId)}`)
+          ]);
+
+          const [examJson, assignmentJson] = await Promise.all([
+            examRes.json(),
+            assignmentRes.json()
+          ]);
+
           if (examJson.success) {
             setExams(examJson.data);
           }
-
-          const assignmentResponse = await fetch(`/api/lms/assignments?studentId=${encodeURIComponent(lmsUserId)}`);
-          const assignmentResult = await assignmentResponse.json();
-          if (assignmentResult.success) setAssignments(assignmentResult.data);
+          if (assignmentJson.success) {
+            setAssignments(assignmentJson.data);
+          }
         }
       }
     } catch (e) {

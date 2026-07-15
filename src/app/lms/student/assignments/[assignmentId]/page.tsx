@@ -19,12 +19,17 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
   const loadAssignmentAndSubmission = useCallback(async () => {
     if (!lmsUserId) return;
     try {
-      const assRes = await fetch(`/api/lms/assignments?id=${assignmentId}`);
-      const assJson = await assRes.json();
-      if (assJson.success) setAssignment(assJson.data);
+      const [assRes, subRes] = await Promise.all([
+        fetch(`/api/lms/assignments?id=${assignmentId}`),
+        fetch(`/api/lms/submissions?assignmentId=${assignmentId}&studentId=${lmsUserId}`)
+      ]);
 
-      const subRes = await fetch(`/api/lms/submissions?assignmentId=${assignmentId}&studentId=${lmsUserId}`);
-      const subJson = await subRes.json();
+      const [assJson, subJson] = await Promise.all([
+        assRes.json(),
+        subRes.json()
+      ]);
+
+      if (assJson.success) setAssignment(assJson.data);
       if (subJson.success && subJson.data.length > 0) {
         const sub = subJson.data[0];
         setSubmission(sub);

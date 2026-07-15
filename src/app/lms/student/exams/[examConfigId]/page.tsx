@@ -42,16 +42,21 @@ export default function StudentExamPage({ params }: { params: Promise<{ examConf
     setLoading(true);
     setPageError('');
     try {
-      const res = await fetch(`/api/lms/exams/config?id=${examConfigId}`);
-      const json = await res.json().catch(() => null);
+      const [res, resultResponse] = await Promise.all([
+        fetch(`/api/lms/exams/config?id=${examConfigId}`),
+        fetch(`/api/lms/exams/results?examConfigId=${encodeURIComponent(examConfigId)}`)
+      ]);
+
+      const [json, resultJson] = await Promise.all([
+        res.json().catch(() => null),
+        resultResponse.json().catch(() => null)
+      ]);
+
       if (!res.ok || !json?.success || !json.data) {
         throw new Error(json?.error || 'Không thể tải cấu hình bài thi.');
       }
       setConfig(json.data);
 
-      // Backend tự xác định học sinh từ phiên đăng nhập và chỉ trả kết quả của chính họ.
-      const resultResponse = await fetch(`/api/lms/exams/results?examConfigId=${encodeURIComponent(examConfigId)}`);
-      const resultJson = await resultResponse.json().catch(() => null);
       if (!resultResponse.ok || !resultJson?.success) {
         throw new Error(resultJson?.error || 'Không thể kiểm tra trạng thái bài thi.');
       }
