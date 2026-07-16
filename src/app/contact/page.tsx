@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { createLead } from '@/services/api';
 
 const faqs = [
   {
@@ -46,6 +47,8 @@ export default function Contact() {
   const [showToast, setShowToast] = useState(false);
   const [mapError, setMapError] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -62,9 +65,9 @@ export default function Contact() {
     try {
       map = new maplibregl.Map({
         container: mapContainer.current,
-        style: 'https://demotiles.maplibre.org/style.json',
+        style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
         center: [106.6773, 10.7712],
-        zoom: 14,
+        zoom: 15,
         pitch: 30,
       });
 
@@ -72,9 +75,9 @@ export default function Contact() {
 
       const popup = new maplibregl.Popup({ offset: 25 }).setHTML(`
         <div class="font-sans p-1 text-slate-800 text-xs">
-          <h4 class="font-bold text-[#0077bb] text-sm flex items-center gap-1">SeduAi</h4>
+          <h4 class="font-bold text-[#0077bb] text-sm">SeduAi</h4>
           <p class="text-slate-500 mt-1 leading-snug">Hệ điều hành AI dành cho giáo dục</p>
-          <p class="font-semibold text-slate-600 mt-0.5">Tòa nhà SeduAi, Đường 3/2, Quận 10</p>
+          <p class="font-semibold text-slate-600 mt-1">Tầng 5, Tòa nhà SeduAi, Đường 3/2, Quận 10, TP. Hồ Chí Minh</p>
         </div>
       `);
 
@@ -96,19 +99,39 @@ export default function Contact() {
     };
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.email || !formData.message) {
-      alert('Vui lòng điền đầy đủ thông tin!');
+      setErrorMessage('Vui lòng điền đầy đủ thông tin!');
       return;
     }
 
-    setShowToast(true);
-    setFormData({ name: '', phone: '', email: '', message: '' });
+    setLoading(true);
+    setErrorMessage('');
 
-    setTimeout(() => {
-      setShowToast(false);
-    }, 4000);
+    try {
+      const response = await createLead({
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        demand: formData.message,
+        source: 31, // Nguồn Website
+      });
+
+      if (response.success) {
+        setShowToast(true);
+        setFormData({ name: '', phone: '', email: '', message: '' });
+        setTimeout(() => {
+          setShowToast(false);
+        }, 4000);
+      } else {
+        setErrorMessage(response.message || 'Gửi liên hệ thất bại. Vui lòng thử lại sau.');
+      }
+    } catch {
+      setErrorMessage('Lỗi kết nối máy chủ. Vui lòng thử lại sau.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -148,7 +171,7 @@ export default function Contact() {
               <div className="space-y-1">
                 <h3 className="font-bold text-slate-900 text-sm">Văn phòng chính</h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Tầng 5, Tòa nhà SeduAi, Đường 3/2, Quận 10, TP. HCM
+                  Tầng 5, Tòa nhà SeduAi, Đường 3/2, Quận 10, TP. Hồ Chí Minh
                 </p>
               </div>
             </div>
@@ -208,6 +231,13 @@ export default function Contact() {
               </p>
 
               <form onSubmit={handleSubmit} className="space-y-4">
+                {errorMessage && (
+                  <div className="p-3 bg-rose-50 border-l-4 border-rose-500 rounded-xl text-xs text-rose-700 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
@@ -224,6 +254,7 @@ export default function Contact() {
                       className="w-full px-4 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50/50"
                     />
                   </div>
+
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                       Số điện thoại *
@@ -275,9 +306,16 @@ export default function Contact() {
 
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-primary hover:bg-primary-dark text-white font-bold text-xs rounded-xl transition duration-200 shadow-md flex items-center gap-2 cursor-pointer"
+                  disabled={loading}
+                  className="px-6 py-3 bg-primary hover:bg-primary-dark text-white font-bold text-xs rounded-xl transition duration-200 shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-55 disabled:cursor-not-allowed uppercase tracking-wider"
                 >
-                  <Send className="w-4 h-4" /> Gửi lời nhắn
+                  {loading ? (
+                    <>Đang gửi liên hệ...</>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" /> Gửi lời nhắn
+                    </>
+                  )}
                 </button>
               </form>
             </div>
@@ -302,7 +340,7 @@ export default function Contact() {
               <div className="flex items-center gap-2.5 text-xs text-slate-500 px-4">
                 <Info className="w-4 h-4 text-primary flex-shrink-0" />
                 <span>
-                  Tọa độ hiển thị: [10.7712, 106.6773]. Nhấp và kéo để xoay bản đồ vector mượt mà.
+                  Trụ sở chính: Tầng 5, Tòa nhà SeduAi, Đường 3/2, Quận 10, TP. Hồ Chí Minh.
                 </span>
               </div>
             </div>
