@@ -63,7 +63,7 @@ export default function HeroSlider() {
   const slide = slides[currentSlide];
 
   return (
-    <section className="relative h-[650px] lg:h-[720px] overflow-hidden text-white flex items-center pt-24 lg:pt-36 animate-fade-in">
+    <section className="relative h-[750px] lg:h-[840px] overflow-hidden text-white flex items-center pt-24 lg:pt-36 animate-fade-in">
       
       {/* Slide Background Images with smooth opacity transitions */}
       {slides.map((s, idx) => (
