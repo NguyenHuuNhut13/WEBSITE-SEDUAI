@@ -1,90 +1,151 @@
 'use client';
 
-import { useState, useTransition, useEffect } from 'react';
+import { useState, useTransition, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, GraduationCap, Headset, Mail, RefreshCw, SlidersHorizontal, ArrowUpDown, Sparkles } from 'lucide-react';
+import { Search, GraduationCap, Headset, Mail, RefreshCw, ArrowUpDown, Tag, Wallet } from 'lucide-react';
 import CourseCard from '@/components/CourseCard';
-import { courses, Course } from '@/data/courses';
+import { Course } from '@/data/courses';
 import { getEduCourses, ApiCourse } from '@/services/api';
+
+// Ảnh fallback theo danh mục
+const CATEGORY_FALLBACK_IMAGES: Record<string, string> = {
+  'Marketing & Bán hàng': 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80',
+  'Kinh doanh & Khởi nghiệp': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80',
+  'AI & Công nghệ': 'https://images.unsplash.com/photo-1677442136019-21780efad99a?w=800&auto=format&fit=crop&q=80',
+};
+const DEFAULT_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80';
+
+// Khoảng giá
+const PRICE_RANGES = [
+  { label: 'Tất cả mức giá', value: 'all' },
+  { label: 'Dưới 500.000đ', value: 'under500k' },
+  { label: '500.000đ – 1.000.000đ', value: '500k-1m' },
+  { label: 'Trên 1.000.000đ', value: 'over1m' },
+] as const;
+
+function extractCategory(acfCategory: unknown): string {
+  if (Array.isArray(acfCategory) && acfCategory.length > 0) {
+    const first = acfCategory[0];
+    if (first && typeof first === 'object' && 'title' in first) {
+      return String((first as { title: string }).title);
+    }
+  }
+  if (acfCategory && typeof acfCategory === 'object' && 'title' in acfCategory) {
+    return String((acfCategory as { title: string }).title);
+  }
+  if (typeof acfCategory === 'string' && acfCategory) {
+    return acfCategory;
+  }
+  return 'Khác';
+}
+
+function extractInstructor(acf: ApiCourse['acf']): string {
+  if (acf?.faculty && typeof acf.faculty === 'object' && 'title' in acf.faculty) {
+    return String((acf.faculty as { title: string }).title);
+  }
+  if (acf?.expactteacher && typeof acf.expactteacher === 'object' && 'title' in acf.expactteacher) {
+    return String((acf.expactteacher as { title: string }).title);
+  }
+  if (typeof acf?.expactteacher === 'string' && acf.expactteacher) {
+    return acf.expactteacher;
+  }
+  return 'Giảng viên SeduAi';
+}
+
+function parsePrice(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return 0;
+}
+
+function mapApiCourse(c: ApiCourse): Course {
+  const category = extractCategory(c.acf?.category);
+  const price = parsePrice(c.acf?.price);
+  const salePrice = parsePrice(c.acf?.sale_price);
+  const discountPrice = salePrice > 0 ? salePrice : price;
+  const image = c.acf?.featureimg || CATEGORY_FALLBACK_IMAGES[category] || DEFAULT_FALLBACK_IMAGE;
+
+  return {
+    slug: `api-course-${c.id}`,
+    title: typeof c.title === 'object' && c.title !== null && 'rendered' in c.title
+      ? (c.title as { rendered: string }).rendered
+      : String(c.title || ''),
+    description: c.acf?.description?.replace(/<[^>]*>/g, '') || 'Khóa học chính thức từ hệ thống SeduAi EduCenter.',
+    instructor: extractInstructor(c.acf),
+    level: 'Mọi trình độ',
+    duration: c.acf?.duration || '—',
+    student_count: 420 + (c.id % 150),
+    rating: 4.9,
+    discount_price: discountPrice,
+    price,
+    reviews_count: 24,
+    image,
+    category,
+    benefits: [
+      'Lộ trình chuẩn thực chiến SeduAi EduCenter',
+      'Thực hành dự án với sự hướng dẫn của chuyên gia',
+      'Đồng hành cùng Trợ lý AI giải đáp thắc mắc 24/7',
+    ],
+    syllabus: [
+      { title: 'Chương 1: Khởi động và kiến thức nền tảng', lessons: ['Bài 1: Giới thiệu khóa học', 'Bài 2: Chuẩn bị môi trường & công cụ'] },
+      { title: 'Chương 2: Thực chiến kỹ năng cốt lõi', lessons: ['Bài 3: Ứng dụng thực tế và thực hành chuyên sâu'] },
+    ],
+    reviews: [
+      { name: 'Học viên SeduAi', rating: 5, date: 'Vừa xong', comment: 'Khóa học rất chất lượng, giảng viên nhiệt tình, AI hỗ trợ trả lời rất nhanh.' },
+    ],
+  };
+}
 
 export default function CourseList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [sortBy, setSortBy] = useState('default');
+  const [priceRange, setPriceRange] = useState('all');
   const [apiCoursesList, setApiCoursesList] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [, startTransition] = useTransition();
-
-  const categories = ['Tất cả', 'Tiếng Anh', 'Lập trình', 'Kỹ năng', 'AI & Công nghệ'];
 
   useEffect(() => {
     setLoading(true);
     getEduCourses().then((list) => {
       if (list && list.length > 0) {
-        const mapped: Course[] = list.map((c: ApiCourse) => ({
-          slug: `api-course-${c.id}`,
-          title: typeof c.title === 'object' && c.title !== null && 'rendered' in c.title ? (c.title as any).rendered : String(c.title || ''),
-          description: c.acf?.description?.replace(/<[^>]*>/g, '') || 'Khóa học chính thức từ hệ thống SeduAi EduCenter.',
-          instructor: typeof c.acf?.faculty === 'object' && c.acf?.faculty !== null && 'title' in c.acf.faculty
-            ? (c.acf.faculty as any).title
-            : (typeof c.acf?.expactteacher === 'object' && c.acf?.expactteacher !== null && 'title' in c.acf.expactteacher
-              ? (c.acf.expactteacher as any).title
-              : String(c.acf?.expactteacher || 'Giảng viên SeduAi')),
-          level: typeof (c.acf?.type as any) === 'object' && c.acf?.type !== null 
-            ? (Array.isArray(c.acf.type) ? ((c.acf.type as any)[0]?.post_title || 'Mọi trình độ') : ((c.acf.type as any).title || 'Mọi trình độ'))
-            : String(c.acf?.type || 'Mọi trình độ'),
-          duration: c.acf?.duration || '12 tuần',
-          student_count: 420 + (c.id % 150),
-          rating: 4.9,
-          original_price: Number(c.acf?.price || 3500000),
-          discount_price: Number(c.acf?.sale_price || c.acf?.price || 2490000),
-          price: Number(c.acf?.price || 3500000),
-          reviews_count: 24,
-          image: c.acf?.featureimg || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
-          category: typeof (c.acf?.category as any) === 'object' && c.acf?.category !== null
-            ? (Array.isArray(c.acf.category) ? ((c.acf.category as any)[0]?.title || 'AI & Công nghệ') : ((c.acf.category as any).title || 'AI & Công nghệ'))
-            : String(c.acf?.category || 'AI & Công nghệ'),
-          lessons_count: Number(c.acf?.lession || 24),
-          benefits: [
-            'Lộ trình chuẩn thực chiến SeduAi EduCenter',
-            'Thực hành dự án với sự hướng dẫn của chuyên gia',
-            'Đồng hành cùng Trợ lý AI giải đáp thắc mắc 24/7'
-          ],
-          syllabus: [
-            {
-              title: 'Chương 1: Khởi động và kiến thức nền tảng',
-              lessons: ['Bài 1: Giới thiệu khóa học', 'Bài 2: Chuẩn bị môi trường & công cụ']
-            },
-            {
-              title: 'Chương 2: Thực chiến kỹ năng cốt lõi',
-              lessons: ['Bài 3: Ứng dụng thực tế và thực hành chuyên sâu']
-            }
-          ],
-          reviews: [
-            {
-              name: 'Học viên SeduAi',
-              rating: 5,
-              date: 'Vừa xong',
-              comment: 'Khóa học rất chất lượng, giảng viên nhiệt tình, AI hỗ trợ trả lời rất nhanh.'
-            }
-          ]
-        }));
-        setApiCoursesList(mapped);
+        setApiCoursesList(list.map(mapApiCourse));
       }
       setLoading(false);
     });
   }, []);
 
-  const allCombinedCourses = apiCoursesList;
+  // Trích xuất danh mục từ dữ liệu API
+  const categories = useMemo(() => {
+    const catSet = new Set<string>();
+    apiCoursesList.forEach((c) => { if (c.category) catSet.add(c.category); });
+    return ['Tất cả', ...Array.from(catSet).sort()];
+  }, [apiCoursesList]);
 
   // Client-side filtering logic
-  let filteredCourses = allCombinedCourses.filter((course) => {
+  let filteredCourses = apiCoursesList.filter((course) => {
+    const lowerSearch = searchTerm.toLowerCase();
     const matchesSearch =
-      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchTerm.toLowerCase());
+      !searchTerm ||
+      course.title.toLowerCase().includes(lowerSearch) ||
+      course.description.toLowerCase().includes(lowerSearch) ||
+      course.instructor.toLowerCase().includes(lowerSearch);
     const matchesCategory =
       selectedCategory === 'Tất cả' || course.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+
+    let matchesPrice = true;
+    if (priceRange === 'under500k') {
+      matchesPrice = course.discount_price < 500000;
+    } else if (priceRange === '500k-1m') {
+      matchesPrice = course.discount_price >= 500000 && course.discount_price <= 1000000;
+    } else if (priceRange === 'over1m') {
+      matchesPrice = course.discount_price > 1000000;
+    }
+
+    return matchesSearch && matchesCategory && matchesPrice;
   });
 
   // Sorting
@@ -104,10 +165,13 @@ export default function CourseList() {
     });
   };
 
+  const isFiltered = searchTerm !== '' || selectedCategory !== 'Tất cả' || sortBy !== 'default' || priceRange !== 'all';
+
   const handleReset = () => {
     setSearchTerm('');
     setSelectedCategory('Tất cả');
     setSortBy('default');
+    setPriceRange('all');
   };
 
   return (
@@ -149,7 +213,7 @@ export default function CourseList() {
                 </span>
                 <input
                   type="text"
-                  placeholder="Tìm kiếm tên khóa học..."
+                  placeholder="Tìm tên khóa học, giảng viên..."
                   value={searchTerm}
                   onChange={handleSearchChange}
                   className="w-full pl-11 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50"
@@ -158,7 +222,7 @@ export default function CourseList() {
 
               {/* Category tabs */}
               <div className="flex items-center gap-1.5 overflow-x-auto w-full lg:w-auto py-1 scrollbar-none">
-                {categories.map((cat) => (
+                {(loading ? ['Tất cả'] : categories).map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
@@ -190,7 +254,7 @@ export default function CourseList() {
                   </select>
                 </div>
 
-                {(searchTerm !== '' || selectedCategory !== 'Tất cả' || sortBy !== 'default') && (
+                {isFiltered && (
                   <button
                     onClick={handleReset}
                     className="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer flex-shrink-0"
@@ -220,6 +284,59 @@ export default function CourseList() {
                 </Link>
               </div>
 
+              {/* Price range filter */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
+                <h3 className="font-bold text-slate-900 text-sm pb-2 border-b border-slate-100 flex items-center gap-2">
+                  <Wallet className="w-4 h-4 text-primary" /> Khoảng giá
+                </h3>
+                <div className="space-y-2">
+                  {PRICE_RANGES.map((range) => (
+                    <label key={range.value} className="flex items-center gap-2.5 text-xs text-slate-600 cursor-pointer hover:text-primary transition group">
+                      <input
+                        type="radio"
+                        name="priceRange"
+                        checked={priceRange === range.value}
+                        onChange={() => setPriceRange(range.value)}
+                        className="rounded-full border-slate-300 text-primary focus:ring-primary w-3.5 h-3.5 cursor-pointer"
+                      />
+                      <span className={priceRange === range.value ? 'text-primary font-semibold' : ''}>{range.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category summary */}
+              {!loading && (
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
+                  <h3 className="font-bold text-slate-900 text-sm pb-2 border-b border-slate-100 flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-primary" /> Danh mục
+                  </h3>
+                  <div className="space-y-2">
+                    {categories.filter(c => c !== 'Tất cả').map((cat) => {
+                      const count = apiCoursesList.filter(c => c.category === cat).length;
+                      return (
+                        <button
+                          key={cat}
+                          onClick={() => setSelectedCategory(cat)}
+                          className={`w-full flex items-center justify-between text-xs py-1.5 px-2 rounded-lg transition cursor-pointer ${
+                            selectedCategory === cat
+                              ? 'bg-primary-light text-primary font-bold'
+                              : 'text-slate-600 hover:bg-slate-50 hover:text-primary'
+                          }`}
+                        >
+                          <span className="truncate">{cat}</span>
+                          <span className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ${
+                            selectedCategory === cat ? 'bg-primary text-white' : 'bg-slate-100 text-slate-500'
+                          }`}>
+                            {count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Quick FAQ info */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
                 <h3 className="font-bold text-slate-900 text-sm pb-2 border-b border-slate-100">
@@ -246,21 +363,6 @@ export default function CourseList() {
                   </div>
                 </div>
               </div>
-
-              {/* Level filter */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
-                <h3 className="font-bold text-slate-900 text-sm pb-2 border-b border-slate-100 flex items-center gap-2">
-                  <SlidersHorizontal className="w-4 h-4 text-primary" /> Trình độ
-                </h3>
-                <div className="space-y-2">
-                  {['Mọi trình độ', 'Cơ bản', 'Trung cấp', 'Nâng cao'].map((level) => (
-                    <label key={level} className="flex items-center gap-2.5 text-xs text-slate-600 cursor-pointer hover:text-primary transition">
-                      <input type="checkbox" className="rounded border-slate-300 text-primary focus:ring-primary" />
-                      {level}
-                    </label>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {/* Courses grid */}
@@ -269,6 +371,9 @@ export default function CourseList() {
               <div className="flex items-center justify-between mb-4">
                 <p className="text-xs text-slate-500">
                   Hiển thị <strong className="text-slate-900">{loading ? 0 : filteredCourses.length}</strong> khóa học
+                  {selectedCategory !== 'Tất cả' && (
+                    <> trong <strong className="text-primary">{selectedCategory}</strong></>
+                  )}
                 </p>
               </div>
 
