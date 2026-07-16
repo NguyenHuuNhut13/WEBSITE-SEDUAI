@@ -120,17 +120,45 @@ export async function syncLmsUser(account: any): Promise<LmsUser> {
       nksUserId: nksUserId || undefined,
     };
 
+    // Determine user role dynamically from NKS account properties
+    let role: UserRole = 'STUDENT';
+    const rawRole = String(account?.role || account?.role_name || account?.type || account?.group_name || '').toUpperCase();
+    const isTeacherFlag = account?.is_teacher === true || account?.is_teacher === 1 || account?.is_teacher === '1';
+
+    if (rawRole.includes('ADMIN') || rawRole === '1') {
+      role = 'ADMIN';
+    } else if (rawRole.includes('TEACHER') || rawRole.includes('GIANG_VIEN') || rawRole.includes('GIẢNG VIÊN') || rawRole.includes('INSTRUCTOR') || isTeacherFlag || rawRole === '2') {
+      role = 'TEACHER';
+    } else if (existing?.role) {
+      role = existing.role; // Default fallback to preserve role
+    } else if (shouldBootstrapAdmin) {
+      role = 'ADMIN';
+    }
+
     if (existing) {
+      // Safe checks before updating role
+      let finalRole = role;
+      if (existing.role === 'ADMIN' && finalRole !== 'ADMIN') {
+        const adminCount = await tx.lmsUser.count({ where: { role: 'ADMIN' } });
+        if (adminCount <= 1) {
+          finalRole = 'ADMIN';
+        }
+      }
+      if (existing.role === 'TEACHER' && finalRole !== 'TEACHER') {
+        const classCount = await tx.lmsClass.count({ where: { teacherId: existing.id } });
+        if (classCount > 0) {
+          finalRole = 'TEACHER';
+        }
+      }
+
       return tx.lmsUser.update({
         where: { id: existing.id },
-        data: { ...profile, ...(shouldBootstrapAdmin ? { role: 'ADMIN' as const } : {}) },
+        data: { ...profile, role: finalRole },
       });
     }
 
-    // Every newly verified NKS account starts with least privilege. Admin and
-    // teacher roles must be provisioned explicitly and are never overwritten.
     return tx.lmsUser.create({
-      data: { ...profile, role: shouldBootstrapAdmin ? 'ADMIN' : 'STUDENT' },
+      data: { ...profile, role },
     });
   });
 }
