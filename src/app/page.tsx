@@ -23,12 +23,12 @@ import CourseCard from '@/components/CourseCard';
 import CounterSection from '@/components/CounterSection';
 import EventCard from '@/components/EventCard';
 import InstructorCard from '@/components/InstructorCard';
-import EcosystemAndTestimonials from '@/components/EcosystemAndTestimonials';
 import { courses, Course } from '@/data/courses';
 import { events } from '@/data/events';
 import { instructors } from '@/data/instructors';
 import { getEduCourses, ApiCourse } from '@/services/api';
 import TeacherAssistantWrapper from '@/components/TeacherAssistantWrapper';
+import EcosystemAndTestimonials from '@/components/EcosystemAndTestimonials';
 
 const partners = [
   {
@@ -571,7 +571,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ====== Ecosystem & Testimonials Section ====== */}
+      {/* ====== Ecosystem and Testimonials ====== */}
       <EcosystemAndTestimonials />
 
       {/* ====== Grayscale Partner Logos Marquee ====== */}

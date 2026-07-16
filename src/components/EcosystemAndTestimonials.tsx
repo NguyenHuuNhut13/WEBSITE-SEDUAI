@@ -1,155 +1,180 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Plus, Minus, Star } from 'lucide-react';
 import { testimonials } from '@/data/testimonials';
 
-const ecosystemFaqs = [
+const faqs = [
   {
-    title: 'HỆ SINH THÁI GIÁO DỤC THÔNG MINH SEDUAI LÀ GÌ?',
-    content: 'Hệ sinh thái SeduAi là nền tảng giáo dục tích hợp trí tuệ nhân tạo toàn diện, kết hợp giữa: AI Admissions CRM (tối ưu hóa tuyển sinh), AI Teacher Assistant (trợ lý giáo án & đề thi cho giáo viên), hệ thống LMS thông minh (học tập tương tác) và AI Grading (chấm điểm & nhận xét tự động theo thời gian thực).'
+    question: 'Hệ sinh thái học tập SeduAi hoạt động như thế nào?',
+    answer:
+      'SeduAi tích hợp mô hình LMS (Learning Management System) chuẩn 5 sao cùng Trợ lý AI cá nhân hóa hỗ trợ 24/7. Học viên có thể làm bài tập, nhận phản hồi chấm điểm tự động tức thì từ AI, đồng thời tham gia các buổi học tương tác cùng giảng viên chuyên gia.',
   },
   {
-    title: 'TRỢ LÝ GIẢNG DẠY AI TEACHER ASSISTANT HOẠT ĐỘNG RA SAO?',
-    content: 'Giúp giảm tải 80% công việc hành chính cho giáo viên. Chỉ với lệnh giọng nói hoặc văn bản đơn giản, Trợ lý AI sẽ hỗ trợ soạn giáo án chi tiết theo chương trình, tạo kho đề thi phong phú, hỗ trợ chấm điểm và viết nhận xét học viên chi tiết.'
+    question: 'Giảng viên chuyên môn và AI hỗ trợ học viên ra sao?',
+    answer:
+      'Các buổi học chính khóa được giảng dạy trực tiếp bởi các giảng viên giàu kinh nghiệm thực chiến. Trợ lý AI đóng vai trò như gia sư đồng hành 24/7 giúp giải đáp lý thuyết, sửa lỗi mã nguồn, chấm điểm bài luận và gợi ý lộ trình cải thiện riêng cho từng học viên.',
   },
   {
-    title: 'HỆ THỐNG HỌC TẬP TƯƠNG TÁC THÔNG MINH LMS LÀ GÌ?',
-    content: 'Hệ thống quản lý học tập (LMS) thế hệ mới giúp học viên theo dõi tiến độ, thực hành bài tập trực tiếp với sự đồng hành của trợ lý AI 24/7, tự động nhắc nhở và tối ưu hóa lộ trình ôn tập cá nhân hóa.'
+    question: 'Thông tin học phí và chính sách trả góp của SeduAi ra sao?',
+    answer:
+      'SeduAi hỗ trợ trả góp học phí lãi suất 0% thông qua liên kết thẻ tín dụng của hơn 25 ngân hàng uy tín toàn quốc. Ngoài ra, trung tâm có các chính sách học bổng khuyến học và ưu đãi lên đến 30% cho học viên đăng ký sớm.',
   },
   {
-    title: 'AI GRADING - CHẤM ĐIỂM & NHẬN XÉT TỰ ĐỘNG BẰNG AI?',
-    content: 'Tích hợp mô hình ngôn ngữ lớn chấm điểm tự động cho các bài tập Writing & Speaking. Học viên nhận kết quả chấm điểm kèm phân tích ngữ pháp, phát âm và gợi ý sửa bài chi tiết ngay lập tức mà không cần chờ đợi.'
+    question: 'Chứng chỉ hoàn thành khóa học của SeduAi có giá trị thế nào?',
+    answer:
+      'Sau khi hoàn thành tối thiểu 80% tiến độ học tập và các bài kiểm tra thực chiến, học viên sẽ được cấp Chứng chỉ Hoàn thành khóa học điện tử chuẩn quốc tế của SeduAi, có mã định danh để nhà tuyển dụng dễ dàng xác thực.',
   },
   {
-    title: 'AI ADMISSIONS CRM - TỰ ĐỘNG HÓA TUYỂN SINH THẾ NÀO?',
-    content: 'Hệ thống CRM thông minh tự động tương tác với phụ huynh và học sinh qua Website/Fanpage, tự động khai thác nhu cầu thực tế và đẩy thông tin Lead trực tiếp vào hệ thống quản lý kèm theo chấm điểm tiềm năng.'
-  }
+    question: 'Chính sách cam kết và hoàn học phí được quy định thế nào?',
+    answer:
+      'SeduAi cam kết hoàn trả 100% học phí trong vòng 7 ngày đầu tiên kể từ ngày khai giảng nếu học viên cảm thấy không hài lòng với phương pháp giảng dạy hoặc chất lượng dịch vụ hỗ trợ của trung tâm.',
+  },
 ];
 
 export default function EcosystemAndTestimonials() {
-  const [activePage, setActivePage] = useState(0);
+  const [activeSlide, setActiveSlide] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  // Carousel sliding window of 2 items
-  const displayedTestimonials = testimonials.slice(activePage, activePage + 2);
+  // Divide 4 testimonials into 2 slides (each slide contains 2 items)
+  const slides = [
+    [testimonials[0], testimonials[1]],
+    [testimonials[2], testimonials[3]],
+  ];
 
   return (
-    <section className="py-20 bg-white border-t border-slate-100">
+    <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
-          {/* Column 1: Testimonials Carousel (6 cols) */}
-          <div className="lg:col-span-6 flex flex-col justify-between">
-            <div>
-              <div className="mb-8 space-y-1">
-                <span className="text-xs uppercase font-extrabold tracking-widest text-[#0077bb]">Cảm nhận học viên</span>
-                <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight uppercase">
-                  TESTIMONIALS
-                </h2>
-              </div>
-
-              <div className="space-y-6 min-h-[460px]">
-                {displayedTestimonials.map((item, idx) => (
-                  <div 
-                    key={idx} 
-                    className="bg-[#f2f2f2] p-8 border border-slate-200/40 relative shadow-sm transition-all duration-300 hover:shadow-md"
-                  >
-                    <div className="flex items-center gap-4 mb-4">
-                      <div className="relative w-12 h-12 overflow-hidden bg-slate-200">
-                        {/* Circular clip path mask to bypass global border-radius: 0px */}
-                        <img 
-                          src={item.avatar} 
-                          alt={item.name} 
-                          className="w-full h-full object-cover"
-                          style={{ clipPath: 'circle(50% at 50% 50%)' }}
-                        />
-                      </div>
-                      <div>
-                        <h4 className="font-extrabold text-slate-950 text-sm uppercase tracking-wide inline">
-                          {item.name}
-                        </h4>
-                        <span className="text-xs text-slate-500 ml-2 font-medium">
-                          ({item.role})
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <p className="text-slate-600 text-xs sm:text-sm leading-relaxed italic">
-                      &ldquo;{item.comment}&rdquo;
-                    </p>
-                    
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-[10px] font-black uppercase text-[#0077bb]">
-                        Khóa học: {item.course}
-                      </span>
-                      <div className="flex gap-0.5">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <span key={i} className="text-amber-400 text-xs">★</span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          {/* ====== LEFT COLUMN: TESTIMONIALS SLIDER ====== */}
+          <div className="lg:col-span-6 space-y-8">
+            <div className="space-y-2">
+              <span className="text-[11px] uppercase font-extrabold tracking-widest text-red-500 block">
+                Testimonials
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight uppercase">
+                Ý Kiến Học Viên
+              </h2>
             </div>
 
-            {/* Carousel dots indicator */}
-            <div className="flex justify-center gap-2.5 mt-8">
-              {[0, 1, 2].map((pageIndex) => (
+            {/* Testimonials stacked cards (exactly 2 cards visible per slide) */}
+            <div className="space-y-6 transition-all duration-500 ease-in-out">
+              {slides[activeSlide]?.map((testimonial, idx) => {
+                if (!testimonial) return null;
+                return (
+                  <div
+                    key={idx}
+                    className="bg-slate-100/70 p-8 shadow-sm relative flex flex-col sm:flex-row gap-6 items-start"
+                    style={{ borderRadius: '0px' }} // Sharp corners as requested
+                  >
+                    {/* Circle Avatar on Left */}
+                    <div className="flex-shrink-0 w-16 h-16 rounded-full overflow-hidden border border-red-200 bg-white">
+                      <img
+                        src={testimonial.avatar}
+                        alt={testimonial.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Content on Right */}
+                    <div className="space-y-3 flex-grow">
+                      <div className="flex flex-wrap items-baseline gap-2">
+                        <h4 className="font-extrabold text-slate-800 text-sm tracking-wide uppercase">
+                          {testimonial.name}
+                        </h4>
+                        <span className="text-xs text-slate-400 font-medium">
+                          ({testimonial.role})
+                        </span>
+                      </div>
+
+                      {/* Rating Stars */}
+                      <div className="flex gap-0.5">
+                        {Array.from({ length: testimonial.rating || 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className="w-3.5 h-3.5 fill-amber-400 stroke-amber-400"
+                          />
+                        ))}
+                      </div>
+
+                      <p className="text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
+                        {testimonial.comment}
+                      </p>
+                      
+                      <span className="inline-block text-[10px] font-extrabold text-primary bg-primary-light px-2.5 py-0.5 border border-primary/10">
+                        Khóa học: {testimonial.course}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Dot indicators (exactly like pink/red dots in template image) */}
+            <div className="flex items-center gap-2 pt-2 justify-start">
+              {slides.map((_, index) => (
                 <button
-                  key={pageIndex}
-                  onClick={() => setActivePage(pageIndex)}
-                  className={`w-3.5 h-3.5 transition-all duration-300 ${
-                    activePage === pageIndex 
-                      ? 'bg-red-600 scale-110' 
-                      : 'bg-slate-200 hover:bg-slate-300'
+                  key={index}
+                  onClick={() => setActiveSlide(index)}
+                  className={`w-3.5 h-3.5 rounded-full transition-all duration-300 ${
+                    activeSlide === index
+                      ? 'bg-red-500 scale-110 shadow-sm'
+                      : 'bg-red-200 hover:bg-red-300'
                   }`}
-                  aria-label={`Go to page ${pageIndex + 1}`}
+                  aria-label={`Slide ${index + 1}`}
                 />
               ))}
             </div>
           </div>
 
-          {/* Column 2: Ecosystem & FAQs Accordion (6 cols) */}
-          <div className="lg:col-span-6 space-y-6">
-            <div className="mb-8 space-y-1">
-              <span className="text-xs uppercase font-extrabold tracking-widest text-[#0077bb]">Hỏi đáp & thông tin</span>
+          {/* ====== RIGHT COLUMN: FAQ ACCORDION ====== */}
+          <div className="lg:col-span-6 space-y-8">
+            <div className="space-y-2">
+              <span className="text-[11px] uppercase font-extrabold tracking-widest text-red-500 block">
+                Frequently Asked Questions
+              </span>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight uppercase">
-                FREQUENTLY ASKED QUESTIONS
+                Câu Hỏi Thường Gặp
               </h2>
             </div>
 
             <div className="space-y-4">
-              {ecosystemFaqs.map((faq, index) => {
+              {faqs.map((faq, index) => {
                 const isOpen = openFaq === index;
                 return (
-                  <div 
+                  <div
                     key={index}
-                    className="border border-slate-200/40 bg-[#f8f9fa] transition-all duration-300"
+                    className="border border-slate-100 overflow-hidden transition-all duration-300"
+                    style={{ borderRadius: '0px' }} // Strict sharp corners
                   >
+                    {/* Header trigger */}
                     <button
                       onClick={() => setOpenFaq(isOpen ? null : index)}
-                      className="w-full text-left p-4 flex items-center gap-4 focus:outline-none transition hover:bg-[#f2f2f2]"
+                      className="w-full flex items-center gap-4 p-4 bg-slate-100/70 hover:bg-slate-100 transition text-left cursor-pointer"
                     >
-                      {/* Plus / Minus indicator square box matching screenshot red/orange accents */}
-                      <span className={`w-6 h-6 flex-shrink-0 flex items-center justify-center border font-bold text-xs transition-colors duration-200 ${
-                        isOpen 
-                          ? 'border-red-600 text-red-600 bg-white' 
-                          : 'border-red-600 text-white bg-red-600'
-                      }`}>
-                        {isOpen ? '－' : '＋'}
-                      </span>
-                      <span className="font-extrabold text-slate-900 text-xs sm:text-sm tracking-wide uppercase">
-                        {faq.title}
+                      {/* Red square symbol container */}
+                      <div className="flex-shrink-0 w-6 h-6 border border-red-500 flex items-center justify-center bg-white text-red-500 font-bold transition-colors">
+                        {isOpen ? (
+                          <Minus className="w-3.5 h-3.5 stroke-[3px]" />
+                        ) : (
+                          <Plus className="w-3.5 h-3.5 stroke-[3px]" />
+                        )}
+                      </div>
+
+                      <span className="font-extrabold text-slate-800 text-xs sm:text-sm tracking-wide uppercase">
+                        {faq.question}
                       </span>
                     </button>
 
-                    {/* Content smooth collapse */}
-                    <div className={`transition-all duration-300 overflow-hidden ${
-                      isOpen ? 'max-h-60 border-t border-slate-200/60' : 'max-h-0'
-                    }`}>
-                      <div className="p-5 text-slate-600 text-xs sm:text-sm leading-relaxed bg-white">
-                        {faq.content}
+                    {/* Expandable answer panel */}
+                    <div
+                      className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                        isOpen ? 'max-h-[300px] border-t border-slate-100 bg-white' : 'max-h-0'
+                      }`}
+                    >
+                      <div className="p-6 text-slate-600 text-xs sm:text-sm leading-relaxed font-medium">
+                        {faq.answer}
                       </div>
                     </div>
                   </div>
