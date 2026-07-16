@@ -139,8 +139,8 @@ export default async function Home() {
 
   const mappedInstructors = Array.from(uniqueFaculties.values()).map((fac, idx) => ({
     name: fac.title,
-    title: 'Giảng viên Chuyên môn - SeduAi',
-    specialty: `Chuyên gia giảng dạy khóa "${fac.courseTitle}"`,
+    title: 'Giảng viên Chuyên môn',
+    specialty: fac.courseTitle.length > 25 ? fac.courseTitle.slice(0, 25) + '...' : fac.courseTitle,
     avatar: avatarList[idx % avatarList.length],
     bio: `Giảng viên giàu kinh nghiệm thực tế, chuyên môn cao trực tiếp đồng hành dẫn dắt và hỗ trợ học viên hoàn thành mục tiêu học tập chuẩn quốc tế.`,
   }));
