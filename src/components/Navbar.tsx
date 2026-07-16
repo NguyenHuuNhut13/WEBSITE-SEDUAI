@@ -292,12 +292,14 @@ export default function Navbar() {
                 if (link.submenu) {
                   return (
                     <div key={link.name} className="relative group flex items-center h-full cursor-pointer py-4">
-                      <span className={`transition duration-150 flex items-center gap-1 py-1 px-2 rounded-lg ${
+                      <span className={`transition duration-150 flex items-center gap-1 py-1 px-3 ${
                         isSticky 
-                          ? 'hover:text-primary hover:bg-slate-100 text-slate-700' 
-                          : 'hover:text-white hover:bg-white/10 text-white/90'
+                          ? 'hover:text-primary text-slate-700' 
+                          : 'hover:text-white text-white/90'
                       }`}>
-                        {link.name}{' '}
+                        <span className="relative py-1 after:absolute after:bottom-[-2px] after:left-0 after:h-[2px] after:w-full after:bg-current after:transition-transform after:duration-300 after:origin-left after:scale-x-0 group-hover:after:scale-x-100">
+                          {link.name}
+                        </span>
                         <ChevronDown className={`w-3.5 h-3.5 transition duration-200 group-hover:rotate-180 ${
                           isSticky ? 'text-slate-400 group-hover:text-primary' : 'text-white/70 group-hover:text-white'
                         }`} />
@@ -325,17 +327,23 @@ export default function Navbar() {
                     key={link.name}
                     href={link.href}
                     onClick={() => handleLinkClick(link.href)}
-                    className={`px-2.5 py-1.5 rounded-lg transition duration-150 ${
+                    className={`group px-3 py-2 transition duration-300 ${
                       isActive
                         ? isSticky
-                          ? 'text-primary font-black bg-primary/10 border-b-2 border-primary'
-                          : 'text-white font-black bg-white/15 border-b-2 border-white'
+                          ? 'text-primary font-black'
+                          : 'text-white font-black'
                         : isSticky
-                          ? 'hover:text-primary hover:bg-slate-100 text-slate-600'
-                          : 'hover:text-white hover:bg-white/10 text-white/90'
+                          ? 'text-slate-600 hover:text-primary'
+                          : 'text-white/90 hover:text-white'
                     }`}
                   >
-                    {link.name}
+                    <span className={`relative py-1 after:absolute after:bottom-[-2px] after:left-0 after:h-[2px] after:w-full after:bg-current after:transition-transform after:duration-300 after:origin-left ${
+                      isActive
+                        ? 'after:scale-x-100'
+                        : 'after:scale-x-0 group-hover:after:scale-x-100'
+                    }`}>
+                      {link.name}
+                    </span>
                   </Link>
                 );
               })}
