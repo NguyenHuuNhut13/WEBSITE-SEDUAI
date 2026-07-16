@@ -178,7 +178,7 @@ export default function Navbar() {
   return (
     <>
       {!isSticky && (
-        <div className={`text-slate-300 py-1.5 border-b hidden lg:block text-xs z-50 ${
+        <div className={`text-slate-300 py-3 border-b hidden lg:block text-xs z-50 ${
           pathname === '/' 
             ? 'absolute top-0 left-0 right-0 bg-transparent border-white/10' 
             : 'relative bg-slate-950 border-slate-800/80'
@@ -245,21 +245,21 @@ export default function Navbar() {
         isSticky 
           ? 'sticky top-0 left-0 w-full bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-lg text-slate-800 py-0' 
           : pathname === '/'
-            ? 'bg-transparent absolute top-0 lg:top-[48px] left-0 right-0 py-0 text-white'
+            ? 'bg-transparent absolute top-0 lg:top-[44px] left-0 right-0 py-0 text-white'
             : 'relative w-full bg-slate-950 text-white py-0 border-b border-slate-800'
       }`}>
         <div className={`mx-auto transition-[max-width,padding,margin] duration-300 ease-in-out ${
           isSticky 
             ? 'w-full px-4 lg:px-8' 
             : pathname === '/'
-              ? 'max-w-7xl px-4 sm:px-6 lg:px-8 mt-1 lg:mt-2'
+              ? 'max-w-7xl px-4 sm:px-6 lg:px-8 mt-0 lg:mt-0'
               : 'max-w-7xl px-4 sm:px-6 lg:px-8'
         }`}>
           <div className={`flex items-center justify-between transition-[height,background-color,border-radius,padding] duration-300 ease-in-out ${
             isSticky 
               ? 'h-16 w-full' 
               : pathname === '/'
-                ? 'h-14 lg:h-16 w-full bg-slate-950/60 backdrop-blur-xl border border-white/10 px-6 lg:px-8 rounded-2xl shadow-2xl'
+                ? 'h-16 lg:h-20 w-full bg-[#0077bb]/90 backdrop-blur-xl border border-white/10 px-6 lg:px-8 rounded-2xl shadow-2xl'
                 : 'h-16 w-full bg-transparent border-0 px-0'
           }`}>
             
