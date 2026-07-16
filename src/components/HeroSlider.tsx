@@ -119,7 +119,7 @@ export default function HeroSlider() {
       <div className="absolute top-1/3 right-10 w-80 h-80 bg-accent/5 rounded-full blur-[90px] animate-blob pointer-events-none z-0" style={{ animationDelay: '8s' }} />
 
       {/* Slide Layout Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 lg:pt-28">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           {/* Left Column: Typography & Text details */}

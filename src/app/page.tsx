@@ -6,7 +6,6 @@ import {
   Users,
   GraduationCap,
   CheckCircle2,
-  BookOpen,
   Globe,
   Cpu,
   Lightbulb,
@@ -119,24 +118,19 @@ export default async function Home() {
 
   const categories = [
     {
-      icon: <Globe className="w-5 h-5 transition-transform" />,
-      title: 'Tiếng Anh & IELTS',
-      count: 2,
+      icon: <Cpu className="w-5 h-5 transition-transform" />,
+      title: 'AI & Công nghệ',
+      count: 6,
     },
     {
-      icon: <Cpu className="w-5 h-5 transition-transform" />,
-      title: 'Lập trình & Công nghệ',
-      count: 2,
+      icon: <Globe className="w-5 h-5 transition-transform" />,
+      title: 'Marketing & Bán hàng',
+      count: 5,
     },
     {
       icon: <Lightbulb className="w-5 h-5 transition-transform" />,
-      title: 'AI & Ứng dụng',
-      count: 1,
-    },
-    {
-      icon: <BookOpen className="w-5 h-5 transition-transform" />,
-      title: 'Kỹ năng mềm',
-      count: 1,
+      title: 'Kinh doanh & Khởi nghiệp',
+      count: 4,
     },
   ];
 
@@ -159,11 +153,11 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories.map((cat, index) => (
               <Link
                 key={index}
-                href={`/courses?category=${encodeURIComponent(cat.title.split(' & ')[0])}`}
+                href={`/courses?category=${encodeURIComponent(cat.title)}`}
                 className="bg-white border border-slate-200/60 rounded-3xl p-6 hover-lift-glow card-shine transition-all duration-300 group shadow-sm flex flex-col justify-between min-h-[180px] text-left"
               >
                 <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-300">
@@ -301,7 +295,7 @@ export default async function Home() {
             </div>
 
             {/* Box 4 (Span 2) - Project thuc chien */}
-            <div className="col-span-1 md:col-span-2 bg-gradient-to-r from-primary to-blue-600 text-white rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between hover-lift-glow min-h-[220px]">
+            <div className="col-span-1 md:col-span-2 bg-gradient-to-r from-primary to-blue-600 text-white rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between hover-lift-glow min-h-[320px]">
               <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
               
               <div className="space-y-3 relative z-10">
