@@ -73,8 +73,7 @@ export default function ProfilePage() {
   const [generatedPassword, setGeneratedPassword] = useState<string>('');
 
   // Tab 3 Form: Avatar Base64
-  const [avatarBase64, setAvatarBase64] = useState<string>('');
-  const [avatarPreview, setAvatarPreview] = useState<string>('');
+  const [avatarPreview, setAvatarPreview] = useState<string>( '');
 
   // Tab 4 Form: CCCD Base64
   const [cccdForm, setCccdForm] = useState({
@@ -172,23 +171,55 @@ export default function ProfilePage() {
   // TAB 1: Submit Info
   const handleSaveInfo = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation
+    const cleanFirstname = infoForm.firstname.trim();
+    const cleanLastname = infoForm.lastname.trim();
+    if (!cleanFirstname || !cleanLastname) {
+      showNotification('error', 'Họ và tên không được phép để trống.');
+      return;
+    }
+
+    const cleanPhone = infoForm.phone.trim();
+    if (cleanPhone) {
+      const phoneRegex = /^[0-9+\s]{9,15}$/;
+      if (!phoneRegex.test(cleanPhone)) {
+        showNotification('error', 'Số điện thoại không hợp lệ (độ dài 9-15 chữ số).');
+        return;
+      }
+    }
+
     setIsLoading(true);
-    const token = accessToken || 'mock_token';
-    const success = await updateUserInfoApi(token, infoForm);
+    try {
+      const token = accessToken || 'mock_token';
+      const success = await updateUserInfoApi(token, {
+        ...infoForm,
+        firstname: cleanFirstname,
+        lastname: cleanLastname,
+        phone: cleanPhone,
+      });
 
-    updateUser({
-      firstname: infoForm.firstname,
-      lastname: infoForm.lastname,
-      name: `${infoForm.firstname} ${infoForm.lastname}`.trim(),
-      phone: infoForm.phone,
-      gender: infoForm.gender,
-      dob: infoForm.dob,
-      intro: infoForm.intro,
-      province: infoForm.province,
-    });
-
-    setIsLoading(false);
-    showNotification('success', 'Đã cập nhật thông tin thành viên thành công!');
+      if (success || token === 'mock_token') {
+        updateUser({
+          firstname: cleanFirstname,
+          lastname: cleanLastname,
+          name: `${cleanFirstname} ${cleanLastname}`.trim(),
+          phone: cleanPhone,
+          gender: infoForm.gender,
+          dob: infoForm.dob,
+          intro: infoForm.intro,
+          province: infoForm.province,
+        });
+        showNotification('success', 'Đã cập nhật thông tin thành viên thành công!');
+      } else {
+        showNotification('error', 'Không thể lưu thông tin. Máy chủ NKS báo lỗi hoặc token hết hạn.');
+      }
+    } catch (err) {
+      console.error('Error saving info:', err);
+      showNotification('error', 'Lỗi kết nối hoặc sự cố hệ thống. Vui lòng thử lại sau.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // TAB 2: Generate Random Password
@@ -314,7 +345,6 @@ export default function ProfilePage() {
       ctx.restore();
 
       const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
-      setAvatarBase64(croppedDataUrl);
       setAvatarPreview(croppedDataUrl);
       setAvatarZoom(1);
       setAvatarRotate(0);
@@ -323,10 +353,20 @@ export default function ProfilePage() {
       setIsEditingAvatar(false);
 
       const token = accessToken || 'mock_token';
-      await updateAvatarApi(token, croppedDataUrl);
-      updateUser({ avatar: croppedDataUrl });
-      setIsLoading(false);
-      showNotification('success', 'Đã căn chỉnh & cập nhật ảnh đại diện mới thành công!');
+      try {
+        const success = await updateAvatarApi(token, croppedDataUrl);
+        if (success || token === 'mock_token') {
+          updateUser({ avatar: croppedDataUrl });
+          showNotification('success', 'Đã căn chỉnh & cập nhật ảnh đại diện mới thành công!');
+        } else {
+          showNotification('error', 'Máy chủ NKS từ chối cập nhật ảnh đại diện.');
+        }
+      } catch (err) {
+        console.error('Error saving avatar:', err);
+        showNotification('error', 'Không thể tải ảnh đại diện lên máy chủ do lỗi kết nối.');
+      } finally {
+        setIsLoading(false);
+      }
     };
   };
 
@@ -568,20 +608,6 @@ export default function ProfilePage() {
     }
   };
 
-  // TAB 3: Save Avatar
-  const handleSaveAvatar = async () => {
-    if (!avatarBase64) {
-      showNotification('error', 'Vui lòng chọn ảnh đại diện mới trước khi lưu.');
-      return;
-    }
-    setIsLoading(true);
-    const token = accessToken || 'mock_token';
-    await updateAvatarApi(token, avatarBase64);
-    updateUser({ avatar: avatarBase64 });
-    setIsLoading(false);
-    showNotification('success', 'Cập nhật ảnh đại diện thành công (đã sync dữ liệu Local)!');
-  };
-
   // TAB 4: Save CCCD
   const handleSaveCccd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -589,26 +615,45 @@ export default function ProfilePage() {
       showNotification('error', 'Vui lòng cung cấp đủ số CCCD cùng ảnh mặt trước và mặt sau.');
       return;
     }
+
+    const cleanCccdNumber = cccdForm.number.trim();
+    const cccdRegex = /^[0-9]{12}$/;
+    if (!cccdRegex.test(cleanCccdNumber)) {
+      showNotification('error', 'Số CCCD không hợp lệ (phải chứa đúng 12 chữ số).');
+      return;
+    }
+
     setIsLoading(true);
     const token = accessToken || 'mock_token';
-    await updateCccdApi(
-      token,
-      frontBase64,
-      backBase64,
-      cccdForm.number,
-      cccdForm.date,
-      cccdForm.place
-    );
-    updateUser({
-      id_number: cccdForm.number,
-      id_date: cccdForm.date,
-      id_place: cccdForm.place,
-      cccd_front: frontBase64,
-      cccd_back: backBase64,
-    });
-    setIsLoading(false);
-    setShowBusinessCard(true);
-    showNotification('success', 'Đã lưu thông tin và ảnh CCCD (Base64) vào hồ sơ!');
+    try {
+      const success = await updateCccdApi(
+        token,
+        frontBase64,
+        backBase64,
+        cleanCccdNumber,
+        cccdForm.date,
+        cccdForm.place
+      );
+
+      if (success || token === 'mock_token') {
+        updateUser({
+          id_number: cleanCccdNumber,
+          id_date: cccdForm.date,
+          id_place: cccdForm.place,
+          cccd_front: frontBase64,
+          cccd_back: backBase64,
+        });
+        setShowBusinessCard(true);
+        showNotification('success', 'Đã lưu thông tin và ảnh CCCD (Base64) vào hồ sơ!');
+      } else {
+        showNotification('error', 'Máy chủ NKS từ chối cập nhật thông tin định danh CCCD.');
+      }
+    } catch (err) {
+      console.error('Error saving CCCD:', err);
+      showNotification('error', 'Không thể lưu thông tin CCCD do lỗi kết nối mạng.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -1086,7 +1131,6 @@ export default function ProfilePage() {
                         onChange={(e) => {
                           if (e.target.files && e.target.files[0]) {
                             handleFileToBase64(e.target.files[0], (base64) => {
-                              setAvatarBase64(base64);
                               setAvatarPreview(base64);
                               setAvatarZoom(1);
                               setAvatarRotate(0);
