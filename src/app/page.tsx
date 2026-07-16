@@ -23,11 +23,10 @@ import CourseCard from '@/components/CourseCard';
 import CounterSection from '@/components/CounterSection';
 import EventCard from '@/components/EventCard';
 import InstructorCard from '@/components/InstructorCard';
-import TestimonialCard from '@/components/TestimonialCard';
+import EcosystemAndTestimonials from '@/components/EcosystemAndTestimonials';
 import { courses, Course } from '@/data/courses';
 import { events } from '@/data/events';
 import { instructors } from '@/data/instructors';
-import { testimonials } from '@/data/testimonials';
 import { getEduCourses, ApiCourse } from '@/services/api';
 import TeacherAssistantWrapper from '@/components/TeacherAssistantWrapper';
 
@@ -572,26 +571,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ====== Testimonials ====== */}
-      <section className="py-16 bg-slate-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 space-y-2">
-            <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Cảm nhận</span>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-              Học Viên Nói Gì Về SeduAi
-            </h2>
-            <p className="text-slate-500 text-xs sm:text-sm max-w-lg mx-auto">
-              Hàng ngàn học viên đã tìm thấy lộ trình tối ưu và nâng cao vượt bậc năng lực học tập cùng SeduAi.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {testimonials.map((testimonial, index) => (
-              <TestimonialCard key={index} testimonial={testimonial} />
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ====== Ecosystem & Testimonials Section ====== */}
+      <EcosystemAndTestimonials />
 
       {/* ====== Grayscale Partner Logos Marquee ====== */}
       <section className="py-14 bg-white border-t border-slate-100 overflow-hidden">
