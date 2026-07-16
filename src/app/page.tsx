@@ -139,6 +139,76 @@ export default async function Home() {
       {/* ====== Upgraded Hero Slider ====== */}
       <HeroSlider />
 
+      {/* ====== Quick Features Section (Box-Image-Box layout similar to template) ====== */}
+      <section className="py-12 bg-slate-50 border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+            
+            {/* Box 1 (Left): Smart Learning */}
+            <div className="bg-[#0077bb] text-white rounded-3xl p-8 flex flex-col justify-between hover:shadow-[0_15px_30px_rgba(0,119,187,0.25)] transition-all duration-300 group shadow-lg text-left">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white">
+                  <GraduationCap className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold tracking-tight text-white">
+                  LỘ TRÌNH CHUẨN QUỐC TẾ
+                </h3>
+                <p className="text-blue-50 text-xs leading-relaxed">
+                  Các khóa học Tiếng Anh, IELTS và Lập trình được thiết kế chuẩn đầu ra kết hợp với Trợ lý ảo AI đắc lực đồng hành hỗ trợ học viên 24/7 giải đáp thắc mắc.
+                </p>
+              </div>
+              <div className="pt-6">
+                <Link
+                  href="/courses"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-white text-[#0077bb] hover:bg-blue-50 font-bold text-xs rounded-xl shadow-md transition-all duration-300 uppercase tracking-wider"
+                >
+                  Xem khóa học
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Box 2 (Center Image) */}
+            <div className="relative min-h-[320px] rounded-3xl overflow-hidden shadow-lg group">
+              <Image
+                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80"
+                alt="Học viên SeduAi học tập"
+                fill
+                sizes="(max-w-768px) 100vw, 33vw"
+                unoptimized
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
+            </div>
+
+            {/* Box 3 (Right): Library */}
+            <div className="bg-[#0077bb] text-white rounded-3xl p-8 flex flex-col justify-between hover:shadow-[0_15px_30px_rgba(0,119,187,0.25)] transition-all duration-300 group shadow-lg text-left">
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white">
+                  <Lightbulb className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold tracking-tight text-white">
+                  KHO THƯ VIỆN HỌC TẬP
+                </h3>
+                <p className="text-blue-50 text-xs leading-relaxed">
+                  Hệ thống kho tài liệu chuyên sâu, bài viết hướng dẫn học tập và chia sẻ kiến thức chuẩn hóa từ các chuyên gia hàng đầu giúp bứt phá mục tiêu.
+                </p>
+              </div>
+              <div className="pt-6">
+                <Link
+                  href="/blog"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-white text-[#0077bb] hover:bg-blue-50 font-bold text-xs rounded-xl shadow-md transition-all duration-300 uppercase tracking-wider"
+                >
+                  Xem bài viết
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
       {/* ====== Course Categories Section ====== */}
       <section className="py-16 bg-white border-b border-slate-100 relative">
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
