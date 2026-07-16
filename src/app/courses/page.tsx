@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useTransition, useEffect, useMemo } from 'react';
+import { useState, useTransition, useEffect, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Search, GraduationCap, Headset, Mail, RefreshCw, ArrowUpDown, Tag, Wallet } from 'lucide-react';
 import CourseCard from '@/components/CourseCard';
@@ -99,7 +100,8 @@ function mapApiCourse(c: ApiCourse): Course {
   };
 }
 
-export default function CourseList() {
+function CourseListContent() {
+  const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [sortBy, setSortBy] = useState('default');
@@ -107,6 +109,13 @@ export default function CourseList() {
   const [apiCoursesList, setApiCoursesList] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     setLoading(true);
@@ -430,3 +439,19 @@ export default function CourseList() {
     </div>
   );
 }
+
+export default function CourseList() {
+  return (
+    <Suspense fallback={
+      <div className="bg-slate-50 min-h-screen py-24 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto" />
+          <p className="text-slate-500 text-xs font-semibold">Đang tải danh sách khóa học...</p>
+        </div>
+      </div>
+    }>
+      <CourseListContent />
+    </Suspense>
+  );
+}
+

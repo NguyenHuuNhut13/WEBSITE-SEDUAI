@@ -22,6 +22,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { getEduCourses } from '@/services/api';
 
 const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -58,6 +59,46 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { accessToken, localSync, logout } = useAuth();
+
+  const [coursesSubmenu, setCoursesSubmenu] = useState<{ name: string; href: string }[]>([
+    { name: 'Tất cả khóa học', href: '/courses' },
+    { name: 'AI & Công nghệ', href: '/courses?category=AI %26 Công nghệ' },
+    { name: 'Marketing & Bán hàng', href: '/courses?category=Marketing %26 Bán hàng' },
+    { name: 'Kinh doanh & Khởi nghiệp', href: '/courses?category=Kinh doanh %26 Khởi nghiệp' },
+  ]);
+
+  useEffect(() => {
+    getEduCourses().then((list) => {
+      if (list && list.length > 0) {
+        const catSet = new Set<string>();
+        list.forEach((c) => {
+          let catTitle = 'Khác';
+          const acfCategory = c.acf?.category;
+          if (Array.isArray(acfCategory) && acfCategory.length > 0) {
+            const first = acfCategory[0];
+            if (first && typeof first === 'object' && 'title' in first) {
+              catTitle = String(first.title);
+            }
+          } else if (acfCategory && typeof acfCategory === 'object' && 'title' in acfCategory) {
+            catTitle = String((acfCategory as { title: string }).title);
+          } else if (typeof acfCategory === 'string' && acfCategory) {
+            catTitle = acfCategory;
+          }
+          if (catTitle) catSet.add(catTitle);
+        });
+
+        const sortedCats = Array.from(catSet).sort();
+        const apiSubmenu = [
+          { name: 'Tất cả khóa học', href: '/courses' },
+          ...sortedCats.map((cat) => ({
+            name: cat,
+            href: `/courses?category=${encodeURIComponent(cat)}`,
+          })),
+        ];
+        setCoursesSubmenu(apiSubmenu);
+      }
+    });
+  }, []);
 
   const [isSticky, setIsSticky] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -125,14 +166,7 @@ export default function Navbar() {
     {
       name: 'Khóa học',
       href: '/courses',
-      submenu: [
-        { name: 'Tất cả khóa học', href: '/courses' },
-        { name: 'Lập trình Web Full-Stack', href: '/courses/lap-trinh-web-fullstack-laravel-react' },
-        { name: 'Tiếng Anh Giao Tiếp', href: '/courses/tieng-anh-giao-tiep-quoc-te' },
-        { name: 'Luyện thi IELTS 6.5+', href: '/courses/luyen-thi-ielts-cam-ket-dau-ra' },
-        { name: 'Ứng dụng AI Doanh Nghiệp', href: '/courses/ung-dung-ai-trong-cong-viec-quan-tri' },
-        { name: 'Lập trình Python Trẻ Em', href: '/courses/lap-trinh-python-cho-tre-em' },
-      ],
+      submenu: coursesSubmenu,
     },
     { name: 'Tính năng CRM', href: '/#ai-crm-demo' },
     ...(accessToken ? [{ name: 'Hệ thống LMS', href: '/lms' }] : []),
