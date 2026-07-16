@@ -43,12 +43,12 @@ export default function EcosystemAndTestimonials() {
   ];
 
   return (
-    <section className="py-20 bg-white">
+    <section className="py-20 bg-white reveal-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
           {/* ====== LEFT COLUMN: TESTIMONIALS SLIDER ====== */}
-          <div className="lg:col-span-6 space-y-8">
+          <div className="scroll-reveal lg:col-span-6 space-y-8">
             <div className="space-y-2">
               <span className="text-[11px] uppercase font-extrabold tracking-widest text-primary block">
                 Testimonials
@@ -129,7 +129,7 @@ export default function EcosystemAndTestimonials() {
           </div>
 
           {/* ====== RIGHT COLUMN: FAQ ACCORDION ====== */}
-          <div className="lg:col-span-6 space-y-8">
+          <div className="scroll-reveal lg:col-span-6 space-y-8">
             <div className="space-y-2">
               <span className="text-[11px] uppercase font-extrabold tracking-widest text-primary block">
                 Frequently Asked Questions

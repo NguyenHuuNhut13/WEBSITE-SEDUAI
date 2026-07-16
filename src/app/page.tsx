@@ -192,12 +192,12 @@ export default async function Home() {
       <HeroSlider />
 
       {/* ====== Quick Features Section (Box-Image-Box layout similar to template) ====== */}
-      <section className="pb-16 bg-slate-50 border-b border-slate-100 relative z-20 -mt-20 lg:-mt-28">
+      <section className="reveal-section pb-16 bg-slate-50 border-b border-slate-100 relative z-20 -mt-20 lg:-mt-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 items-stretch rounded-3xl overflow-hidden shadow-2xl">
             
             {/* Box 1 (Left): Smart Learning */}
-            <div className="bg-[#0077bb] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-center min-h-[240px] lg:min-h-[280px] text-left transition-all duration-300 hover:brightness-[1.03] group shadow-inner">
+            <div className="scroll-reveal bg-[#0077bb] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-center min-h-[240px] lg:min-h-[280px] text-left transition-all duration-300 hover:brightness-[1.03] group shadow-inner">
               <div className="space-y-4">
                 <div className="w-12 h-12 rounded-full border-2 border-white/20 flex items-center justify-center text-white bg-white/10 shadow-sm">
                   <GraduationCap className="w-6 h-6" />
@@ -221,12 +221,12 @@ export default async function Home() {
             </div>
 
             {/* Box 2 (Center Image) */}
-            <div className="relative min-h-[240px] lg:min-h-full w-full group">
+            <div className="scroll-reveal relative min-h-[240px] lg:min-h-full w-full group">
               <Image
                 src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80"
                 alt="Học viên SeduAi học tập"
                 fill
-                sizes="(max-w-768px) 100vw, 33vw"
+                sizes="(max-w-[768px]) 100vw, 33vw"
                 unoptimized
                 className="object-cover group-hover:scale-[1.03] transition-transform duration-700"
               />
@@ -234,7 +234,7 @@ export default async function Home() {
             </div>
 
             {/* Box 3 (Right): Library */}
-            <div className="bg-[#0077bb] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-center min-h-[240px] lg:min-h-[280px] text-left transition-all duration-300 hover:brightness-[1.03] group shadow-inner">
+            <div className="scroll-reveal bg-[#0077bb] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-center min-h-[240px] lg:min-h-[280px] text-left transition-all duration-300 hover:brightness-[1.03] group shadow-inner">
               <div className="space-y-4">
                 <div className="w-12 h-12 rounded-full border-2 border-white/20 flex items-center justify-center text-white bg-white/10 shadow-sm">
                   <Lightbulb className="w-6 h-6" />
@@ -304,9 +304,9 @@ export default async function Home() {
       </section>
 
       {/* ====== Featured Courses ====== */}
-      <section className="py-16">
+      <section className="py-16 reveal-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-12">
+          <div className="scroll-reveal flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-12">
             <div className="space-y-2">
               <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Nổi bật</span>
               <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-tight">
@@ -327,7 +327,7 @@ export default async function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {featuredCourses.map((course, idx) => (
-              <div key={course.slug} className="animate-fade-in-up" style={{ animationDelay: `${idx * 80}ms`, animationFillMode: 'both' }}>
+              <div key={course.slug} className="scroll-reveal" style={{ transitionDelay: `${idx * 80}ms` }}>
                 <CourseCard course={course} />
               </div>
             ))}
@@ -336,10 +336,10 @@ export default async function Home() {
       </section>
 
       {/* ====== Bento Grid Features (Why Choose Us Redesign) ====== */}
-      <section className="py-16 bg-white border-t border-b border-slate-100 relative">
+      <section className="py-16 bg-white border-t border-b border-slate-100 relative reveal-section">
         <div className="absolute top-[20%] left-0 w-90 h-90 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-14 space-y-2">
+          <div className="text-center mb-14 space-y-2 scroll-reveal">
             <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Khác biệt</span>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">
               Hệ Sinh Thái Đào Tạo Ưu Việt SeduAi
@@ -353,8 +353,8 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             {/* Box 1 (Span 2, height x2) - AI Assistant interactive representation */}
-            <div className="col-span-1 md:col-span-2 bg-slate-900 text-white rounded-3xl p-8 border border-slate-800 relative overflow-hidden flex flex-col justify-between hover-lift-glow group min-h-[320px]">
-              <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:2rem_2rem] pointer-events-none" />
+            <div className="scroll-reveal col-span-1 md:col-span-2 bg-slate-900 text-white rounded-3xl p-8 border border-slate-800 relative overflow-hidden flex flex-col justify-between hover-lift-glow group min-h-[320px]">
+              <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />
               <div className="absolute -right-10 -top-10 w-48 h-48 bg-primary/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-500 pointer-events-none" />
               
               <div className="space-y-3 relative z-10">
@@ -379,7 +379,7 @@ export default async function Home() {
             </div>
 
             {/* Box 2 (Span 1) - Cam ket dau ra */}
-            <div className="col-span-1 bg-white border border-slate-200/80 rounded-3xl p-8 flex flex-col justify-between hover-lift-glow card-shine group min-h-[320px] shadow-sm">
+            <div className="scroll-reveal col-span-1 bg-white border border-slate-200/80 rounded-3xl p-8 flex flex-col justify-between hover-lift-glow card-shine group min-h-[320px] shadow-sm">
               <div className="space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
                   <ShieldCheck className="w-5.5 h-5.5" />
@@ -395,7 +395,7 @@ export default async function Home() {
             </div>
 
             {/* Box 3 (Span 1) - Mentor 1-1 */}
-            <div className="col-span-1 bg-white border border-slate-200/80 rounded-3xl p-8 flex flex-col justify-between hover-lift-glow card-shine group min-h-[320px] shadow-sm">
+            <div className="scroll-reveal col-span-1 bg-white border border-slate-200/80 rounded-3xl p-8 flex flex-col justify-between hover-lift-glow card-shine group min-h-[320px] shadow-sm">
               <div className="space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
                   <Headset className="w-5.5 h-5.5" />
@@ -417,7 +417,7 @@ export default async function Home() {
             </div>
 
             {/* Box 4 (Span 2) - Project thuc chien */}
-            <div className="col-span-1 md:col-span-2 bg-gradient-to-r from-primary to-blue-600 text-white rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between hover-lift-glow min-h-[320px]">
+            <div className="scroll-reveal col-span-1 md:col-span-2 bg-gradient-to-r from-primary to-blue-600 text-white rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between hover-lift-glow min-h-[320px]">
               <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
               
               <div className="space-y-3 relative z-10">
@@ -441,11 +441,11 @@ export default async function Home() {
       </section>
 
       {/* ====== AI Admissions CRM Demo Section ====== */}
-      <section id="ai-crm-demo" className="py-16 bg-slate-50 scroll-mt-28">
+      <section id="ai-crm-demo" className="py-16 bg-slate-50 scroll-mt-28 reveal-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             {/* Left Info */}
-            <div className="lg:col-span-5 space-y-6">
+            <div className="scroll-reveal lg:col-span-5 space-y-6">
               <div className="w-12 h-12 rounded-2xl bg-primary-light text-primary flex items-center justify-center shadow-sm">
                 <Bot className="w-6 h-6" />
               </div>
@@ -475,7 +475,7 @@ export default async function Home() {
             </div>
 
             {/* Right Chatbot CRM Simulation */}
-            <div className="lg:col-span-7">
+            <div className="scroll-reveal lg:col-span-7">
               <ChatbotCRM />
             </div>
           </div>
@@ -484,16 +484,16 @@ export default async function Home() {
 
       {/* ====== AI Teacher Assistant Section ====== */}
       <TeacherAssistantWrapper>
-        <section className="py-16 bg-white border-t border-slate-100">
+        <section className="py-16 bg-white border-t border-slate-100 reveal-section">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
               {/* Left Console */}
-              <div className="lg:col-span-7 order-last lg:order-first">
+              <div className="scroll-reveal lg:col-span-7 order-last lg:order-first">
                 <TeacherConsole />
               </div>
 
               {/* Right Info */}
-              <div className="lg:col-span-5 space-y-6">
+              <div className="scroll-reveal lg:col-span-5 space-y-6">
                 <div className="w-12 h-12 rounded-2xl bg-primary-light text-primary flex items-center justify-center shadow-sm">
                   <Users className="w-6 h-6" />
                 </div>
@@ -530,9 +530,9 @@ export default async function Home() {
       <CounterSection />
 
       {/* ====== Upcoming Events ====== */}
-      <section className="py-16 bg-slate-50">
+      <section className="py-16 bg-slate-50 reveal-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 space-y-2">
+          <div className="scroll-reveal text-center mb-12 space-y-2">
             <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Khai giảng</span>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">
               Lịch Khai Giảng & Sự Kiện
@@ -544,16 +544,18 @@ export default async function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {displayEvents.map((event, index) => (
-              <EventCard key={index} event={event} />
+              <div key={index} className="scroll-reveal" style={{ transitionDelay: `${index * 120}ms` }}>
+                <EventCard event={event} />
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* ====== Instructors Section ====== */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white reveal-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 space-y-2">
+          <div className="scroll-reveal text-center mb-12 space-y-2">
             <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Giảng viên</span>
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">
               Đội Ngũ Giảng Viên Chuyên Môn
@@ -565,7 +567,9 @@ export default async function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {displayInstructors.map((instructor, index) => (
-              <InstructorCard key={index} instructor={instructor} />
+              <div key={index} className="scroll-reveal" style={{ transitionDelay: `${index * 100}ms` }}>
+                <InstructorCard instructor={instructor} />
+              </div>
             ))}
           </div>
         </div>
