@@ -77,7 +77,7 @@ export default function Contact() {
         <div class="font-sans p-1 text-slate-800 text-xs">
           <h4 class="font-bold text-[#0077bb] text-sm">SeduAi</h4>
           <p class="text-slate-500 mt-1 leading-snug">Hệ điều hành AI dành cho giáo dục</p>
-          <p class="font-semibold text-slate-600 mt-1">Tầng 5, Tòa nhà SeduAi, Đường 3/2, Phường Hòa Hưng, Quận 10, TP. Hồ Chí Minh</p>
+          <p class="font-semibold text-slate-600 mt-1">Tầng 5, Tòa nhà SeduAi, Đường 3/2, Phường Hòa Hưng, TP. Hồ Chí Minh</p>
         </div>
       `);
 
@@ -171,7 +171,7 @@ export default function Contact() {
               <div className="space-y-1">
                 <h3 className="font-bold text-slate-900 text-sm">Văn phòng chính</h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  Tầng 5, Tòa nhà SeduAi, Đường 3/2, Phường Hòa Hưng, Quận 10, TP. Hồ Chí Minh
+                  Tầng 5, Tòa nhà SeduAi, Đường 3/2, Phường Hòa Hưng, TP. Hồ Chí Minh
                 </p>
               </div>
             </div>
@@ -340,7 +340,7 @@ export default function Contact() {
               <div className="flex items-center gap-2.5 text-xs text-slate-500 px-4">
                 <Info className="w-4 h-4 text-primary flex-shrink-0" />
                 <span>
-                  Trụ sở chính: Tầng 5, Tòa nhà SeduAi, Đường 3/2, Phường Hòa Hưng, Quận 10, TP. Hồ Chí Minh.
+                  Trụ sở chính: Tầng 5, Tòa nhà SeduAi, Đường 3/2, Phường Hòa Hưng, TP. Hồ Chí Minh.
                 </span>
               </div>
             </div>
