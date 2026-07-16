@@ -145,19 +145,19 @@ export default async function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 items-stretch rounded-3xl overflow-hidden shadow-2xl">
             
             {/* Box 1 (Left): Smart Learning */}
-            <div className="bg-[#0077bb] text-white p-8 sm:p-12 lg:p-16 flex flex-col justify-center min-h-[380px] lg:min-h-[440px] text-left transition-all duration-300 hover:brightness-[1.03] group shadow-inner">
+            <div className="bg-[#0077bb] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-center min-h-[240px] lg:min-h-[280px] text-left transition-all duration-300 hover:brightness-[1.03] group shadow-inner">
               <div className="space-y-4">
-                <div className="w-14 h-14 rounded-full border-2 border-white/20 flex items-center justify-center text-white bg-white/10 shadow-sm">
-                  <GraduationCap className="w-7 h-7" />
+                <div className="w-12 h-12 rounded-full border-2 border-white/20 flex items-center justify-center text-white bg-white/10 shadow-sm">
+                  <GraduationCap className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white uppercase">
+                <h3 className="text-lg sm:text-xl font-black tracking-tight text-white uppercase">
                   LỘ TRÌNH CHUẨN QUỐC TẾ
                 </h3>
                 <p className="text-blue-50 text-xs sm:text-sm leading-relaxed max-w-md font-medium">
                   Các khóa học Tiếng Anh, IELTS và Lập trình được thiết kế chuẩn đầu ra kết hợp với Trợ lý ảo AI đắc lực đồng hành hỗ trợ học viên 24/7 giải đáp thắc mắc.
                 </p>
               </div>
-              <div className="pt-8">
+              <div className="pt-5">
                 <Link
                   href="/courses"
                   className="inline-flex items-center gap-2 border-2 border-white/80 hover:bg-white hover:text-[#0077bb] hover:border-white text-white font-black text-[11px] px-6 py-3 transition duration-300 uppercase tracking-widest self-start cursor-pointer shadow-md"
@@ -169,7 +169,7 @@ export default async function Home() {
             </div>
 
             {/* Box 2 (Center Image) */}
-            <div className="relative min-h-[320px] lg:min-h-full w-full group">
+            <div className="relative min-h-[240px] lg:min-h-full w-full group">
               <Image
                 src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&auto=format&fit=crop&q=80"
                 alt="Học viên SeduAi học tập"
@@ -182,19 +182,19 @@ export default async function Home() {
             </div>
 
             {/* Box 3 (Right): Library */}
-            <div className="bg-[#0077bb] text-white p-8 sm:p-12 lg:p-16 flex flex-col justify-center min-h-[380px] lg:min-h-[440px] text-left transition-all duration-300 hover:brightness-[1.03] group shadow-inner">
+            <div className="bg-[#0077bb] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-center min-h-[240px] lg:min-h-[280px] text-left transition-all duration-300 hover:brightness-[1.03] group shadow-inner">
               <div className="space-y-4">
-                <div className="w-14 h-14 rounded-full border-2 border-white/20 flex items-center justify-center text-white bg-white/10 shadow-sm">
-                  <Lightbulb className="w-7 h-7" />
+                <div className="w-12 h-12 rounded-full border-2 border-white/20 flex items-center justify-center text-white bg-white/10 shadow-sm">
+                  <Lightbulb className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white uppercase">
+                <h3 className="text-lg sm:text-xl font-black tracking-tight text-white uppercase">
                   KHO THƯ VIỆN HỌC TẬP
                 </h3>
                 <p className="text-blue-50 text-xs sm:text-sm leading-relaxed max-w-md font-medium">
                   Hệ thống kho tài liệu chuyên sâu, bài viết hướng dẫn học tập và chia sẻ kiến thức chuẩn hóa từ các chuyên gia hàng đầu giúp bứt phá mục tiêu.
                 </p>
               </div>
-              <div className="pt-8">
+              <div className="pt-5">
                 <Link
                   href="/blog"
                   className="inline-flex items-center gap-2 border-2 border-white/80 hover:bg-white hover:text-[#0077bb] hover:border-white text-white font-black text-[11px] px-6 py-3 transition duration-300 uppercase tracking-widest self-start cursor-pointer shadow-md"
