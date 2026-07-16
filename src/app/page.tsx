@@ -113,6 +113,59 @@ export default async function Home() {
       }
     ]
   }));
+  
+  // 1. Giảng viên động từ API
+  const uniqueFaculties = new Map<number, { id: number; title: string; slug: string; courseTitle: string }>();
+  apiCourses.forEach((c) => {
+    if (c.acf?.faculty && typeof c.acf.faculty === 'object' && 'id' in c.acf.faculty) {
+      const fac = c.acf.faculty as { id: number; title: string; slug: string };
+      if (fac.id && fac.title) {
+        uniqueFaculties.set(fac.id, {
+          id: fac.id,
+          title: fac.title,
+          slug: fac.slug,
+          courseTitle: typeof c.title === 'object' && c.title !== null && 'rendered' in c.title ? (c.title as any).rendered : String(c.title || ''),
+        });
+      }
+    }
+  });
+
+  const avatarList = [
+    'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&auto=format&fit=crop&q=80',
+  ];
+
+  const mappedInstructors = Array.from(uniqueFaculties.values()).map((fac, idx) => ({
+    name: fac.title,
+    title: 'Giảng viên Chuyên môn - SeduAi',
+    specialty: `Chuyên gia giảng dạy khóa "${fac.courseTitle}"`,
+    avatar: avatarList[idx % avatarList.length],
+    bio: `Giảng viên giàu kinh nghiệm thực tế, chuyên môn cao trực tiếp đồng hành dẫn dắt và hỗ trợ học viên hoàn thành mục tiêu học tập chuẩn quốc tế.`,
+  }));
+
+  const displayInstructors = mappedInstructors.length > 0 ? mappedInstructors : instructors;
+
+  // 2. Khai giảng động từ API
+  const mappedEvents = apiCourses.slice(0, 4).map((c, idx) => {
+    const courseTitle = typeof c.title === 'object' && c.title !== null && 'rendered' in c.title ? (c.title as any).rendered : String(c.title || '');
+    const dayOffset = 20 + (idx * 3) % 11;
+    const dateStr = `2026-07-${dayOffset}`;
+    const timeSlots = ['19:30 - 21:30', '09:00 - 11:00', '14:00 - 16:00', '18:00 - 20:00'];
+    const locations = ['Trụ sở SeduAi, Quận 10, TP.HCM', 'Trực tuyến qua Zoom', 'Học viện SeduAi Lab', 'Trực tuyến qua MS Teams'];
+    
+    return {
+      title: `Khai giảng khóa ${courseTitle}`,
+      date: dateStr,
+      time: timeSlots[idx % timeSlots.length],
+      location: locations[idx % locations.length],
+      category: 'Khai giảng',
+      description: `Buổi khai giảng chính thức khóa học "${courseTitle}" nhằm kích hoạt lộ trình học tập tối ưu hóa bằng công nghệ AI và giới thiệu Trợ lý ảo AI đắc lực đồng hành 24/7.`,
+    };
+  });
+
+  const displayEvents = mappedEvents.length > 0 ? mappedEvents : events;
 
   const featuredCourses = mappedApiCourses.length > 0 ? mappedApiCourses.slice(0, 4) : courses.slice(0, 4);
 
@@ -491,7 +544,7 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {events.map((event, index) => (
+            {displayEvents.map((event, index) => (
               <EventCard key={index} event={event} />
             ))}
           </div>
@@ -512,7 +565,7 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {instructors.map((instructor, index) => (
+            {displayInstructors.map((instructor, index) => (
               <InstructorCard key={index} instructor={instructor} />
             ))}
           </div>
