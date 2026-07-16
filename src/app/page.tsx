@@ -140,7 +140,7 @@ export default async function Home() {
       <HeroSlider />
 
       {/* ====== Quick Features Section (Box-Image-Box layout similar to template) ====== */}
-      <section className="py-16 bg-slate-50 border-b border-slate-100">
+      <section className="pb-16 bg-slate-50 border-b border-slate-100 relative z-20 -mt-20 lg:-mt-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 items-stretch rounded-3xl overflow-hidden shadow-2xl">
             
@@ -210,7 +210,7 @@ export default async function Home() {
       </section>
 
       {/* ====== Course Categories Section ====== */}
-      <section className="py-16 bg-white border-b border-slate-100 relative">
+      <section className="pt-24 pb-16 bg-white border-b border-slate-100 relative">
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 space-y-2">
