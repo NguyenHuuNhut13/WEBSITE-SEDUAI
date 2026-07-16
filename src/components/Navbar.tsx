@@ -191,7 +191,7 @@ export default function Navbar() {
                 </div>
                 <span>
                   <span className="text-slate-500 font-medium">CS1: </span>
-                  <strong className="text-slate-300 font-semibold group-hover:text-white transition">Quận 10, TP. Hồ Chí Minh</strong>
+                  <strong className="text-slate-300 font-semibold group-hover:text-white transition">Phường Hòa Hưng, Quận 10, TP.HCM</strong>
                 </span>
               </div>
 
