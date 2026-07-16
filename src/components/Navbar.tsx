@@ -178,7 +178,11 @@ export default function Navbar() {
   return (
     <>
       {!isSticky && (
-        <div className="bg-slate-950 text-slate-300 py-2.5 border-b border-slate-800/80 hidden lg:block text-xs relative z-50">
+        <div className={`text-slate-300 py-2.5 border-b hidden lg:block text-xs z-50 ${
+          pathname === '/' 
+            ? 'absolute top-0 left-0 right-0 bg-transparent border-white/10' 
+            : 'relative bg-slate-950 border-slate-800/80'
+        }`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2 group cursor-default">
@@ -241,7 +245,7 @@ export default function Navbar() {
         isSticky 
           ? 'sticky top-0 left-0 w-full bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-lg text-slate-800 py-0' 
           : pathname === '/'
-            ? 'bg-transparent lg:absolute lg:top-[48px] lg:left-0 lg:right-0 py-0 text-white'
+            ? 'bg-transparent absolute top-0 lg:top-[48px] left-0 right-0 py-0 text-white'
             : 'relative w-full bg-slate-950 text-white py-0 border-b border-slate-800'
       }`}>
         <div className={`mx-auto transition-[max-width,padding,margin] duration-300 ease-in-out ${
