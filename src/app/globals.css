@@ -712,4 +712,13 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 0px !important;
 }
 
+/* Exceptions: explicitly styled circular elements (status dots, avatars, slide dots) */
+.rounded-full,
+.avatar,
+.circle-dot,
+[class*="rounded-full"],
+[class*="avatar"] {
+  border-radius: 9999px !important;
+}
+
 
