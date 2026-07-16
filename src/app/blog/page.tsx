@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Calendar, User, Search, ChevronRight, Tag, BookOpen, ArrowRight } from 'lucide-react';
+import { Calendar, User, Search, ChevronRight, Tag, BookOpen, ArrowRight, TrendingUp, Grid } from 'lucide-react';
 
 interface BlogPost {
   id: number;
@@ -16,11 +16,18 @@ interface BlogPost {
 }
 
 const categoryColors: Record<string, string> = {
-  'AI & Giáo Dục': 'bg-blue-100 text-blue-700 border-blue-200',
-  'Luyện thi IELTS': 'bg-amber-100 text-amber-700 border-amber-200',
-  'Xu hướng Lập trình': 'bg-purple-100 text-purple-700 border-purple-200',
-  'Mẹo học tập': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  'Tất cả': 'bg-slate-100 text-slate-700 border-slate-200',
+  'AI & Giáo Dục': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  'Luyện thi IELTS': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  'Xu hướng Lập trình': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  'Mẹo học tập': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  'Tất cả': 'bg-slate-800/30 text-slate-400 border-slate-800',
+};
+
+const categoryBadgeGlow: Record<string, string> = {
+  'AI & Giáo Dục': 'group-hover:border-blue-500/30 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.1)]',
+  'Luyện thi IELTS': 'group-hover:border-amber-500/30 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.1)]',
+  'Xu hướng Lập trình': 'group-hover:border-purple-500/30 group-hover:shadow-[0_0_15px_rgba(168,85,247,0.1)]',
+  'Mẹo học tập': 'group-hover:border-emerald-500/30 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.1)]',
 };
 
 export default function BlogPage() {
@@ -94,27 +101,33 @@ export default function BlogPage() {
   const listPosts = filteredPosts.slice(1);
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-20">
-      {/* Hero Banner */}
-      <div className="bg-gradient-to-br from-primary via-blue-700 to-primary-dark py-20 text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
-        <div className="absolute top-0 left-1/3 w-64 h-64 bg-white/5 rounded-full blur-3xl animate-blob" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center space-y-4">
-          <span className="text-xs uppercase font-extrabold tracking-widest text-white/70 block">Góc chia sẻ kiến thức</span>
-          <h1 className="text-4xl sm:text-5xl font-black tracking-tight">TIN TỨC & BÀI VIẾT</h1>
-          <p className="text-white/80 max-w-2xl mx-auto text-sm sm:text-base">
-            Cập nhật xu hướng công nghệ, mẹo tự học tiếng Anh và các thông tin định hướng giáo dục cùng chuyên gia SeduAi.
+    <div className="bg-slate-950 text-slate-100 min-h-screen pb-24 selection:bg-primary selection:text-white">
+      {/* Sleek Dark Tech Header Banner */}
+      <div className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20 text-center relative overflow-hidden border-b border-slate-900">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-[0.15] pointer-events-none" />
+        <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
+        
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative space-y-5">
+          <span className="text-[10px] uppercase font-black tracking-widest text-primary bg-primary/10 border border-primary/20 px-3.5 py-1.5 rounded-full inline-block">
+            Góc chia sẻ tri thức AI & Giáo dục
+          </span>
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-none text-white">
+            TIN TỨC & <span className="gradient-text">BÀI VIẾT</span>
+          </h1>
+          <p className="text-slate-400 max-w-xl mx-auto text-xs sm:text-sm leading-relaxed">
+            Cập nhật xu hướng công nghệ, cẩm nang lập trình và chiến thuật học tiếng Anh được tối ưu hóa với các giải pháp giáo dục AI tại SeduAi.
           </p>
-          {/* Category pills in hero */}
-          <div className="flex flex-wrap justify-center gap-2 pt-2">
+
+          {/* Elegant inline filter buttons in Hero */}
+          <div className="flex flex-wrap justify-center gap-2 pt-4">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 border ${
+                className={`px-4.5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-300 border cursor-pointer ${
                   selectedCategory === cat
-                    ? 'bg-white text-primary border-white shadow-md'
-                    : 'bg-white/10 text-white/80 border-white/20 hover:bg-white/20'
+                    ? 'bg-white text-slate-950 border-white shadow-lg scale-105'
+                    : 'bg-slate-900/40 text-slate-400 border-slate-800 hover:border-slate-700 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
                 {cat}
@@ -125,68 +138,102 @@ export default function BlogPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-          {/* Left Area: Blog Posts */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
+          {/* Left Column: Blog Posts list */}
           <div className="lg:col-span-8 space-y-8">
             {filteredPosts.length > 0 ? (
               <>
-                {/* Featured Post */}
+                {/* Featured Post Card */}
                 {featuredPost && (
-                  <article className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-lg hover:shadow-xl transition-all duration-400 group card-hover-lift">
-                    <div className={`bg-gradient-to-tr ${featuredPost.imageBg} text-white p-8 h-48 flex flex-col justify-between relative overflow-hidden`}>
-                      {/* Shine overlay */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                      <div className="flex items-center justify-between">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${categoryColors[featuredPost.category]} bg-white`}>
+                  <article className={`bg-slate-900/30 rounded-3xl overflow-hidden border border-slate-800/80 shadow-2xl transition-all duration-500 group ${categoryBadgeGlow[featuredPost.category]}`}>
+                    <div className={`bg-gradient-to-tr ${featuredPost.imageBg} text-white p-8 h-56 flex flex-col justify-between relative overflow-hidden`}>
+                      {/* Technical mesh background overlay */}
+                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_45%,rgba(255,255,255,0.03)_50%,transparent_55%)] bg-[size:8px_8px] pointer-events-none" />
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                      
+                      <div className="flex items-center justify-between relative z-10">
+                        <span className={`px-3 py-1 rounded-full text-[9px] font-black border uppercase tracking-wider ${categoryColors[featuredPost.category]} bg-slate-950/40 backdrop-blur-md`}>
                           {featuredPost.category}
                         </span>
-                        <span className="bg-white/20 backdrop-blur-md rounded-lg px-2.5 py-1 text-[10px] font-bold text-white uppercase tracking-wider">Nổi bật</span>
+                        <span className="bg-rose-500 text-white rounded-lg px-2.5 py-1 text-[9px] font-black uppercase tracking-wider animate-pulse">
+                          Nổi bật
+                        </span>
                       </div>
-                      <div className="text-[11px] text-white/80 font-bold uppercase tracking-widest">SeduAi Press</div>
+                      <div className="text-[9px] text-white/50 font-bold uppercase tracking-widest relative z-10">
+                        SeduAi Press
+                      </div>
                     </div>
-                    <div className="p-6 space-y-3">
-                      <div className="flex items-center gap-4 text-slate-400 text-xs font-semibold">
-                        <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-primary" /> {featuredPost.date}</span>
-                        <span className="flex items-center gap-1"><User className="w-3.5 h-3.5 text-primary" /> {featuredPost.author}</span>
+                    
+                    <div className="p-6 sm:p-8 space-y-4">
+                      <div className="flex items-center gap-4 text-slate-400 text-[11px] font-bold">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5 text-primary" /> {featuredPost.date}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <User className="w-3.5 h-3.5 text-primary" /> {featuredPost.author}
+                        </span>
                       </div>
-                      <h2 className="font-extrabold text-slate-900 text-xl leading-snug group-hover:text-primary transition duration-150">
+                      
+                      <h2 className="font-black text-white text-xl sm:text-2xl leading-snug group-hover:text-primary transition duration-300">
                         <Link href="/blog#">{featuredPost.title}</Link>
                       </h2>
-                      <p className="text-slate-500 text-sm leading-relaxed">{featuredPost.excerpt}</p>
-                      <Link href="/blog#" className="inline-flex items-center gap-1.5 text-xs text-primary font-bold hover:gap-2.5 transition-all duration-200 group/link mt-2">
-                        Đọc chi tiết <ArrowRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-                      </Link>
+                      <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
+                        {featuredPost.excerpt}
+                      </p>
+                      
+                      <div className="pt-2">
+                        <Link
+                          href="/blog#"
+                          className="inline-flex items-center gap-1.5 text-xs text-primary font-black uppercase tracking-wider group-hover:text-white transition duration-300"
+                        >
+                          Đọc chi tiết <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform duration-300" />
+                        </Link>
+                      </div>
                     </div>
                   </article>
                 )}
 
-                {/* List Posts */}
-                <div className="space-y-5">
+                {/* Sub Post Cards */}
+                <div className="space-y-6">
                   {listPosts.map((post) => (
                     <article
                       key={post.id}
-                      className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col md:flex-row group card-hover-lift"
+                      className={`bg-slate-900/30 rounded-3xl overflow-hidden border border-slate-800/80 shadow-lg hover:shadow-xl transition-all duration-500 flex flex-col md:flex-row group ${categoryBadgeGlow[post.category]}`}
                     >
-                      <div className={`md:w-48 bg-gradient-to-tr ${post.imageBg} text-white p-5 flex flex-col justify-between flex-shrink-0 relative overflow-hidden min-h-[140px] group-hover:brightness-110 transition-all duration-300`}>
-                        <span className={`self-start px-2 py-0.5 rounded-full text-[9px] font-bold bg-white border ${categoryColors[post.category]}`}>
+                      <div className={`md:w-56 bg-gradient-to-tr ${post.imageBg} text-white p-6 flex flex-col justify-between flex-shrink-0 relative overflow-hidden min-h-[160px]`}>
+                        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_45%,rgba(255,255,255,0.03)_50%,transparent_55%)] bg-[size:8px_8px] pointer-events-none" />
+                        <span className={`self-start px-2.5 py-1 rounded-full text-[9px] font-black border uppercase tracking-wider ${categoryColors[post.category]} bg-slate-950/40 backdrop-blur-md`}>
                           {post.category}
                         </span>
-                        <div className="text-[9px] text-white/80 font-bold uppercase tracking-widest">SeduAi Press</div>
+                        <div className="text-[9px] text-white/50 font-bold uppercase tracking-widest">
+                          SeduAi Press
+                        </div>
                       </div>
-                      <div className="p-5 flex flex-col justify-between space-y-3 flex-grow">
-                        <div className="space-y-1.5">
-                          <div className="flex items-center gap-3 text-slate-400 text-xs font-semibold">
-                            <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5 text-primary" /> {post.date}</span>
-                            <span className="flex items-center gap-1"><User className="w-3.5 h-3.5 text-primary" /> {post.author}</span>
+
+                      <div className="p-6 flex flex-col justify-between space-y-4 flex-grow">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-4 text-slate-400 text-[10px] font-bold">
+                            <span className="flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-primary" /> {post.date}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <User className="w-3.5 h-3.5 text-primary" /> {post.author}
+                            </span>
                           </div>
-                          <h2 className="font-extrabold text-slate-900 text-base leading-snug group-hover:text-primary transition duration-150">
+                          
+                          <h2 className="font-black text-white text-base leading-snug group-hover:text-primary transition duration-300">
                             <Link href="/blog#">{post.title}</Link>
                           </h2>
-                          <p className="text-slate-500 text-xs leading-relaxed line-clamp-2">{post.excerpt}</p>
+                          <p className="text-slate-400 text-xs leading-relaxed line-clamp-2">
+                            {post.excerpt}
+                          </p>
                         </div>
-                        <Link href="/blog#" className="text-xs text-primary font-bold flex items-center gap-1 hover:gap-2 transition-all duration-200 self-start group/link">
-                          Đọc tiếp <ChevronRight className="w-4 h-4 group-hover/link:translate-x-0.5 transition-transform" />
+                        
+                        <Link
+                          href="/blog#"
+                          className="text-xs text-primary font-black uppercase tracking-wider flex items-center gap-1.5 self-start group-hover:text-white transition duration-300"
+                        >
+                          Đọc tiếp <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                         </Link>
                       </div>
                     </article>
@@ -194,64 +241,75 @@ export default function BlogPage() {
                 </div>
               </>
             ) : (
-              <div className="bg-white rounded-3xl py-20 border border-slate-100 text-center space-y-3 shadow-md">
-                <BookOpen className="w-12 h-12 text-slate-300 mx-auto" />
-                <h3 className="text-lg font-bold text-slate-800">Không tìm thấy bài viết nào</h3>
-                <p className="text-slate-400 text-sm">Vui lòng thử từ khóa tìm kiếm hoặc chuyên mục khác.</p>
+              <div className="bg-slate-900/30 rounded-3xl py-20 border border-slate-800 text-center space-y-4 shadow-xl">
+                <BookOpen className="w-12 h-12 text-slate-600 mx-auto" />
+                <div className="space-y-1">
+                  <h3 className="text-lg font-bold text-slate-300">Không tìm thấy bài viết nào</h3>
+                  <p className="text-slate-500 text-xs">Vui lòng thử từ khóa tìm kiếm hoặc chuyên mục khác.</p>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Right Area: Sidebar Widgets */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* Widget 1: Search */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-md space-y-4">
-              <h3 className="font-extrabold text-slate-900 text-base pb-3 border-b border-slate-100">Tìm kiếm bài viết</h3>
+          {/* Right Column: Glassmorphism Sidebar Widgets */}
+          <div className="lg:col-span-4 space-y-6 relative z-10">
+            {/* Widget: Search */}
+            <div className="bg-slate-900/40 backdrop-blur-md p-6 rounded-3xl border border-slate-800/80 shadow-xl space-y-4">
+              <h3 className="font-black text-white text-sm pb-3 border-b border-slate-800/80 uppercase tracking-wider flex items-center gap-2">
+                <Grid className="w-4 h-4 text-primary" /> Tìm kiếm bài viết
+              </h3>
               <div className="relative">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Nhập từ khóa tìm kiếm..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all"
+                  className="w-full bg-slate-950/60 border border-slate-800 rounded-xl pl-4 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
                 />
-                <Search className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-slate-500 absolute right-3.5 top-1/2 -translate-y-1/2" />
               </div>
             </div>
 
-            {/* Widget 2: Categories */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-md space-y-4">
-              <h3 className="font-extrabold text-slate-900 text-base pb-3 border-b border-slate-100">Chuyên mục bài viết</h3>
-              <div className="flex flex-col gap-2">
+            {/* Widget: Categories list */}
+            <div className="bg-slate-900/40 backdrop-blur-md p-6 rounded-3xl border border-slate-800/80 shadow-xl space-y-4">
+              <h3 className="font-black text-white text-sm pb-3 border-b border-slate-800/80 uppercase tracking-wider flex items-center gap-2">
+                <Tag className="w-4 h-4 text-primary" /> Chuyên mục
+              </h3>
+              <div className="flex flex-col gap-1.5">
                 {categories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-left transition-all duration-200 group ${
+                    className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-left transition-all duration-300 group cursor-pointer ${
                       selectedCategory === cat
-                        ? 'bg-primary-light text-primary shadow-sm'
-                        : 'text-slate-600 hover:bg-slate-50 hover:translate-x-1'
+                        ? 'bg-primary-light/10 text-primary border border-primary/20'
+                        : 'text-slate-400 border border-transparent hover:bg-slate-800/30 hover:text-white hover:translate-x-1'
                     }`}
                   >
                     <span>{cat}</span>
-                    <ChevronRight className={`w-3.5 h-3.5 opacity-60 transition-transform duration-200 ${selectedCategory === cat ? 'translate-x-0.5' : 'group-hover:translate-x-1'}`} />
+                    <ChevronRight className={`w-3.5 h-3.5 opacity-60 transition-transform duration-300 ${selectedCategory === cat ? 'translate-x-0.5' : 'group-hover:translate-x-1'}`} />
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Widget 3: Recent Posts */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-md space-y-4">
-              <h3 className="font-extrabold text-slate-900 text-base pb-3 border-b border-slate-100">Bài viết mới nhất</h3>
+            {/* Widget: Recent Posts with dynamic thumbnails */}
+            <div className="bg-slate-900/40 backdrop-blur-md p-6 rounded-3xl border border-slate-800/80 shadow-xl space-y-4">
+              <h3 className="font-black text-white text-sm pb-3 border-b border-slate-800/80 uppercase tracking-wider flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-primary" /> Bài viết mới nhất
+              </h3>
               <div className="space-y-4">
                 {recentPosts.map((post) => (
-                  <div key={post.id} className="flex gap-3 items-center group">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${post.imageBg} text-white flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
-                      <Tag className="w-4 h-4" />
+                  <div key={post.id} className="flex gap-3.5 items-center group">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${post.imageBg} text-white flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-300`}>
+                      <Tag className="w-4 h-4 text-white/80" />
                     </div>
-                    <div className="space-y-0.5">
-                      <span className="text-[10px] text-slate-400 font-semibold block">{post.date}</span>
-                      <Link href="/blog#" className="text-xs font-bold text-slate-800 line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-200">
+                    <div className="space-y-1 overflow-hidden">
+                      <span className="text-[9px] text-slate-500 font-bold block">{post.date}</span>
+                      <Link
+                        href="/blog#"
+                        className="text-xs font-bold text-slate-300 line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-200"
+                      >
                         {post.title}
                       </Link>
                     </div>
@@ -260,7 +318,6 @@ export default function BlogPage() {
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
