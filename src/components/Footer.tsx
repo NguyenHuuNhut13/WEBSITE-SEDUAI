@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Brain, MapPin, Phone, Mail, ArrowRight, ChevronUp, CheckCircle2 } from 'lucide-react';
 
 const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -49,6 +49,20 @@ const socialLinks = [
 export default function Footer() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.scrollY > 300) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener('scroll', toggleVisibility);
+    return () => window.removeEventListener('scroll', toggleVisibility);
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -220,7 +234,9 @@ export default function Footer() {
       {/* Back to Top Button — with progress ring */}
       <button
         onClick={scrollToTop}
-        className="fixed bottom-24 right-6 w-12 h-12 rounded-full bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/30 flex items-center justify-center z-40 transition-all duration-300 hover:scale-110 hover:shadow-primary/50 cursor-pointer animate-glow-border"
+        className={`fixed bottom-24 right-6 w-12 h-12 rounded-full bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/30 flex items-center justify-center z-40 transition-all duration-500 hover:scale-110 hover:shadow-primary/50 cursor-pointer animate-glow-border ${
+          isVisible ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-10 pointer-events-none'
+        }`}
         aria-label="Lên đầu trang"
       >
         <ChevronUp className="w-5 h-5" />
