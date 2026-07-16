@@ -243,7 +243,7 @@ export default function Navbar() {
 
       <header className={`z-50 transition-[background-color,transform,box-shadow] duration-300 ease-in-out will-change-[background-color,transform] ${
         isSticky 
-          ? 'sticky top-0 left-0 w-full bg-white/95 backdrop-blur-xl border-b border-slate-200/60 shadow-lg text-slate-800 py-0' 
+          ? 'sticky top-0 left-0 w-full bg-[#0077bb]/95 backdrop-blur-xl border-b border-[#0066a3] shadow-lg text-white py-0' 
           : pathname === '/'
             ? 'bg-transparent absolute top-0 lg:top-[44px] left-0 right-0 py-0 text-white'
             : 'relative w-full bg-slate-950 text-white py-0 border-b border-slate-800'
@@ -264,45 +264,29 @@ export default function Navbar() {
           }`}>
             
             <Link href="/" onClick={() => handleLinkClick('/')} className="flex items-center space-x-2.5 group cursor-pointer py-2">
-              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-md transition duration-300 group-hover:scale-105 ${
-                isSticky 
-                  ? 'bg-primary text-white shadow-primary/20' 
-                  : 'bg-white text-primary shadow-black/10'
-              }`}>
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-md transition duration-300 group-hover:scale-105 bg-white text-primary shadow-black/10">
                 <Brain className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div className="flex flex-col">
-                <span className={`text-lg sm:text-xl font-black tracking-tight leading-none transition duration-300 ${
-                  isSticky ? 'text-slate-900' : 'text-white'
-                }`}>
-                  Sedu<span className={isSticky ? 'text-primary' : 'text-amber-400'}>Ai</span>
+                <span className="text-lg sm:text-xl font-black tracking-tight leading-none transition duration-300 text-white">
+                  Sedu<span className="text-amber-400">Ai</span>
                 </span>
-                <span className={`text-[8px] sm:text-[9px] font-bold uppercase tracking-widest mt-0.5 transition duration-300 ${
-                  isSticky ? 'text-slate-500' : 'text-white/60'
-                }`}>
+                <span className="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest mt-0.5 transition duration-300 text-white/60">
                   EduCenter
                 </span>
               </div>
             </Link>
 
-            <nav className={`hidden lg:flex space-x-2.5 xl:space-x-4 text-xs font-bold uppercase tracking-wider items-center h-full transition duration-300 ${
-              isSticky ? 'text-slate-700' : 'text-white/95'
-            }`}>
+            <nav className="hidden lg:flex space-x-2.5 xl:space-x-4 text-xs font-bold uppercase tracking-wider items-center h-full transition duration-300 text-white/95">
               {navLinks.map((link) => {
                 if (link.submenu) {
                   return (
                     <div key={link.name} className="relative group flex items-center h-full cursor-pointer py-4">
-                      <span className={`transition duration-150 flex items-center gap-1 py-1 px-3 ${
-                        isSticky 
-                          ? 'hover:text-primary text-slate-700' 
-                          : 'hover:text-white text-white/90'
-                      }`}>
+                      <span className="transition duration-150 flex items-center gap-1 py-1 px-3 hover:text-white text-white/90">
                         <span className="relative py-1 after:absolute after:bottom-[-2px] after:left-0 after:h-[2px] after:w-full after:bg-current after:transition-transform after:duration-300 after:origin-left after:scale-x-0 group-hover:after:scale-x-100">
                           {link.name}
                         </span>
-                        <ChevronDown className={`w-3.5 h-3.5 transition duration-200 group-hover:rotate-180 ${
-                          isSticky ? 'text-slate-400 group-hover:text-primary' : 'text-white/70 group-hover:text-white'
-                        }`} />
+                        <ChevronDown className="w-3.5 h-3.5 transition duration-200 group-hover:rotate-180 text-white/70 group-hover:text-white" />
                       </span>
                       <div className="absolute top-full left-0 w-64 bg-white border border-slate-100 rounded-2xl shadow-2xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 transform translate-y-2 group-hover:translate-y-0 text-slate-800">
                         {link.submenu.map((sub) => (
@@ -329,12 +313,8 @@ export default function Navbar() {
                     onClick={() => handleLinkClick(link.href)}
                     className={`group px-3 py-2 transition duration-300 ${
                       isActive
-                        ? isSticky
-                          ? 'text-primary font-black'
-                          : 'text-white font-black'
-                        : isSticky
-                          ? 'text-slate-600 hover:text-primary'
-                          : 'text-white/90 hover:text-white'
+                        ? 'text-white font-black'
+                        : 'text-white/90 hover:text-white'
                     }`}
                   >
                     <span className={`relative py-1 after:absolute after:bottom-[-2px] after:left-0 after:h-[2px] after:w-full after:bg-current after:transition-transform after:duration-300 after:origin-left ${
@@ -360,22 +340,14 @@ export default function Navbar() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Tìm khóa học..."
-                    className={`w-full border rounded-xl pl-3 pr-3 py-1.5 text-xs focus:outline-none focus:ring-2 ${
-                      isSticky 
-                        ? 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-primary/20' 
-                        : 'bg-white/15 hover:bg-white/20 focus:bg-white/25 border-white/20 text-white placeholder-white/70 focus:ring-white/30'
-                    }`}
+                    className="w-full border rounded-xl pl-3 pr-3 py-1.5 text-xs focus:outline-none focus:ring-2 bg-white/15 hover:bg-white/20 focus:bg-white/25 border-white/20 text-white placeholder-white/70 focus:ring-white/30"
                     autoFocus={isSearchOpen}
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsSearchOpen(!isSearchOpen)}
-                  className={`p-2 rounded-xl transition duration-200 flex items-center justify-center cursor-pointer ${
-                    isSticky 
-                      ? 'hover:bg-slate-100 text-slate-600 hover:text-primary' 
-                      : 'hover:bg-white/10 text-white/95 hover:text-white'
-                  }`}
+                  className="p-2 rounded-xl transition duration-200 flex items-center justify-center cursor-pointer hover:bg-white/10 text-white/95 hover:text-white"
                   title="Tìm kiếm"
                 >
                   {isSearchOpen ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
@@ -385,11 +357,7 @@ export default function Navbar() {
               <Link
                 href="/ai-assistant"
                 onClick={() => handleLinkClick('/ai-assistant')}
-                className={`p-2 rounded-xl transition duration-200 flex items-center justify-center relative cursor-pointer group ${
-                  isSticky 
-                    ? 'hover:bg-slate-100 text-amber-500 hover:text-amber-600' 
-                    : 'hover:bg-white/10 text-amber-400 hover:text-amber-300'
-                }`}
+                className="p-2 rounded-xl transition duration-200 flex items-center justify-center relative cursor-pointer group hover:bg-white/10 text-amber-400 hover:text-amber-300"
                 title="Mở AI Assistant"
               >
                 <Sparkles className="w-4 h-4 animate-pulse" />
@@ -403,11 +371,7 @@ export default function Navbar() {
                 <div className="relative">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className={`flex items-center gap-2 border px-3 py-1.5 rounded-xl transition text-xs font-semibold cursor-pointer shadow-inner ${
-                      isSticky 
-                        ? 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50' 
-                        : 'bg-white/15 hover:bg-white/25 border-white/30 text-white'
-                    }`}
+                    className="flex items-center gap-2 border px-3 py-1.5 rounded-xl transition text-xs font-semibold cursor-pointer shadow-inner bg-white/15 hover:bg-white/25 border-white/30 text-white"
                   >
                     <img
                       src={localSync.avatar}
@@ -455,11 +419,7 @@ export default function Navbar() {
               ) : (
                 <Link
                   href="/login"
-                  className={`flex items-center gap-1.5 font-black px-4 py-2 rounded-xl text-xs transition duration-200 transform hover:scale-105 ${
-                    isSticky 
-                      ? 'bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/10' 
-                      : 'bg-white text-primary hover:bg-slate-100 shadow-lg shadow-white/10'
-                  }`}
+                  className="flex items-center gap-1.5 font-black px-4 py-2 rounded-xl text-xs transition duration-200 transform hover:scale-105 bg-white text-primary hover:bg-slate-100 shadow-lg shadow-white/10"
                 >
                   <LogIn className="w-3.5 h-3.5" /> Đăng nhập
                 </Link>
@@ -487,9 +447,7 @@ export default function Navbar() {
               ) : (
                 <Link
                   href="/login"
-                  className={`font-black px-3 py-1.5 rounded-xl text-xs shadow-md transition ${
-                    isSticky ? 'bg-primary text-white' : 'bg-white text-primary'
-                  }`}
+                  className="font-black px-3 py-1.5 rounded-xl text-xs shadow-md transition bg-white text-primary"
                 >
                   Đăng nhập
                 </Link>
@@ -497,11 +455,7 @@ export default function Navbar() {
 
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`inline-flex items-center justify-center p-2 rounded-xl focus:outline-none transition duration-200 border ${
-                  isSticky 
-                    ? 'text-slate-650 hover:bg-slate-100 border-slate-200' 
-                    : 'text-white hover:bg-white/15 border-white/20'
-                }`}
+                className="inline-flex items-center justify-center p-2 rounded-xl focus:outline-none transition duration-200 border text-white hover:bg-white/15 border-white/20"
                 aria-label="Toggle Menu"
               >
                 {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
