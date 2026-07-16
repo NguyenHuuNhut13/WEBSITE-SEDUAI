@@ -12,7 +12,7 @@ interface BlogPost {
   author: string;
   excerpt: string;
   slug: string;
-  imageBg: string;
+  image: string;
 }
 
 const categoryColors: Record<string, string> = {
@@ -45,7 +45,7 @@ export default function BlogPage() {
       author: 'Lê Hoàng Nam',
       excerpt: 'Tìm hiểu cách các công cụ AI hỗ trợ giáo viên tự động hóa việc lên ý tưởng bài giảng, biên soạn tài liệu khảo thí và tạo phản hồi cá nhân hóa nhanh gấp 5 lần thông thường.',
       slug: 'ai-dinh-hinh-phuong-phap-soan-giao-an',
-      imageBg: 'from-blue-500 to-indigo-650',
+      image: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=800&auto=format&fit=crop&q=80',
     },
     {
       id: 2,
@@ -55,7 +55,7 @@ export default function BlogPage() {
       author: 'ThS. Trần Thị Hạnh',
       excerpt: 'Chia sẻ phương pháp đàm thoại hàng ngày, sửa phát âm theo thời gian thực và ghi nhớ từ vựng theo sơ đồ tư duy được tối ưu bởi AI dành riêng cho người bận rộn.',
       slug: 'tu-hoc-tieng-anh-giao-tiep-cung-ai',
-      imageBg: 'from-emerald-550 to-teal-650',
+      image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&auto=format&fit=crop&q=80',
     },
     {
       id: 3,
@@ -65,7 +65,7 @@ export default function BlogPage() {
       author: 'GS. Nguyễn Văn Sedu',
       excerpt: 'Điểm mặt những công nghệ hàng đầu như Next.js 16, Tailwind CSS v4, cơ sở dữ liệu phân tán và sự tích hợp không thể thiếu của các AI coding agents trong quy trình sản xuất phần mềm.',
       slug: 'xu-huong-cong-nghe-lap-trinh-web-2026',
-      imageBg: 'from-purple-550 to-pink-650',
+      image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&auto=format&fit=crop&q=80',
     },
     {
       id: 4,
@@ -75,7 +75,7 @@ export default function BlogPage() {
       author: 'Cô Nguyễn Mai Phương',
       excerpt: 'Bật mí mẹo tránh bẫy gây nhiễu, cách định vị thông tin đồng nghĩa (paraphrasing) cực nhanh và phương pháp rèn luyện phản xạ nghe ghi chú hiệu quả.',
       slug: 'chien-thuat-multiple-choice-ielts-listening',
-      imageBg: 'from-amber-550 to-orange-650',
+      image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop&q=80',
     },
     {
       id: 5,
@@ -85,7 +85,7 @@ export default function BlogPage() {
       author: 'Lê Hoàng Nam',
       excerpt: 'Phân tích cú pháp đơn giản, trực quan của Python giúp kích thích tư duy logic, rèn luyện kỹ năng giải quyết vấn đề và tạo bước đệm vững chắc trước khi tiếp cận AI.',
       slug: 'python-perfect-start-for-students',
-      imageBg: 'from-cyan-550 to-blue-650',
+      image: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=800&auto=format&fit=crop&q=80',
     },
   ];
 
@@ -102,6 +102,7 @@ export default function BlogPage() {
 
   return (
     <div className="bg-slate-50 text-slate-800 min-h-screen pb-24 selection:bg-primary selection:text-white">
+      {/* Header Banner */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-primary-dark text-white py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-15" />
         <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-primary/15 rounded-full blur-3xl animate-blob" />
@@ -118,6 +119,7 @@ export default function BlogPage() {
             Cập nhật xu hướng công nghệ, cẩm nang lập trình và chiến thuật học tiếng Anh được tối ưu hóa với các giải pháp giáo dục AI tại SeduAi.
           </p>
 
+          {/* Breadcrumbs */}
           <nav className="flex justify-center text-xs font-semibold text-slate-400 gap-2 pt-2">
             <Link href="/" className="hover:text-primary transition">
               Trang chủ
@@ -130,24 +132,30 @@ export default function BlogPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
+          {/* Left Column: Blog Posts list */}
           <div className="lg:col-span-8 space-y-8">
             {filteredPosts.length > 0 ? (
               <>
+                {/* Featured Post Card */}
                 {featuredPost && (
                   <article className={`bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-md transition-all duration-500 group ${categoryBadgeGlow[featuredPost.category]}`}>
-                    <div className={`bg-gradient-to-tr ${featuredPost.imageBg} text-white p-8 h-56 flex flex-col justify-between relative overflow-hidden`}>
-                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_45%,rgba(255,255,255,0.03)_50%,transparent_55%)] bg-[size:8px_8px] pointer-events-none" />
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+                    <div className="relative h-64 w-full overflow-hidden">
+                      <img
+                        src={featuredPost.image}
+                        alt={featuredPost.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/10 to-slate-950/30" />
                       
-                      <div className="flex items-center justify-between relative z-10">
-                        <span className={`px-3 py-1 rounded-full text-[9px] font-black border uppercase tracking-wider ${categoryColors[featuredPost.category]} bg-white/10 backdrop-blur-md`}>
+                      <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-10">
+                        <span className={`px-3 py-1 rounded-full text-[9px] font-black border uppercase tracking-wider ${categoryColors[featuredPost.category]} bg-white/20 backdrop-blur-md`}>
                           {featuredPost.category}
                         </span>
                         <span className="bg-rose-600 text-white rounded-lg px-2.5 py-1 text-[9px] font-black uppercase tracking-wider animate-pulse">
                           Nổi bật
                         </span>
                       </div>
-                      <div className="text-[9px] text-white/60 font-bold uppercase tracking-widest relative z-10">
+                      <div className="absolute bottom-6 left-6 text-[9px] text-white/80 font-bold uppercase tracking-widest z-10">
                         SeduAi Press
                       </div>
                     </div>
@@ -181,18 +189,24 @@ export default function BlogPage() {
                   </article>
                 )}
 
+                {/* Sub Post Cards */}
                 <div className="space-y-6">
                   {listPosts.map((post) => (
                     <article
                       key={post.id}
                       className={`bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-md hover:shadow-lg transition-all duration-500 flex flex-col md:flex-row group ${categoryBadgeGlow[post.category]}`}
                     >
-                      <div className={`md:w-56 bg-gradient-to-tr ${post.imageBg} text-white p-6 flex flex-col justify-between flex-shrink-0 relative overflow-hidden min-h-[160px]`}>
-                        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_45%,rgba(255,255,255,0.03)_50%,transparent_55%)] bg-[size:8px_8px] pointer-events-none" />
-                        <span className={`self-start px-2.5 py-1 rounded-full text-[9px] font-black border uppercase tracking-wider ${categoryColors[post.category]} bg-white/10 backdrop-blur-md`}>
+                      <div className="md:w-56 h-48 md:h-auto relative overflow-hidden flex-shrink-0">
+                        <img
+                          src={post.image}
+                          alt={post.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-slate-950/15" />
+                        <span className={`absolute top-4 left-4 px-2.5 py-1 rounded-full text-[9px] font-black border uppercase tracking-wider ${categoryColors[post.category]} bg-white/20 backdrop-blur-md z-10`}>
                           {post.category}
                         </span>
-                        <div className="text-[9px] text-white/60 font-bold uppercase tracking-widest">
+                        <div className="absolute bottom-4 left-4 text-[9px] text-white/80 font-bold uppercase tracking-widest z-10">
                           SeduAi Press
                         </div>
                       </div>
@@ -238,7 +252,9 @@ export default function BlogPage() {
             )}
           </div>
 
+          {/* Right Column: Sidebar Widgets */}
           <div className="lg:col-span-4 space-y-6 relative z-10">
+            {/* Widget: Search */}
             <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="font-black text-slate-900 text-sm pb-3 border-b border-slate-100 uppercase tracking-wider flex items-center gap-2">
                 <Grid className="w-4 h-4 text-primary" /> Tìm kiếm bài viết
@@ -255,6 +271,7 @@ export default function BlogPage() {
               </div>
             </div>
 
+            {/* Widget: Categories list */}
             <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="font-black text-slate-900 text-sm pb-3 border-b border-slate-100 uppercase tracking-wider flex items-center gap-2">
                 <Tag className="w-4 h-4 text-primary" /> Chuyên mục
@@ -277,6 +294,7 @@ export default function BlogPage() {
               </div>
             </div>
 
+            {/* Widget: Recent Posts */}
             <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
               <h3 className="font-black text-slate-900 text-sm pb-3 border-b border-slate-100 uppercase tracking-wider flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-primary" /> Bài viết mới nhất
@@ -284,8 +302,8 @@ export default function BlogPage() {
               <div className="space-y-4">
                 {recentPosts.map((post) => (
                   <div key={post.id} className="flex gap-3.5 items-center group">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-tr ${post.imageBg} text-white flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-300`}>
-                      <Tag className="w-4 h-4 text-white/80" />
+                    <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform duration-300 border border-slate-100">
+                      <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
                     </div>
                     <div className="space-y-1 overflow-hidden">
                       <span className="text-[9px] text-slate-400 font-bold block">{post.date}</span>
