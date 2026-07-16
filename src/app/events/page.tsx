@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Calendar, Clock, MapPin, Search, X, CheckCircle, AlertCircle, ArrowUpRight } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 interface EventItem {
   id: number;
@@ -36,11 +37,21 @@ const statusBadgeColors: Record<string, string> = {
 };
 
 export default function EventsPage() {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Tất cả');
   const [registerEvent, setRegisterEvent] = useState<EventItem | null>(null);
   const [formData, setFormData] = useState({ name: '', phone: '', email: '' });
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const handleOpenRegister = (evt: EventItem) => {
+    setRegisterEvent(evt);
+    setFormData({
+      name: user?.name || `${user?.lastname || ''} ${user?.firstname || ''}`.trim() || '',
+      phone: user?.phone || '',
+      email: user?.email || '',
+    });
+  };
 
   const categories = ['Tất cả', 'Workshop', 'Seminar', 'Lớp học thử'];
 
@@ -249,7 +260,7 @@ export default function EventsPage() {
                 {/* Registration button footer */}
                 <div className="px-6 pb-6 pt-2">
                   <button
-                    onClick={() => setRegisterEvent(evt)}
+                    onClick={() => handleOpenRegister(evt)}
                     className="w-full py-3 bg-slate-800 hover:bg-primary text-white text-xs font-black rounded-xl transition-all duration-300 border border-slate-700/60 hover:border-primary shadow-md hover:shadow-primary/20 cursor-pointer uppercase tracking-wider"
                   >
                     Đăng ký giữ chỗ
