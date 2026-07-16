@@ -50,7 +50,7 @@ export default function EcosystemAndTestimonials() {
           {/* ====== LEFT COLUMN: TESTIMONIALS SLIDER ====== */}
           <div className="lg:col-span-6 space-y-8">
             <div className="space-y-2">
-              <span className="text-[11px] uppercase font-extrabold tracking-widest text-red-500 block">
+              <span className="text-[11px] uppercase font-extrabold tracking-widest text-primary block">
                 Testimonials
               </span>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight uppercase">
@@ -69,7 +69,7 @@ export default function EcosystemAndTestimonials() {
                     style={{ borderRadius: '0px' }} // Sharp corners as requested
                   >
                     {/* Circle Avatar on Left */}
-                    <div className="flex-shrink-0 w-16 h-16 rounded-full overflow-hidden border border-red-200 bg-white">
+                    <div className="flex-shrink-0 w-16 h-16 rounded-full overflow-hidden border border-primary/20 bg-white">
                       <img
                         src={testimonial.avatar}
                         alt={testimonial.name}
@@ -119,8 +119,8 @@ export default function EcosystemAndTestimonials() {
                   onClick={() => setActiveSlide(index)}
                   className={`w-3.5 h-3.5 rounded-full transition-all duration-300 ${
                     activeSlide === index
-                      ? 'bg-red-500 scale-110 shadow-sm'
-                      : 'bg-red-200 hover:bg-red-300'
+                      ? 'bg-primary scale-110 shadow-sm'
+                      : 'bg-primary/20 hover:bg-primary/35'
                   }`}
                   aria-label={`Slide ${index + 1}`}
                 />
@@ -131,7 +131,7 @@ export default function EcosystemAndTestimonials() {
           {/* ====== RIGHT COLUMN: FAQ ACCORDION ====== */}
           <div className="lg:col-span-6 space-y-8">
             <div className="space-y-2">
-              <span className="text-[11px] uppercase font-extrabold tracking-widest text-red-500 block">
+              <span className="text-[11px] uppercase font-extrabold tracking-widest text-primary block">
                 Frequently Asked Questions
               </span>
               <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight uppercase">
@@ -153,8 +153,8 @@ export default function EcosystemAndTestimonials() {
                       onClick={() => setOpenFaq(isOpen ? null : index)}
                       className="w-full flex items-center gap-4 p-4 bg-slate-100/70 hover:bg-slate-100 transition text-left cursor-pointer"
                     >
-                      {/* Red square symbol container */}
-                      <div className="flex-shrink-0 w-6 h-6 border border-red-500 flex items-center justify-center bg-white text-red-500 font-bold transition-colors">
+                      {/* Primary square symbol container */}
+                      <div className="flex-shrink-0 w-6 h-6 border border-primary flex items-center justify-center bg-white text-primary font-bold transition-colors">
                         {isOpen ? (
                           <Minus className="w-3.5 h-3.5 stroke-[3px]" />
                         ) : (
