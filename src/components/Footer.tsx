@@ -261,7 +261,7 @@ export default function Footer() {
           isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         } ${
           isChatbotOpen
-            ? 'bottom-6 right-[380px] sm:right-[410px]'
+            ? 'bottom-7 right-[88px]'
             : 'bottom-24 right-6'
         }`}
         aria-label="Lên đầu trang"
