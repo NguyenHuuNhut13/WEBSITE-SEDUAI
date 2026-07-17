@@ -190,9 +190,14 @@ export default function FloatingChatbot() {
   };
 
   const handleToggle = () => {
-    setIsOpen(!isOpen);
+    const nextOpen = !isOpen;
+    setIsOpen(nextOpen);
     if (hasNewMessage) {
       setHasNewMessage(false);
+    }
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent('chatbot-state-change', { detail: { isOpen: nextOpen } });
+      window.dispatchEvent(event);
     }
   };
 

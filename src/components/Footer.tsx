@@ -51,6 +51,7 @@ export default function Footer() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false);
 
   useEffect(() => {
     const toggleVisibility = () => {
@@ -61,8 +62,18 @@ export default function Footer() {
       }
     };
 
+    const handleChatbotChange = (e: Event) => {
+      const customEvent = e as CustomEvent<{ isOpen: boolean }>;
+      setIsChatbotOpen(customEvent.detail.isOpen);
+    };
+
     window.addEventListener('scroll', toggleVisibility);
-    return () => window.removeEventListener('scroll', toggleVisibility);
+    window.addEventListener('chatbot-state-change', handleChatbotChange);
+
+    return () => {
+      window.removeEventListener('scroll', toggleVisibility);
+      window.removeEventListener('chatbot-state-change', handleChatbotChange);
+    };
   }, []);
 
   const scrollToTop = () => {
@@ -246,8 +257,12 @@ export default function Footer() {
       {/* Back to Top Button — with progress ring */}
       <button
         onClick={scrollToTop}
-        className={`fixed bottom-24 right-6 w-12 h-12 rounded-full bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/30 flex items-center justify-center z-40 transition-all duration-500 hover:scale-110 hover:shadow-primary/50 cursor-pointer animate-glow-border ${
-          isVisible ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-10 pointer-events-none'
+        className={`fixed z-40 transition-all duration-500 rounded-full bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-110 hover:shadow-primary/50 cursor-pointer animate-glow-border w-12 h-12 ${
+          isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        } ${
+          isChatbotOpen
+            ? 'bottom-6 right-[380px] sm:right-[410px]'
+            : 'bottom-24 right-6'
         }`}
         aria-label="Lên đầu trang"
       >
