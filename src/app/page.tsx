@@ -261,8 +261,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ====== Course Categories Section ====== */}
-      <section className="pt-24 pb-16 bg-slate-100 border-b border-slate-200/80 relative">
+      <section className="pt-24 pb-16 bg-slate-50 border-b border-slate-100 relative">
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 space-y-2">
@@ -280,7 +279,7 @@ export default async function Home() {
               <Link
                 key={index}
                 href={`/courses?category=${encodeURIComponent(cat.title)}`}
-                className="bg-white border border-slate-200 rounded-3xl p-6 hover-lift-glow card-shine transition-all duration-300 group shadow-md hover:shadow-xl flex flex-col justify-between min-h-[180px] text-left"
+                className="bg-slate-100/40 border border-slate-200/60 rounded-3xl p-6 hover-lift-glow card-shine transition-all duration-300 group shadow-sm flex flex-col justify-between min-h-[180px] text-left"
               >
                 <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-300">
                   {cat.icon}
@@ -304,7 +303,7 @@ export default async function Home() {
       </section>
 
       {/* ====== Featured Courses ====== */}
-      <section className="py-16 bg-slate-100 border-b border-slate-200/80 reveal-section">
+      <section className="py-16 reveal-section bg-slate-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="scroll-reveal flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-12">
             <div className="space-y-2">

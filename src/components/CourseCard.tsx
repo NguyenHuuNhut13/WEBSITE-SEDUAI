@@ -15,7 +15,7 @@ export default function CourseCard({ course }: CourseCardProps) {
   const isNew = discountPercent === 0;
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden flex flex-col group h-full card-hover-lift card-shine glow-border">
+    <div className="bg-slate-50 border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden flex flex-col group h-full card-hover-lift card-shine glow-border">
       {/* Course Image */}
       <div className="relative overflow-hidden aspect-video bg-slate-100">
         <img

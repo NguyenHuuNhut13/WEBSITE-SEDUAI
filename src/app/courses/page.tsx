@@ -213,7 +213,7 @@ function CourseListContent() {
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Controls bar */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 mb-8 shadow-sm">
+          <div className="bg-slate-100/40 border border-slate-200/80 rounded-2xl p-5 mb-8 shadow-sm">
             <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
               {/* Search bar */}
               <div className="relative w-full lg:max-w-sm">
@@ -294,7 +294,7 @@ function CourseListContent() {
               </div>
 
               {/* Price range filter */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
+              <div className="bg-slate-100/40 border border-slate-200/80 rounded-2xl p-5 shadow-sm space-y-3">
                 <h3 className="font-bold text-slate-900 text-sm pb-2 border-b border-slate-100 flex items-center gap-2">
                   <Wallet className="w-4 h-4 text-primary" /> Khoảng giá
                 </h3>
@@ -316,7 +316,7 @@ function CourseListContent() {
 
               {/* Category summary */}
               {!loading && (
-                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
+                <div className="bg-slate-100/40 border border-slate-200/80 rounded-2xl p-5 shadow-sm space-y-3">
                   <h3 className="font-bold text-slate-900 text-sm pb-2 border-b border-slate-100 flex items-center gap-2">
                     <Tag className="w-4 h-4 text-primary" /> Danh mục
                   </h3>
