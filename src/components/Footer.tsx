@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Brain, MapPin, Phone, Mail, ArrowRight, ChevronUp, CheckCircle2 } from 'lucide-react';
+import { createLead } from '@/services/api';
 
 const FacebookIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -68,10 +69,21 @@ export default function Footer() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSubscribe = () => {
+  const handleSubscribe = async () => {
     if (email.includes('@')) {
-      setSubscribed(true);
-      setTimeout(() => { setSubscribed(false); setEmail(''); }, 3000);
+      try {
+        await createLead({
+          name: 'Học viên nhận bản tin',
+          phone: '0000000000',
+          email: email,
+          demand: 'Đăng ký nhận bản tin khuyến mãi & sự kiện từ Footer',
+          source: 31,
+        });
+        setSubscribed(true);
+        setTimeout(() => { setSubscribed(false); setEmail(''); }, 3000);
+      } catch (error) {
+        console.error('Lỗi đăng ký nhận bản tin:', error);
+      }
     }
   };
 
@@ -162,9 +174,9 @@ export default function Footer() {
                 {[
                   { label: 'Admissions CRM', href: '/ai-assistant' },
                   { label: 'AI Teacher Assistant', href: '/ai-assistant' },
-                  { label: 'Học viên & Phụ huynh', href: '/profile' },
-                  { label: 'Workflow Automation', href: '/courses' },
-                  { label: 'AI Marketplace', href: '/courses' },
+                  { label: 'Hệ thống LMS', href: '/lms' },
+                  { label: 'Trang cá nhân', href: '/profile' },
+                  { label: 'Cổng đăng nhập', href: '/login' },
                 ].map((item, i) => (
                   <li key={i}>
                     <Link href={item.href} prefetch={false} className="hover:text-primary hover:translate-x-1 transition-all duration-200 flex items-center gap-1.5 group">
@@ -181,10 +193,10 @@ export default function Footer() {
               <h3 className="text-white font-bold text-base mb-5">Khóa học Đào tạo</h3>
               <ul className="space-y-2.5 text-sm">
                 {[
-                  { label: 'Tiếng Anh giao tiếp & IELTS', href: '/courses?category=Tiếng Anh' },
-                  { label: 'Lập trình Fullstack & Python', href: '/courses?category=Lập trình' },
-                  { label: 'Ứng dụng AI doanh nghiệp', href: '/courses?category=AI & Công nghệ' },
-                  { label: 'Kỹ năng mềm thế hệ mới', href: '/courses?category=Kỹ năng' },
+                  { label: 'AI & Công nghệ', href: '/courses?category=AI & Công nghệ' },
+                  { label: 'Marketing & Bán hàng', href: '/courses?category=Marketing & Bán hàng' },
+                  { label: 'Kinh doanh & Khởi nghiệp', href: '/courses?category=Kinh doanh & Khởi nghiệp' },
+                  { label: 'Danh mục khác', href: '/courses?category=Khác' },
                 ].map((item, i) => (
                   <li key={i}>
                     <Link href={item.href} prefetch={false} className="hover:text-primary hover:translate-x-1 transition-all duration-200 flex items-center gap-1.5 group">
