@@ -353,12 +353,12 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             {/* Box 1 (Span 2, height x2) - AI Assistant interactive representation */}
-            <div className="scroll-reveal col-span-1 md:col-span-2 bg-slate-900 text-white rounded-3xl p-8 border border-slate-800 relative overflow-hidden flex flex-col justify-between hover-lift-glow group min-h-[320px]">
+            <div className="scroll-reveal col-span-1 md:col-span-2 bg-slate-900 text-white rounded-3xl p-8 border border-slate-800 relative overflow-hidden flex flex-col justify-between hover-lift-glow glow-border group min-h-[320px]">
               <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />
               <div className="absolute -right-10 -top-10 w-48 h-48 bg-primary/20 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-500 pointer-events-none" />
               
               <div className="space-y-3 relative z-10">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-accent">
+                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-slate-950 transition-all duration-300">
                   <Bot className="w-5.5 h-5.5" />
                 </div>
                 <h3 className="text-xl font-bold text-white group-hover:text-accent transition-colors">Trợ Lý AI Đồng Hành 24/7</h3>
@@ -379,7 +379,7 @@ export default async function Home() {
             </div>
 
             {/* Box 2 (Span 1) - Cam ket dau ra */}
-            <div className="scroll-reveal col-span-1 bg-white border border-slate-200/80 rounded-3xl p-8 flex flex-col justify-between hover-lift-glow card-shine group min-h-[320px] shadow-sm">
+            <div className="scroll-reveal col-span-1 bg-white border border-slate-200/80 rounded-3xl p-8 flex flex-col justify-between hover-lift-glow glow-border card-shine group min-h-[320px] shadow-sm">
               <div className="space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
                   <ShieldCheck className="w-5.5 h-5.5" />
@@ -395,7 +395,7 @@ export default async function Home() {
             </div>
 
             {/* Box 3 (Span 1) - Mentor 1-1 */}
-            <div className="scroll-reveal col-span-1 bg-white border border-slate-200/80 rounded-3xl p-8 flex flex-col justify-between hover-lift-glow card-shine group min-h-[320px] shadow-sm">
+            <div className="scroll-reveal col-span-1 bg-white border border-slate-200/80 rounded-3xl p-8 flex flex-col justify-between hover-lift-glow glow-border card-shine group min-h-[320px] shadow-sm">
               <div className="space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300">
                   <Headset className="w-5.5 h-5.5" />
@@ -417,14 +417,14 @@ export default async function Home() {
             </div>
 
             {/* Box 4 (Span 2) - Project thuc chien */}
-            <div className="scroll-reveal col-span-1 md:col-span-2 bg-gradient-to-r from-primary to-blue-600 text-white rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between hover-lift-glow min-h-[320px]">
+            <div className="scroll-reveal col-span-1 md:col-span-2 bg-gradient-to-r from-primary to-blue-600 text-white rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between hover-lift-glow glow-border group min-h-[320px]">
               <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
               
               <div className="space-y-3 relative z-10">
-                <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-accent">
+                <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-accent group-hover:bg-accent group-hover:text-primary transition-all duration-300">
                   <Zap className="w-5.5 h-5.5" />
                 </div>
-                <h3 className="text-xl font-bold text-white">Thực Chiến Qua Các Dự Án Thực Tế</h3>
+                <h3 className="text-xl font-bold text-white group-hover:text-accent transition-colors">Thực Chiến Qua Các Dự Án Thực Tế</h3>
                 <p className="text-blue-100 text-xs sm:text-sm leading-relaxed max-w-xl">
                   Chúng tôi xây dựng phương pháp học qua thực hành (Project-based learning). Học viên phát triển đồ án thực tế giúp lưu giữ kiến thức lâu dài và tạo portfolio nổi bật.
                 </p>
