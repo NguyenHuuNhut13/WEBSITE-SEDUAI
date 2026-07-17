@@ -16,13 +16,7 @@ const CATEGORY_FALLBACK_IMAGES: Record<string, string> = {
 };
 const DEFAULT_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80';
 
-// Khoảng giá
-const PRICE_RANGES = [
-  { label: 'Tất cả mức giá', value: 'all' },
-  { label: 'Dưới 500.000đ', value: 'under500k' },
-  { label: '500.000đ – 1.000.000đ', value: '500k-1m' },
-  { label: 'Trên 1.000.000đ', value: 'over1m' },
-] as const;
+
 
 function extractCategory(acfCategory: unknown): string {
   if (Array.isArray(acfCategory) && acfCategory.length > 0) {
@@ -105,7 +99,7 @@ function CourseListContent() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Tất cả');
   const [sortBy, setSortBy] = useState('default');
-  const [priceRange, setPriceRange] = useState('all');
+  const [maxPrice, setMaxPrice] = useState(10000000);
   const [apiCoursesList, setApiCoursesList] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [, startTransition] = useTransition();
@@ -145,14 +139,7 @@ function CourseListContent() {
     const matchesCategory =
       selectedCategory === 'Tất cả' || course.category === selectedCategory;
 
-    let matchesPrice = true;
-    if (priceRange === 'under500k') {
-      matchesPrice = course.discount_price < 500000;
-    } else if (priceRange === '500k-1m') {
-      matchesPrice = course.discount_price >= 500000 && course.discount_price <= 1000000;
-    } else if (priceRange === 'over1m') {
-      matchesPrice = course.discount_price > 1000000;
-    }
+    const matchesPrice = course.discount_price <= maxPrice;
 
     return matchesSearch && matchesCategory && matchesPrice;
   });
@@ -174,13 +161,13 @@ function CourseListContent() {
     });
   };
 
-  const isFiltered = searchTerm !== '' || selectedCategory !== 'Tất cả' || sortBy !== 'default' || priceRange !== 'all';
+  const isFiltered = searchTerm !== '' || selectedCategory !== 'Tất cả' || sortBy !== 'default' || maxPrice < 10000000;
 
   const handleReset = () => {
     setSearchTerm('');
     setSelectedCategory('Tất cả');
     setSortBy('default');
-    setPriceRange('all');
+    setMaxPrice(10000000);
   };
 
   return (
@@ -294,23 +281,32 @@ function CourseListContent() {
               </div>
 
               {/* Price range filter */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
-                <h3 className="font-bold text-slate-900 text-sm pb-2 border-b border-slate-100 flex items-center gap-2">
-                  <Wallet className="w-4 h-4 text-primary" /> Khoảng giá
-                </h3>
-                <div className="space-y-2">
-                  {PRICE_RANGES.map((range) => (
-                    <label key={range.value} className="flex items-center gap-2.5 text-xs text-slate-600 cursor-pointer hover:text-primary transition group">
-                      <input
-                        type="radio"
-                        name="priceRange"
-                        checked={priceRange === range.value}
-                        onChange={() => setPriceRange(range.value)}
-                        className="rounded-full border-slate-300 text-primary focus:ring-primary w-3.5 h-3.5 cursor-pointer"
-                      />
-                      <span className={priceRange === range.value ? 'text-primary font-semibold' : ''}>{range.label}</span>
-                    </label>
-                  ))}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                    <Wallet className="w-4 h-4 text-primary" /> Mức giá tối đa
+                  </h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-xs font-semibold">
+                    <span className="text-slate-400">0đ</span>
+                    <span className="text-primary bg-primary-light px-2.5 py-1 rounded-lg">
+                      {maxPrice.toLocaleString('vi-VN')} đ
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="10000000"
+                    step="100000"
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(Number(e.target.value))}
+                    className="w-full accent-primary h-1.5 bg-slate-100 rounded-lg cursor-pointer appearance-none focus:outline-none"
+                  />
+                  <div className="flex justify-between items-center text-[10px] text-slate-400 font-medium">
+                    <span>Thấp nhất</span>
+                    <span>10.000.000đ</span>
+                  </div>
                 </div>
               </div>
 
