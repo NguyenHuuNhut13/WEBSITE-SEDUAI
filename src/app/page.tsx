@@ -262,7 +262,7 @@ export default async function Home() {
       </section>
 
       {/* ====== Course Categories Section ====== */}
-      <section className="pt-24 pb-16 bg-slate-50 border-b border-slate-200/80 relative">
+      <section className="pt-24 pb-16 bg-slate-100 border-b border-slate-200/80 relative">
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 space-y-2">
@@ -304,7 +304,7 @@ export default async function Home() {
       </section>
 
       {/* ====== Featured Courses ====== */}
-      <section className="py-16 bg-slate-50 border-b border-slate-200/80 reveal-section">
+      <section className="py-16 bg-slate-100 border-b border-slate-200/80 reveal-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="scroll-reveal flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-12">
             <div className="space-y-2">
