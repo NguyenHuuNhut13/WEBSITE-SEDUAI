@@ -184,7 +184,7 @@ function CourseListContent() {
   };
 
   return (
-    <div className="bg-slate-800 min-h-screen">
+    <div className="bg-slate-100 min-h-screen">
       {/* Header Banner */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-primary-dark text-white py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-15" />
@@ -378,8 +378,8 @@ function CourseListContent() {
             <div className="lg:col-span-9">
               {/* Results count */}
               <div className="flex items-center justify-between mb-4">
-                <p className="text-xs text-slate-400">
-                  Hiển thị <strong className="text-white">{loading ? 0 : filteredCourses.length}</strong> khóa học
+                <p className="text-xs text-slate-500">
+                  Hiển thị <strong className="text-slate-900">{loading ? 0 : filteredCourses.length}</strong> khóa học
                   {selectedCategory !== 'Tất cả' && (
                     <> trong <strong className="text-primary">{selectedCategory}</strong></>
                   )}
@@ -443,10 +443,10 @@ function CourseListContent() {
 export default function CourseList() {
   return (
     <Suspense fallback={
-      <div className="bg-slate-800 min-h-screen py-24 flex items-center justify-center">
+      <div className="bg-slate-100 min-h-screen py-24 flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto" />
-          <p className="text-slate-400 text-xs font-semibold">Đang tải danh sách khóa học...</p>
+          <p className="text-slate-500 text-xs font-semibold">Đang tải danh sách khóa học...</p>
         </div>
       </div>
     }>

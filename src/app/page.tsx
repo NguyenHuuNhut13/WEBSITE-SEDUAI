@@ -262,15 +262,15 @@ export default async function Home() {
       </section>
 
       {/* ====== Course Categories Section ====== */}
-      <section className="pt-24 pb-16 bg-slate-800 border-b border-slate-700 relative">
+      <section className="pt-24 pb-16 bg-slate-100 border-b border-slate-200 relative">
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 space-y-2">
             <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Danh mục</span>
-            <h2 className="text-3xl font-black text-white tracking-tight leading-tight">
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-tight">
               Khám Phá Các Lĩnh Vực Đào Tạo
             </h2>
-            <p className="text-slate-400 text-xs sm:text-sm max-w-lg mx-auto">
+            <p className="text-slate-500 text-xs sm:text-sm max-w-lg mx-auto">
               Chương trình chuẩn quốc tế kết hợp công nghệ AI tiên tiến giúp tăng tốc lộ trình học tập.
             </p>
           </div>
@@ -304,21 +304,21 @@ export default async function Home() {
       </section>
 
       {/* ====== Featured Courses ====== */}
-      <section className="py-16 bg-slate-800 relative reveal-section">
+      <section className="py-16 bg-slate-100 relative reveal-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="scroll-reveal flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-12">
             <div className="space-y-2">
               <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Nổi bật</span>
-              <h2 className="text-3xl font-black text-white tracking-tight leading-tight">
+              <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-tight">
                 Khóa Học Nổi Bật Nhất
               </h2>
-              <p className="text-slate-400 text-xs sm:text-sm">
+              <p className="text-slate-500 text-xs sm:text-sm">
                 Các khóa đào tạo đột phá tích hợp công cụ Trí tuệ nhân tạo độc quyền tại SeduAi.
               </p>
             </div>
             <Link
               href="/courses"
-              className="px-5 py-2.5 rounded-xl border border-slate-800 hover:bg-primary hover:border-primary hover:text-white text-slate-300 hover:text-white font-bold text-xs transition-all duration-300 flex items-center gap-1.5 bg-slate-900 shadow-sm hover:scale-105 group"
+              className="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-primary hover:border-primary hover:text-white text-slate-700 font-bold text-xs transition-all duration-300 flex items-center gap-1.5 bg-white shadow-sm hover:scale-105 group"
             >
               Xem Tất Cả Khóa Học
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
