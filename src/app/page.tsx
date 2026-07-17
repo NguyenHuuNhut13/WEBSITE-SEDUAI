@@ -261,15 +261,16 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="pt-24 pb-16 bg-slate-50 border-b border-slate-100 relative">
+      {/* ====== Course Categories Section ====== */}
+      <section className="pt-24 pb-16 bg-slate-950 border-b border-slate-900 relative">
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 space-y-2">
             <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Danh mục</span>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-tight">
+            <h2 className="text-3xl font-black text-white tracking-tight leading-tight">
               Khám Phá Các Lĩnh Vực Đào Tạo
             </h2>
-            <p className="text-slate-500 text-xs sm:text-sm max-w-lg mx-auto">
+            <p className="text-slate-400 text-xs sm:text-sm max-w-lg mx-auto">
               Chương trình chuẩn quốc tế kết hợp công nghệ AI tiên tiến giúp tăng tốc lộ trình học tập.
             </p>
           </div>
@@ -279,7 +280,7 @@ export default async function Home() {
               <Link
                 key={index}
                 href={`/courses?category=${encodeURIComponent(cat.title)}`}
-                className="bg-slate-100/40 border border-slate-200/60 rounded-3xl p-6 hover-lift-glow card-shine transition-all duration-300 group shadow-sm flex flex-col justify-between min-h-[180px] text-left"
+                className="bg-white border border-slate-200/60 rounded-3xl p-6 hover-lift-glow card-shine transition-all duration-300 group shadow-sm flex flex-col justify-between min-h-[180px] text-left"
               >
                 <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-700 group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all duration-300">
                   {cat.icon}
@@ -303,21 +304,21 @@ export default async function Home() {
       </section>
 
       {/* ====== Featured Courses ====== */}
-      <section className="py-16 reveal-section bg-slate-50">
+      <section className="py-16 bg-slate-950 relative reveal-section">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="scroll-reveal flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-12">
             <div className="space-y-2">
               <span className="text-xs uppercase font-extrabold tracking-widest text-primary bg-primary-light px-3 py-1.5 rounded-lg inline-block">Nổi bật</span>
-              <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-tight">
+              <h2 className="text-3xl font-black text-white tracking-tight leading-tight">
                 Khóa Học Nổi Bật Nhất
               </h2>
-              <p className="text-slate-500 text-xs sm:text-sm">
+              <p className="text-slate-400 text-xs sm:text-sm">
                 Các khóa đào tạo đột phá tích hợp công cụ Trí tuệ nhân tạo độc quyền tại SeduAi.
               </p>
             </div>
             <Link
               href="/courses"
-              className="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-primary hover:border-primary hover:text-white text-slate-700 font-bold text-xs transition-all duration-300 flex items-center gap-1.5 bg-white shadow-sm hover:scale-105 group"
+              className="px-5 py-2.5 rounded-xl border border-slate-800 hover:bg-primary hover:border-primary hover:text-white text-slate-300 hover:text-white font-bold text-xs transition-all duration-300 flex items-center gap-1.5 bg-slate-900 shadow-sm hover:scale-105 group"
             >
               Xem Tất Cả Khóa Học
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
