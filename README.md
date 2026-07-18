@@ -6,6 +6,8 @@ Copy `.env.example` to `.env.local` and configure the required server-side value
 
 Configure at least one of `GEMINI_API_KEY` or `GROQ_API_KEY` before using SEDUAI grading or exam generation. `LMS_EXAM_SECRET` signs exam attempts and must remain stable between deployments. `CRM_API_TOKEN` is server-only and must also be configured in Vercel; never expose it through a `NEXT_PUBLIC_` variable.
 
+After changing the LMS schema, synchronize the configured PostgreSQL database with `npx prisma db push`. LMS uploads are stored under `public/uploads/lms` for local/demo use; production deployments should replace this route with durable object storage.
+
 First, run the development server:
 
 ```bash

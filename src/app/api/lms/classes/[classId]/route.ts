@@ -49,6 +49,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     const examConfigs = classData.examConfigs.map(({ password, ...config }) => ({
       ...config,
+      questions: undefined,
       hasPassword: Boolean(password),
     }));
     return NextResponse.json({ success: true, data: { ...classData, examConfigs } });

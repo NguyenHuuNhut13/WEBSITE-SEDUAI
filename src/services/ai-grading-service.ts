@@ -267,7 +267,9 @@ async function callSeduAiJson(prompt: string, maxOutputTokens: number): Promise<
     }
   }
 
-  // Fallback mock data generator if no API key is configured or both providers failed
+  throw new Error('SEDUAI provider unavailable');
+
+  // Legacy demo fallback retained below for reference only; never reached in production.
   if (prompt.includes('chấm bài') || prompt.includes('đánh giá')) {
     return JSON.stringify({
       grade: 8.5,
@@ -279,7 +281,8 @@ async function callSeduAiJson(prompt: string, maxOutputTokens: number): Promise<
   }
 
   const requestedMatch = prompt.match(/Hãy tạo đúng (\d+) câu hỏi/);
-  const count = requestedMatch ? parseInt(requestedMatch[1]) : 10;
+  const requestedCount = requestedMatch?.[1];
+  const count = requestedCount ? parseInt(requestedCount!, 10) : 10;
   const sampleQuestions = [
     {
       content: "Mô hình học máy nào tối ưu hóa dựa trên gradient descent?",

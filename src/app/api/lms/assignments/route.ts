@@ -95,6 +95,9 @@ export async function POST(request: NextRequest) {
     const lessonId = requiredText(body.lessonId, 'Bài học', 100);
     const title = requiredText(body.title, 'Tên bài tập', 200);
     const description = optionalText(body.description, 'Yêu cầu bài tập', 20_000) || '';
+    const rubric = optionalText(body.rubric, 'Rubric chấm điểm', 20_000) || '';
+    const allowLateSubmission = body.allowLateSubmission === true;
+    const allowResubmission = body.allowResubmission === true;
     const parsedDueDate = optionalDate(body.dueDate, 'Hạn nộp');
     const lesson = await prisma.lmsLesson.findUnique({ where: { id: lessonId }, include: { subject: { select: { classId: true } } } });
     if (!lesson) return NextResponse.json({ success: false, error: 'Bài học không tồn tại' }, { status: 404 });
@@ -105,6 +108,9 @@ export async function POST(request: NextRequest) {
         lessonId,
         title,
         description,
+        rubric,
+        allowLateSubmission,
+        allowResubmission,
         dueDate: parsedDueDate,
       },
     }));
@@ -125,7 +131,11 @@ export async function PUT(request: NextRequest) {
     const title = body.title === undefined ? undefined : requiredText(body.title, 'Tên bài tập', 200);
     const description = body.description === undefined ? undefined : optionalText(body.description, 'Yêu cầu bài tập', 20_000) || '';
     const dueDate = body.dueDate === undefined ? undefined : optionalDate(body.dueDate, 'Hạn nộp');
-    if (title === undefined && description === undefined && dueDate === undefined) {
+    const rubric = body.rubric === undefined ? undefined : optionalText(body.rubric, 'Rubric chấm điểm', 20_000) || '';
+    const allowLateSubmission = body.allowLateSubmission === undefined ? undefined : body.allowLateSubmission === true;
+    const allowResubmission = body.allowResubmission === undefined ? undefined : body.allowResubmission === true;
+    if (dueDate && dueDate.getTime() <= Date.now()) throw new LmsRequestError('Hạn nộp phải ở tương lai');
+    if (title === undefined && description === undefined && dueDate === undefined && rubric === undefined && allowLateSubmission === undefined && allowResubmission === undefined) {
       throw new LmsRequestError('Không có dữ liệu bài tập cần cập nhật');
     }
 
@@ -140,6 +150,9 @@ export async function PUT(request: NextRequest) {
         ...(title !== undefined ? { title } : {}),
         ...(description !== undefined ? { description } : {}),
         ...(dueDate !== undefined ? { dueDate } : {}),
+        ...(rubric !== undefined ? { rubric } : {}),
+        ...(allowLateSubmission !== undefined ? { allowLateSubmission } : {}),
+        ...(allowResubmission !== undefined ? { allowResubmission } : {}),
       },
     }));
     return NextResponse.json({ success: true, data: updated });

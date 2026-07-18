@@ -124,10 +124,17 @@ export default function TeacherGradingPage() {
                 <div className="bg-slate-50 rounded-xl p-4 text-sm text-slate-700 whitespace-pre-wrap max-h-48 overflow-y-auto">
                   {selectedSub.content || '(Không có nội dung)'}
                 </div>
+                {selectedSub.files && (
+                  <div className="mt-3 space-y-1 text-xs">
+                    {(typeof selectedSub.files === 'string' ? JSON.parse(selectedSub.files) : selectedSub.files).map((file: any) => (
+                      <a key={file.url} href={file.url} target="_blank" rel="noreferrer" className="block text-primary hover:underline">Tệp: {file.name}</a>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* AI Actions */}
-              {selectedSub.status === 'PENDING' && (
+              {selectedSub.status === 'PENDING' && selectedSub.content && (
                 <button onClick={() => aiGrade(selectedSub.id)} disabled={gradingId === selectedSub.id}
                   className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition cursor-pointer disabled:opacity-50">
                   {gradingId === selectedSub.id ? <><Loader2 className="w-4 h-4 animate-spin" /> AI đang chấm...</> : <><Sparkles className="w-4 h-4" /> AI Chấm bài</>}

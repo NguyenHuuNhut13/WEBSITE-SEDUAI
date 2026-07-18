@@ -9,6 +9,7 @@ export default function TeacherClassDetail({ params }: { params: Promise<{ class
   const [classData, setClassData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'subjects' | 'students' | 'exams'>('subjects');
+  const [examActionId, setExamActionId] = useState<string | null>(null);
 
   const loadClass = useCallback(async () => {
     try {
@@ -22,6 +23,24 @@ export default function TeacherClassDetail({ params }: { params: Promise<{ class
   useEffect(() => {
     void loadClass();
   }, [loadClass]);
+
+  const handleExamAction = async (examConfigId: string, action: 'generate' | 'publish') => {
+    setExamActionId(examConfigId);
+    try {
+      const response = await fetch('/api/lms/exams/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ examConfigId, action }),
+      });
+      const json = await response.json();
+      if (!response.ok || !json.success) throw new Error(json.error || 'Không thể cập nhật đề thi');
+      await loadClass();
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Không thể cập nhật đề thi');
+    } finally {
+      setExamActionId(null);
+    }
+  };
 
   if (loading) {
     return <div className="flex items-center justify-center min-h-[50vh]"><div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
@@ -135,6 +154,9 @@ export default function TeacherClassDetail({ params }: { params: Promise<{ class
               <div className="flex items-center gap-2">
                 {exam.hasPassword && <span className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-lg font-bold">🔒 Có mật khẩu</span>}
                 <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-1 rounded-lg font-bold">{exam._count?.results || 0} kết quả</span>
+                {exam.questionStatus !== 'PUBLISHED' && <button type="button" disabled={examActionId === exam.id} onClick={() => void handleExamAction(exam.id, 'generate')} className="text-xs rounded-lg bg-blue-50 px-2 py-1 font-bold text-blue-700 disabled:opacity-50">{exam.questionStatus === 'GENERATED' ? 'Sinh lại đề' : 'Sinh đề AI'}</button>}
+                {exam.questionStatus === 'GENERATED' && <button type="button" disabled={examActionId === exam.id} onClick={() => void handleExamAction(exam.id, 'publish')} className="text-xs rounded-lg bg-emerald-50 px-2 py-1 font-bold text-emerald-700 disabled:opacity-50">Duyệt & công bố</button>}
+                {exam.questionStatus === 'PUBLISHED' && <span className="text-xs rounded-lg bg-emerald-100 px-2 py-1 font-bold text-emerald-700">Đã công bố</span>}
               </div>
             </div>
           ))}

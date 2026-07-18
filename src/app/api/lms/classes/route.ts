@@ -56,8 +56,8 @@ export async function POST(request: NextRequest) {
     if (!Array.isArray(body.subjects)) throw new LmsRequestError('Danh sách môn học không hợp lệ');
     const subjectInputs = body.subjects as unknown[];
     const validSubjects: string[] = [...new Set(subjectInputs.map((subject) => requiredText(subject, 'Tên môn học', 120)))];
-    if (validSubjects.length < 1 || validSubjects.length > 4) {
-      throw new LmsRequestError('Mỗi lớp phải có từ 1 đến 4 môn học');
+    if (validSubjects.length !== 4) {
+      throw new LmsRequestError('Mỗi lớp phải có đúng 4 môn học');
     }
 
     const uniqueStudentIds = body.studentIds === undefined ? [] : stringIdList(body.studentIds, 'Danh sách học sinh', 25);

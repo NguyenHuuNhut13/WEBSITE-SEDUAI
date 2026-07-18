@@ -14,8 +14,8 @@
   --color-primary-light: #eaf5fc;
   --color-accent: #ffb606;
   --color-accent-dark: #d99a00;
-  --font-sans: var(--font-sans);
-  --font-heading: var(--font-heading);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-heading: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 body {

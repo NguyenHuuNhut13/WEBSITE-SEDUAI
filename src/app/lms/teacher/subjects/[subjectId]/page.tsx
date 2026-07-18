@@ -22,11 +22,21 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
   const [editingLesson, setEditingLesson] = useState<string | null>(null);
   const [lessonTitle, setLessonTitle] = useState('');
   const [lessonContent, setLessonContent] = useState('');
+  const [lessonObjectives, setLessonObjectives] = useState('');
+  const [lessonPreparation, setLessonPreparation] = useState('');
+  const [lessonActivities, setLessonActivities] = useState('');
+  const [lessonAssessment, setLessonAssessment] = useState('');
+  const [lessonStatus, setLessonStatus] = useState('DRAFT');
+  const [lessonAttachments, setLessonAttachments] = useState<any[]>([]);
+  const [lessonFiles, setLessonFiles] = useState<File[]>([]);
   const [saving, setSaving] = useState(false);
   const [assignmentLessonId, setAssignmentLessonId] = useState<string | null>(null);
   const [editingAssignmentId, setEditingAssignmentId] = useState<string | null>(null);
   const [assignmentTitle, setAssignmentTitle] = useState('');
   const [assignmentDescription, setAssignmentDescription] = useState('');
+  const [assignmentRubric, setAssignmentRubric] = useState('');
+  const [allowLateSubmission, setAllowLateSubmission] = useState(false);
+  const [allowResubmission, setAllowResubmission] = useState(false);
   const [assignmentDueDate, setAssignmentDueDate] = useState('');
   const [operationError, setOperationError] = useState('');
 
@@ -68,10 +78,28 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
     setSaving(true);
     setOperationError('');
     try {
+      const uploaded = await Promise.all(lessonFiles.map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const uploadResponse = await fetch('/api/lms/uploads', { method: 'POST', body: formData });
+        const uploadJson = await uploadResponse.json();
+        if (!uploadResponse.ok || !uploadJson.success) throw new Error(uploadJson.error || 'Không thể tải học liệu lên.');
+        return uploadJson.data;
+      }));
       const response = await fetch('/api/lms/lessons', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: lessonId, title: lessonTitle, content: lessonContent }),
+        body: JSON.stringify({
+          id: lessonId,
+          title: lessonTitle,
+          content: lessonContent,
+          objectives: lessonObjectives,
+          preparation: lessonPreparation,
+          activities: lessonActivities,
+          assessment: lessonAssessment,
+          status: lessonStatus,
+          attachments: [...lessonAttachments, ...uploaded],
+        }),
       });
       const result = await response.json().catch(() => null);
       if (!response.ok || !result?.success) throw new Error(result?.error || 'Không thể cập nhật bài học.');
@@ -88,6 +116,13 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
     setEditingLesson(lesson.id);
     setLessonTitle(lesson.title);
     setLessonContent(lesson.content || '');
+    setLessonObjectives(lesson.objectives || '');
+    setLessonPreparation(lesson.preparation || '');
+    setLessonActivities(lesson.activities || '');
+    setLessonAssessment(lesson.assessment || '');
+    setLessonStatus(lesson.status || 'DRAFT');
+    try { setLessonAttachments(lesson.attachments ? JSON.parse(lesson.attachments) : []); } catch { setLessonAttachments([]); }
+    setLessonFiles([]);
   };
 
   const createAssignment = async (lessonId: string) => {
@@ -102,6 +137,9 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
           lessonId,
           title: assignmentTitle.trim(),
           description: assignmentDescription.trim(),
+          rubric: assignmentRubric.trim(),
+          allowLateSubmission,
+          allowResubmission,
           dueDate: assignmentDueDate ? toIsoDateTime(assignmentDueDate) : undefined,
         }),
       });
@@ -121,6 +159,9 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
     setEditingAssignmentId(null);
     setAssignmentTitle('');
     setAssignmentDescription('');
+    setAssignmentRubric('');
+    setAllowLateSubmission(false);
+    setAllowResubmission(false);
     setAssignmentDueDate('');
   };
 
@@ -135,6 +176,9 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
     setEditingAssignmentId(assignment.id);
     setAssignmentTitle(assignment.title || '');
     setAssignmentDescription(assignment.description || '');
+    setAssignmentRubric(assignment.rubric || '');
+    setAllowLateSubmission(Boolean(assignment.allowLateSubmission));
+    setAllowResubmission(Boolean(assignment.allowResubmission));
     setAssignmentDueDate(assignment.dueDate ? toLocalDateTimeInput(assignment.dueDate) : '');
     setOperationError('');
   };
@@ -151,6 +195,9 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
           id: editingAssignmentId,
           title: assignmentTitle.trim(),
           description: assignmentDescription,
+          rubric: assignmentRubric,
+          allowLateSubmission,
+          allowResubmission,
           dueDate: toIsoDateTime(assignmentDueDate),
         }),
       });
@@ -186,9 +233,26 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
                 <div className="space-y-3">
                   <input type="text" value={lessonTitle} onChange={(e) => setLessonTitle(e.target.value)}
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <textarea value={lessonObjectives} onChange={(e) => setLessonObjectives(e.target.value)} rows={2} placeholder="Mục tiêu / yêu cầu cần đạt"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm" />
+                  <textarea value={lessonPreparation} onChange={(e) => setLessonPreparation(e.target.value)} rows={2} placeholder="Chuẩn bị"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm" />
+                  <textarea value={lessonActivities} onChange={(e) => setLessonActivities(e.target.value)} rows={4} placeholder="Tiến trình: Mở đầu, hình thành kiến thức, luyện tập, vận dụng"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm" />
                   <textarea value={lessonContent} onChange={(e) => setLessonContent(e.target.value)} rows={6}
                     placeholder="Nhập nội dung bài học..."
                     className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-y" />
+                  <textarea value={lessonAssessment} onChange={(e) => setLessonAssessment(e.target.value)} rows={2} placeholder="Đánh giá / tiêu chí hoàn thành"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm" />
+                  <label className="block rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600">
+                    Học liệu đính kèm
+                    <input type="file" multiple className="mt-2 block w-full text-xs" onChange={(event) => setLessonFiles(Array.from(event.target.files || []))} />
+                  </label>
+                  <select value={lessonStatus} onChange={(e) => setLessonStatus(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm">
+                    <option value="DRAFT">Bản nháp</option>
+                    <option value="PUBLISHED">Công bố cho học sinh</option>
+                    <option value="ARCHIVED">Lưu trữ</option>
+                  </select>
                   <div className="flex gap-2">
                     <button onClick={() => updateLesson(lesson.id)} disabled={saving}
                       className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition cursor-pointer disabled:opacity-50">
@@ -241,6 +305,10 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
                       className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
                     <textarea value={assignmentDescription} onChange={(event) => setAssignmentDescription(event.target.value)} placeholder="Yêu cầu và tiêu chí chấm bài"
                       rows={3} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+                    <textarea value={assignmentRubric} onChange={(event) => setAssignmentRubric(event.target.value)} placeholder="Rubric: tiêu chí và số điểm cho từng tiêu chí"
+                      rows={3} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+                    <label className="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" checked={allowLateSubmission} onChange={(event) => setAllowLateSubmission(event.target.checked)} /> Cho phép nộp trễ</label>
+                    <label className="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" checked={allowResubmission} onChange={(event) => setAllowResubmission(event.target.checked)} /> Cho phép nộp lại</label>
                     <input type="datetime-local" value={assignmentDueDate} onChange={(event) => setAssignmentDueDate(event.target.value)}
                       className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
                     <div className="flex gap-2">

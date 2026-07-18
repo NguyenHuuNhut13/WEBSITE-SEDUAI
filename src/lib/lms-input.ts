@@ -78,6 +78,13 @@ export function normalizeAttachments(value: unknown, label = 'Tệp đính kèm'
     const record = item as Record<string, unknown>;
     const name = requiredText(record.name, `Tên tệp #${index + 1}`, 160);
     const rawUrl = requiredText(record.url, `URL tệp #${index + 1}`, 2_000);
+    if (rawUrl.startsWith('/') && !rawUrl.startsWith('//') && !rawUrl.includes('..') && !rawUrl.includes('\\')) {
+      const localSize = record.size === undefined ? undefined : Number(record.size);
+      if (localSize !== undefined && (!Number.isFinite(localSize) || localSize < 0 || localSize > 25 * 1024 * 1024)) {
+        throw new LmsRequestError(`Kich thuoc tep #${index + 1} khong hop le`);
+      }
+      return { name, url: rawUrl, ...(localSize !== undefined ? { size: localSize } : {}) };
+    }
     let url: URL;
     try {
       url = new URL(rawUrl);

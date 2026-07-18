@@ -3,7 +3,7 @@
 import { useCallback, useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { ArrowLeft, Send, Sparkles, Loader2, Star, FileText } from 'lucide-react';
+import { ArrowLeft, Send, Sparkles, Loader2, Star, FileText, Upload } from 'lucide-react';
 
 export default function StudentAssignmentSubmission({ params }: { params: Promise<{ assignmentId: string }> }) {
   const { assignmentId } = use(params);
@@ -11,6 +11,7 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
   const [assignment, setAssignment] = useState<any>(null);
   const [submission, setSubmission] = useState<any>(null);
   const [content, setContent] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -49,8 +50,8 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
   const handleSub = async () => {
     setError('');
     setSuccess('');
-    if (!content.trim()) {
-      setError('Vui lòng nhập nội dung trả lời bài tập.');
+    if (!content.trim() && selectedFiles.length === 0) {
+      setError('Vui lòng nhập nội dung hoặc chọn tệp bài làm.');
       return;
     }
 
@@ -58,18 +59,29 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
     try {
       if (!lmsUserId) throw new Error('Không tìm thấy tài khoản trong LMS.');
 
+      const uploadedFiles = await Promise.all(selectedFiles.map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const uploadResponse = await fetch('/api/lms/uploads', { method: 'POST', body: formData });
+        const uploadJson = await uploadResponse.json();
+        if (!uploadResponse.ok || !uploadJson.success) throw new Error(uploadJson.error || 'Không thể tải tệp lên.');
+        return uploadJson.data;
+      }));
+
       const res = await fetch('/api/lms/submissions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           assignmentId,
           content,
+          files: uploadedFiles,
         }),
       });
 
       const json = await res.json();
       if (json.success) {
         setSubmission(json.data);
+        setSelectedFiles([]);
         setSuccess('Nộp bài tập thành công! Giáo viên hoặc AI sẽ chấm điểm bài làm của bạn.');
       } else {
         setError(json.error);
@@ -132,6 +144,12 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
         <div className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">
           {assignment.description || 'Chưa có mô tả bài tập chi tiết.'}
         </div>
+        {assignment.rubric && (
+          <div className="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
+            <p className="font-bold">Tiêu chí chấm điểm</p>
+            <p className="mt-2 whitespace-pre-wrap">{assignment.rubric}</p>
+          </div>
+        )}
       </div>
 
       {/* Submission Panel */}
@@ -166,6 +184,19 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
               placeholder="Nhập câu trả lời hoặc chèn mã nguồn bài làm của bạn vào đây..."
               className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-y"
             />
+
+            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-100">
+              <Upload className="h-4 w-4 text-primary" />
+              <span>{selectedFiles.length ? `${selectedFiles.length} tệp đã chọn` : 'Đính kèm tệp (tối đa 25 MB/tệp)'}</span>
+              <input type="file" multiple className="hidden" onChange={(event) => setSelectedFiles(Array.from(event.target.files || []))} />
+            </label>
+            {submission?.files && (
+              <div className="space-y-1 text-xs text-slate-500">
+                {(typeof submission.files === 'string' ? JSON.parse(submission.files) : submission.files).map((file: any) => (
+                  <a key={file.url} href={file.url} target="_blank" rel="noreferrer" className="block text-primary hover:underline">{file.name}</a>
+                ))}
+              </div>
+            )}
 
             {submission?.status === 'AI_GRADED' && (
               <div className="bg-blue-50 border border-blue-100 rounded-xl p-5">

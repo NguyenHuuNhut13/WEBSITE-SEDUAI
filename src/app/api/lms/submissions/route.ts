@@ -59,8 +59,8 @@ export async function POST(request: NextRequest) {
     const content = optionalLongText(body.content, 'Nội dung bài làm', 50_000) || '';
     const files = normalizeAttachments(body.files, 'Tệp bài làm');
     const studentId = actor.id;
-    if (!content) {
-      throw new LmsRequestError('Bài làm cần có nội dung văn bản để SEDUAI chấm; tệp chỉ dùng làm tài liệu đính kèm');
+    if (!content && !files?.length) {
+      throw new LmsRequestError('Bài làm cần có nội dung hoặc ít nhất một tệp đính kèm');
     }
 
     const assignment = await prisma.lmsAssignment.findUnique({
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       if (lockedAssignment.lesson.subject.class.status !== 'ACTIVE') {
         throw new LmsRequestError('Lớp đã được lưu trữ, không thể nộp bài', 409);
       }
-      if (lockedAssignment.dueDate && lockedAssignment.dueDate.getTime() < Date.now()) {
+      if (lockedAssignment.dueDate && lockedAssignment.dueDate.getTime() < Date.now() && !lockedAssignment.allowLateSubmission) {
         throw new LmsRequestError('Bài tập đã quá hạn nộp', 409);
       }
 
@@ -94,15 +94,19 @@ export async function POST(request: NextRequest) {
         where: { assignmentId_studentId: { assignmentId, studentId } },
         select: { id: true, status: true },
       });
-      if (currentSubmission && currentSubmission.status !== 'PENDING') {
+      if (currentSubmission && currentSubmission.status !== 'PENDING' && !lockedAssignment.allowResubmission) {
         throw new LmsRequestError('Bài đã được chấm, học sinh không thể chỉnh sửa', 409);
       }
       if (currentSubmission) {
         const updated = await tx.lmsSubmission.updateMany({
-          where: { id: currentSubmission.id, status: 'PENDING', aiReview: null },
+          where: { id: currentSubmission.id, status: currentSubmission.status, ...(currentSubmission.status === 'PENDING' ? { aiReview: null } : {}) },
           data: {
             content,
             ...(files !== undefined ? { files: files.length ? JSON.stringify(files) : null } : {}),
+            grade: null,
+            aiReview: null,
+            teacherReview: null,
+            status: 'PENDING',
             submittedAt: new Date(),
           },
         });

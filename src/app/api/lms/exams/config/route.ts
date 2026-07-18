@@ -27,7 +27,7 @@ function parseOptionalDate(value: unknown, fieldName: string) {
 
 function serializeConfig<T extends { password: string | null }>(config: T) {
   const { password, ...safeConfig } = config;
-  return { ...safeConfig, hasPassword: Boolean(password) };
+  return { ...safeConfig, questions: undefined, hasPassword: Boolean(password) };
 }
 
 async function assertCanReadConfig(
@@ -121,6 +121,7 @@ export async function GET(request: NextRequest) {
         ? { ...baseWhere, class: { teacherId: actor.id } }
         : {
             ...baseWhere,
+            questionStatus: 'PUBLISHED' as const,
             class: {
               status: 'ACTIVE' as const,
               students: { some: { studentId: actor.id } },
@@ -163,6 +164,7 @@ export async function POST(request: NextRequest) {
       durationMinutes,
       password,
       lessonOrder,
+      lessonType,
     } = body;
 
     if (typeof subjectId !== 'string' || !subjectId || typeof classId !== 'string' || !classId) {
@@ -171,7 +173,8 @@ export async function POST(request: NextRequest) {
     if (typeof examType !== 'string' || !EXAM_TYPES.includes(examType as typeof EXAM_TYPES[number])) {
       throw new LmsExamError('Loại bài thi không hợp lệ', 400);
     }
-    if (!Number.isInteger(questionCount) || Number(questionCount) < 5 || Number(questionCount) > 100) {
+    const expectedQuestionCount = examType === 'MIDTERM' ? 30 : examType === 'FINAL' ? 50 : Number(questionCount);
+    if (!Number.isInteger(questionCount) || Number(questionCount) !== expectedQuestionCount || Number(questionCount) < 5 || Number(questionCount) > 100) {
       throw new LmsExamError('Số câu hỏi phải là số nguyên từ 5 đến 100', 400);
     }
     if (!Number.isInteger(durationMinutes) || Number(durationMinutes) < 5 || Number(durationMinutes) > 180) {
@@ -213,6 +216,10 @@ export async function POST(request: NextRequest) {
     if (subject.classId !== classData.id) {
       throw new LmsExamError('Môn học không thuộc lớp đã chọn', 400);
     }
+    if (examType !== 'LESSON_QUIZ') {
+      const existingOfficialExam = await prisma.lmsExamConfig.findFirst({ where: { classId, subjectId, examType: examType as 'MIDTERM' | 'FINAL' }, select: { id: true } });
+      if (existingOfficialExam) throw new LmsExamError('Môn học này đã có bài thi chính thức cùng loại', 409);
+    }
 
     let normalizedLessonOrder: number | null = null;
     if (examType === 'LESSON_QUIZ') {
@@ -225,7 +232,12 @@ export async function POST(request: NextRequest) {
         throw new LmsExamError(`Buổi học phải là số nguyên từ 1 đến ${maxLessonOrder}`, 400);
       }
       normalizedLessonOrder = Number(lessonOrder);
-    } else if (lessonOrder !== undefined && lessonOrder !== null) {
+      if (lessonType !== 'THEORY' && lessonType !== 'PRACTICAL') {
+        throw new LmsExamError('Quiz theo buổi học cần chọn loại lý thuyết hoặc thực hành', 400);
+      }
+      const lesson = await prisma.lmsLesson.findFirst({ where: { subjectId, orderIndex: normalizedLessonOrder, type: lessonType }, select: { id: true } });
+      if (!lesson) throw new LmsExamError('Không tìm thấy buổi học được chọn', 404);
+    } else if (lessonOrder !== undefined && lessonOrder !== null || lessonType !== undefined && lessonType !== null) {
       throw new LmsExamError('lessonOrder chỉ áp dụng cho bài kiểm tra theo buổi học', 400);
     }
 
@@ -240,6 +252,10 @@ export async function POST(request: NextRequest) {
       if (actor.role === 'TEACHER' && lockedClass.teacherId !== actor.id) {
         throw new LmsExamError('Bạn không phụ trách lớp học này', 403);
       }
+      if (examType !== 'LESSON_QUIZ') {
+        const duplicate = await tx.lmsExamConfig.findFirst({ where: { classId, subjectId, examType: examType as 'MIDTERM' | 'FINAL' }, select: { id: true } });
+        if (duplicate) throw new LmsExamError('Môn học này đã có bài thi chính thức cùng loại', 409);
+      }
 
       return tx.lmsExamConfig.create({
         data: {
@@ -252,6 +268,7 @@ export async function POST(request: NextRequest) {
           startTime,
           endTime,
           lessonOrder: normalizedLessonOrder,
+          lessonType: examType === 'LESSON_QUIZ' ? lessonType as 'THEORY' | 'PRACTICAL' : null,
         },
         include: { subject: true, class: true },
       });

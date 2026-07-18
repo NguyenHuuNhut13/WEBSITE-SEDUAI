@@ -86,6 +86,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
                     },
                   },
                 },
+                progress: {
+                  select: { studentId: true, completedAt: true },
+                },
               },
             },
             examConfigs: {
@@ -128,7 +131,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     const subjectStats = classData.subjects.map((subject) => {
       const totalLessons = subject.theoryLessons + subject.practicalLessons;
-      const completedLessons = subject.lessons.filter((lesson) => Boolean(lesson.content?.trim())).length;
+      const completedLessons = subject.lessons.filter((lesson) => lesson.progress.some((item) => enrolledStudentIds.has(item.studentId) && item.completedAt)).length;
       const assignments = subject.lessons.flatMap((lesson) => lesson.assignments);
       const submissions = assignments
         .flatMap((assignment) => assignment.submissions)

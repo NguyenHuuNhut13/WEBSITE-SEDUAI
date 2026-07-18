@@ -43,6 +43,16 @@ async function main() {
     },
   });
 
+  const additionalStudents = await Promise.all(Array.from({ length: 24 }, (_, index) => {
+    const number = index + 2;
+    return prisma.lmsUser.upsert({
+      where: { username: `student_seduai_${number}` },
+      update: {},
+      create: { username: `student_seduai_${number}`, name: `Học viên SeduAi ${number}`, role: 'STUDENT' },
+    });
+  }));
+  const allStudents = [studentUser, ...additionalStudents];
+
   console.log('Đã khởi tạo xong tài khoản LMS.');
 
   // 2. Tạo lớp học mẫu
@@ -70,6 +80,10 @@ async function main() {
       studentId: studentUser.id,
     },
   });
+  await prisma.lmsClassStudent.createMany({
+    data: allStudents.slice(1).map((student) => ({ classId: sampleClass.id, studentId: student.id })),
+    skipDuplicates: true,
+  });
   console.log(`Đã xếp học viên ${studentUser.name} vào lớp ${sampleClass.name}`);
 
   // 4. Tạo môn học mẫu
@@ -90,6 +104,12 @@ async function main() {
       practicalLessons: 8,
     },
   });
+  await prisma.lmsSubject.createMany({
+    data: [
+      { classId: sampleClass.id, name: 'Lập trình Web cơ bản', theoryLessons: 8, practicalLessons: 8 },
+      { classId: sampleClass.id, name: 'Kỹ năng số và dự án', theoryLessons: 8, practicalLessons: 8 },
+    ],
+  });
   console.log('Đã tạo 2 môn học mẫu.');
 
   // 5. Tạo bài học và bài tập mẫu
@@ -98,6 +118,8 @@ async function main() {
       subjectId: subject1.id,
       type: 'THEORY',
       orderIndex: 1,
+      status: 'PUBLISHED',
+      publishedAt: new Date(),
       title: 'Bài 1: Giao tiếp tự nhiên & Phát âm cùng AI',
       content: 'Bài học này hướng dẫn học viên các kỹ năng đàm thoại cơ bản và ứng dụng công cụ luyện giọng nói AI.',
     },
@@ -108,6 +130,8 @@ async function main() {
       subjectId: subject1.id,
       type: 'PRACTICAL',
       orderIndex: 1,
+      status: 'PUBLISHED',
+      publishedAt: new Date(),
       title: 'Thực hành 1: Hội thoại đàm thoại 1-1',
       content: 'Học viên thực hành ghi âm giọng nói đối thoại và nhận xét trực quan bằng Trợ lý AI.',
     },

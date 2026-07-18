@@ -19,6 +19,7 @@
 
 # production
 /build
+/public/uploads/lms/
 
 # misc
 .DS_Store

@@ -28,6 +28,9 @@ interface ExamQuestionSource {
   questionCount: number;
   durationMinutes: number;
   lessonOrder: number | null;
+  lessonType?: 'THEORY' | 'PRACTICAL' | null;
+  questions?: string | null;
+  questionStatus?: 'NOT_GENERATED' | 'GENERATED' | 'PUBLISHED';
   startTime: Date | null;
   endTime: Date | null;
   subject: { name: string };
@@ -194,11 +197,18 @@ export function randomizeExamQuestions(questions: QuizQuestion[]): QuizQuestion[
 }
 
 export async function buildExamQuestions(config: ExamQuestionSource): Promise<QuizQuestion[]> {
+  if (!config.questions || config.questionStatus !== 'PUBLISHED') {
+    throw new LmsExamError('Đề thi chưa được giáo viên duyệt và công bố.', 409);
+  }
+  return readAttemptQuestions(config.questions);
+}
+
+export async function generateDraftExamQuestions(config: ExamQuestionSource): Promise<QuizQuestion[]> {
   const lessons = await prisma.lmsLesson.findMany({
     where: {
       subjectId: config.subjectId,
       ...(config.examType === 'LESSON_QUIZ' && config.lessonOrder !== null
-        ? { orderIndex: config.lessonOrder }
+        ? { orderIndex: config.lessonOrder, ...(config.lessonType ? { type: config.lessonType } : {}) }
         : {}),
     },
     select: { content: true },

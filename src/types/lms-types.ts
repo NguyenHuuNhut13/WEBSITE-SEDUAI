@@ -6,7 +6,9 @@
 // Re-export Prisma enums for frontend use
 export type UserRole = 'ADMIN' | 'TEACHER' | 'STUDENT';
 export type LessonType = 'THEORY' | 'PRACTICAL';
+export type LessonStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 export type ExamType = 'LESSON_QUIZ' | 'MIDTERM' | 'FINAL';
+export type ExamQuestionStatus = 'NOT_GENERATED' | 'GENERATED' | 'PUBLISHED';
 export type SubmissionStatus = 'PENDING' | 'AI_GRADED' | 'REVIEWED';
 export type ClassStatus = 'ACTIVE' | 'ARCHIVED';
 
@@ -58,6 +60,12 @@ export interface LmsLessonDTO {
   orderIndex: number;
   title: string;
   content?: string;
+  objectives?: string;
+  preparation?: string;
+  activities?: string;
+  assessment?: string;
+  status: LessonStatus;
+  publishedAt?: string;
   attachments?: AttachmentItem[];
   assignments?: LmsAssignmentDTO[];
   createdAt: string;
@@ -74,6 +82,10 @@ export interface LmsAssignmentDTO {
   lessonId: string;
   title: string;
   description?: string;
+  rubric?: string;
+  maxScore?: number;
+  allowLateSubmission?: boolean;
+  allowResubmission?: boolean;
   dueDate?: string;
   submissionCount?: number;
   createdAt: string;
@@ -106,6 +118,9 @@ export interface LmsExamConfigDTO {
   startTime?: string;
   endTime?: string;
   lessonOrder?: number;
+  lessonType?: LessonType;
+  questionStatus: ExamQuestionStatus;
+  publishedAt?: string;
   resultCount?: number;
   createdAt: string;
 }
@@ -199,6 +214,11 @@ export interface CreateLessonPayload {
   title: string;
   content?: string;
   attachments?: AttachmentItem[];
+  objectives?: string;
+  preparation?: string;
+  activities?: string;
+  assessment?: string;
+  status?: LessonStatus;
 }
 
 export interface CreateAssignmentPayload {
@@ -225,6 +245,7 @@ export interface CreateExamConfigPayload {
   startTime?: string;
   endTime?: string;
   lessonOrder?: number;
+  lessonType?: LessonType;
 }
 
 export interface SubmitExamPayload {

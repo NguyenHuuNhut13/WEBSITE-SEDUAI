@@ -14,6 +14,7 @@ export default function CreateExamPage() {
   const [questionCount, setQuestionCount] = useState(30);
   const [durationMinutes, setDurationMinutes] = useState(45);
   const [lessonOrder, setLessonOrder] = useState(1);
+  const [lessonType, setLessonType] = useState<'THEORY' | 'PRACTICAL'>('THEORY');
   const [password, setPassword] = useState('');
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
@@ -58,6 +59,7 @@ export default function CreateExamPage() {
           questionCount,
           durationMinutes,
           lessonOrder: examType === 'LESSON_QUIZ' ? lessonOrder : null,
+          lessonType: examType === 'LESSON_QUIZ' ? lessonType : null,
           password: password || null,
           startTime: startTime ? new Date(startTime).toISOString() : null,
           endTime: endTime ? new Date(endTime).toISOString() : null,
@@ -129,7 +131,7 @@ export default function CreateExamPage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-xs font-bold text-slate-600 flex items-center gap-1 mb-1.5"><FileText className="w-3.5 h-3.5" /> Số câu hỏi</label>
-            <input type="number" min={5} max={100} value={questionCount} onChange={(e) => setQuestionCount(parseInt(e.target.value))}
+            <input type="number" min={examType === 'MIDTERM' ? 30 : examType === 'FINAL' ? 50 : 5} max={examType === 'MIDTERM' ? 30 : examType === 'FINAL' ? 50 : 100} value={questionCount} readOnly={examType !== 'LESSON_QUIZ'} onChange={(e) => setQuestionCount(parseInt(e.target.value))}
               className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-bold text-center" />
           </div>
           <div>
@@ -139,7 +141,7 @@ export default function CreateExamPage() {
           </div>
         </div>
 
-        {examType === 'LESSON_QUIZ' && (
+        {examType === 'LESSON_QUIZ' && (<>
           <div>
             <label className="text-xs font-bold text-slate-600 block mb-1.5">Buổi học dùng cho quiz</label>
             <input
@@ -151,7 +153,14 @@ export default function CreateExamPage() {
               className="w-full rounded-xl border border-slate-200 px-4 py-3 text-center text-sm font-bold"
             />
           </div>
-        )}
+          <div>
+            <label className="text-xs font-bold text-slate-600 block mb-1.5">Loại buổi học</label>
+            <select value={lessonType} onChange={(event) => setLessonType(event.target.value as 'THEORY' | 'PRACTICAL')} className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm">
+              <option value="THEORY">Lý thuyết</option>
+              <option value="PRACTICAL">Thực hành</option>
+            </select>
+          </div>
+        </>)}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>

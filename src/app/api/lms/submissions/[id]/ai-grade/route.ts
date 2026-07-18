@@ -84,7 +84,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     try {
       grading = await gradeAssignment(
         submission.assignment.title,
-        submission.assignment.description || '',
+        submission.assignment.rubric || submission.assignment.description || '',
         submission.content
       );
     } catch (error) {

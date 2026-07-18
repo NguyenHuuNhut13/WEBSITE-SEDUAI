@@ -107,7 +107,7 @@ export default function CreateClassPage() {
     if (!name.trim()) { setError('Vui lòng nhập tên lớp'); return; }
     if (!teacherId) { setError('Vui lòng chọn giáo viên'); return; }
     const validSubjects = subjects.filter((s) => s.trim());
-    if (validSubjects.length === 0) { setError('Vui lòng nhập ít nhất 1 môn học'); return; }
+    if (validSubjects.length !== 4) { setError('Vui lòng nhập đủ 4 môn học'); return; }
 
     setSaving(true);
     try {

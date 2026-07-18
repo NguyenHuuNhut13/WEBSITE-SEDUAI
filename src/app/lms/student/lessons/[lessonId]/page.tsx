@@ -27,6 +27,7 @@ export default function StudentLessonDetail({ params }: { params: Promise<{ less
   const [lesson, setLesson] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [completed, setCompleted] = useState(false);
 
   const loadLesson = useCallback(async () => {
     setLoading(true);
@@ -38,6 +39,12 @@ export default function StudentLessonDetail({ params }: { params: Promise<{ less
         throw new Error(json?.error || 'Không thể tải nội dung bài học.');
       }
       setLesson(json.data);
+      setCompleted(Boolean(json.data.progress?.[0]?.completedAt));
+      void fetch('/api/lms/progress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lessonId, progressPercent: 25 }),
+      });
     } catch (e) {
       setLesson(null);
       setError(e instanceof Error ? e.message : 'Không thể tải nội dung bài học.');
@@ -115,6 +122,20 @@ export default function StudentLessonDetail({ params }: { params: Promise<{ less
                 <p className="text-slate-400 italic">Bài học này chưa có nội dung chi tiết.</p>
               )}
             </div>
+            {lesson.objectives && <section className="mt-6 rounded-xl bg-blue-50 p-4"><h3 className="text-sm font-bold text-blue-900">Mục tiêu bài học</h3><p className="mt-2 whitespace-pre-wrap text-sm text-blue-800">{lesson.objectives}</p></section>}
+            {lesson.preparation && <section className="mt-4 rounded-xl bg-amber-50 p-4"><h3 className="text-sm font-bold text-amber-900">Chuẩn bị</h3><p className="mt-2 whitespace-pre-wrap text-sm text-amber-800">{lesson.preparation}</p></section>}
+            {lesson.activities && <section className="mt-4 rounded-xl bg-emerald-50 p-4"><h3 className="text-sm font-bold text-emerald-900">Tiến trình hoạt động</h3><p className="mt-2 whitespace-pre-wrap text-sm text-emerald-800">{lesson.activities}</p></section>}
+            {lesson.assessment && <section className="mt-4 rounded-xl bg-violet-50 p-4"><h3 className="text-sm font-bold text-violet-900">Đánh giá</h3><p className="mt-2 whitespace-pre-wrap text-sm text-violet-800">{lesson.assessment}</p></section>}
+            <button
+              type="button"
+              onClick={async () => {
+                const response = await fetch('/api/lms/progress', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ lessonId, progressPercent: 100, completed: true }) });
+                if (response.ok) setCompleted(true);
+              }}
+              className={`mt-6 w-full rounded-xl px-4 py-3 text-sm font-bold ${completed ? 'bg-emerald-100 text-emerald-700' : 'bg-primary text-white hover:bg-blue-700'}`}
+            >
+              {completed ? 'Đã hoàn thành bài học' : 'Đánh dấu đã hoàn thành'}
+            </button>
           </div>
         </div>
 

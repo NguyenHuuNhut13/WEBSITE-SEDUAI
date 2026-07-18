@@ -1,22 +1,7 @@
 import type { Metadata } from 'next';
-import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import Providers from '@/components/Providers';
 import LayoutWrapper from '@/components/LayoutWrapper';
-
-const inter = Inter({
-  subsets: ['latin', 'vietnamese'],
-  display: 'swap',
-  variable: '--font-sans',
-  preload: false,
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-heading',
-  preload: false,
-});
 
 export const metadata: Metadata = {
   title: 'SeduAi - Hệ điều hành AI dành cho giáo dục',
@@ -29,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi" className={`${inter.variable} ${spaceGrotesk.variable} h-full scroll-smooth`}>
+    <html lang="vi" className="h-full scroll-smooth">
       <body className="font-sans antialiased text-slate-800 bg-slate-50 min-h-full flex flex-col">
         <Providers>
           <LayoutWrapper>{children}</LayoutWrapper>
