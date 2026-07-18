@@ -732,7 +732,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .lms-shell .lms-nav-active {
   animation: none;
-  box-shadow: inset 3px 0 0 #0077bb;
+  box-shadow: 0 1px 2px rgba(0, 119, 187, 0.16);
 }
 .lms-shell table thead {
   background: #f9fafb;

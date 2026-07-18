@@ -19,7 +19,9 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Settings,
+  MoreVertical,
 } from 'lucide-react';
 
 interface NavItem {
@@ -27,18 +29,19 @@ interface NavItem {
   href: string;
   icon: React.ReactNode;
   roles: string[];
+  section: string;
 }
 
 const navItems: NavItem[] = [
-  { label: 'Quản trị', href: '/lms/admin', icon: <Shield className="w-5 h-5" />, roles: ['ADMIN'] },
-  { label: 'Tạo lớp học', href: '/lms/admin/classes/create', icon: <Users className="w-5 h-5" />, roles: ['ADMIN'] },
-  { label: 'Dashboard giáo viên', href: '/lms/teacher', icon: <LayoutDashboard className="w-5 h-5" />, roles: ['TEACHER'] },
-  { label: 'Chấm bài', href: '/lms/teacher/grading', icon: <ClipboardCheck className="w-5 h-5" />, roles: ['TEACHER'] },
-  { label: 'Tạo đề thi', href: '/lms/teacher/exams/create', icon: <PenTool className="w-5 h-5" />, roles: ['TEACHER'] },
-  { label: 'Lớp học', href: '/lms/student', icon: <GraduationCap className="w-5 h-5" />, roles: ['STUDENT'] },
-  { label: 'Môn học', href: '/lms/student/subjects', icon: <BookMarked className="w-5 h-5" />, roles: ['STUDENT'] },
-  { label: 'Bài tập', href: '/lms/student/assignments', icon: <FileText className="w-5 h-5" />, roles: ['STUDENT'] },
-  { label: 'Bài thi', href: '/lms/student/exams', icon: <ClipboardCheck className="w-5 h-5" />, roles: ['STUDENT'] },
+  { label: 'Quản trị', href: '/lms/admin', icon: <Shield className="w-5 h-5" />, roles: ['ADMIN'], section: 'Tổng quan' },
+  { label: 'Tạo lớp học', href: '/lms/admin/classes/create', icon: <Users className="w-5 h-5" />, roles: ['ADMIN'], section: 'Quản lý học tập' },
+  { label: 'Dashboard giáo viên', href: '/lms/teacher', icon: <LayoutDashboard className="w-5 h-5" />, roles: ['TEACHER'], section: 'Tổng quan' },
+  { label: 'Chấm bài', href: '/lms/teacher/grading', icon: <ClipboardCheck className="w-5 h-5" />, roles: ['TEACHER'], section: 'Quản lý học tập' },
+  { label: 'Tạo đề thi', href: '/lms/teacher/exams/create', icon: <PenTool className="w-5 h-5" />, roles: ['TEACHER'], section: 'Quản lý học tập' },
+  { label: 'Lớp học', href: '/lms/student', icon: <GraduationCap className="w-5 h-5" />, roles: ['STUDENT'], section: 'Tổng quan' },
+  { label: 'Môn học', href: '/lms/student/subjects', icon: <BookMarked className="w-5 h-5" />, roles: ['STUDENT'], section: 'Học tập' },
+  { label: 'Bài tập', href: '/lms/student/assignments', icon: <FileText className="w-5 h-5" />, roles: ['STUDENT'], section: 'Học tập' },
+  { label: 'Bài thi', href: '/lms/student/exams', icon: <ClipboardCheck className="w-5 h-5" />, roles: ['STUDENT'], section: 'Học tập' },
 ];
 
 const roleLabels: Record<string, string> = {
@@ -53,6 +56,9 @@ export default function LMSSidebar() {
   const pathname = usePathname();
   const { lmsRole, localSync } = useAuth();
   const filteredItems = navItems.filter((item) => item.roles.includes(lmsRole));
+  const activeItem = [...filteredItems]
+    .sort((a, b) => b.href.length - a.href.length)
+    .find((item) => pathname === item.href || pathname?.startsWith(item.href + '/'));
 
   useEffect(() => setMobileOpen(false), [pathname]);
   useEffect(() => {
@@ -62,7 +68,7 @@ export default function LMSSidebar() {
 
   const sidebarContent = (
     <div className="h-full flex flex-col bg-white border-r border-slate-200">
-      <div className={`relative h-[76px] px-4 border-b border-slate-100 flex items-center ${collapsed ? 'justify-center' : 'justify-between'}`}>
+      <div className={`relative h-[76px] px-5 border-b border-slate-100 flex items-center ${collapsed ? 'justify-center' : 'justify-between'}`}>
         <Link href="/lms" className="flex items-center gap-3 group">
           <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm flex-shrink-0 group-hover:bg-primary-dark transition-colors">
             <Brain className="w-5 h-5" strokeWidth={2.5} />
@@ -80,29 +86,42 @@ export default function LMSSidebar() {
         </button>
       </div>
 
-      {!collapsed && <div className="px-4 py-4">
-        <div className="rounded-xl border border-primary/10 bg-primary/5 p-3.5">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-primary">Vai trò hiện tại</p>
-          <p className="text-sm font-black mt-0.5 text-slate-900">{roleLabels[lmsRole] || 'Người dùng'}</p>
-          <p className="text-xs font-medium text-slate-500 truncate mt-0.5">{localSync.name}</p>
+      {!collapsed && <div className="px-5 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Workspace</p>
+            <p className="text-sm font-semibold mt-1 text-slate-900 truncate">{roleLabels[lmsRole] || 'Người dùng'}</p>
+          </div>
+          <ChevronDown className="w-4 h-4 shrink-0 text-slate-400" />
         </div>
       </div>}
 
-      <nav className={`flex-1 ${collapsed ? 'px-2' : 'px-4'} py-2 space-y-1 overflow-y-auto`}>
-        {!collapsed && <p className="px-3 pb-2 pt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Menu chính</p>}
-        {filteredItems.map((item) => {
-          const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
+      <nav className={`flex-1 ${collapsed ? 'px-2' : 'px-4'} py-4 space-y-1 overflow-y-auto`}>
+        {filteredItems.map((item, index) => {
+          const isActive = activeItem?.href === item.href;
+          const showSection = !collapsed && (index === 0 || filteredItems[index - 1].section !== item.section);
           return (
-            <Link key={item.href} href={item.href} title={collapsed ? item.label : undefined} className={`flex items-center ${collapsed ? 'justify-center' : ''} gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 group relative ${isActive ? 'bg-primary/10 text-primary lms-nav-active' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'}`}>
-              {isActive && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />}
-              <span className={`flex-shrink-0 transition-colors ${isActive ? 'text-primary' : 'text-slate-400 group-hover:text-primary'}`}>{item.icon}</span>
-              {!collapsed && <span>{item.label}</span>}
-            </Link>
+            <div key={item.href}>
+              {showSection && <p className="px-3 pb-2 pt-3 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">{item.section}</p>}
+              <Link href={item.href} title={collapsed ? item.label : undefined} className={`flex items-center ${collapsed ? 'justify-center' : ''} gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative ${isActive ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-primary hover:bg-primary/5'}`}>
+                <span className={`flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-primary'}`}>{item.icon}</span>
+                {!collapsed && <span>{item.label}</span>}
+              </Link>
+            </div>
           );
         })}
       </nav>
 
-      <div className={`p-3 border-t border-slate-100 space-y-1 ${collapsed ? 'flex justify-center' : ''}`}>
+      <div className={`p-4 border-t border-slate-100 space-y-1 ${collapsed ? 'flex justify-center' : ''}`}>
+        {!collapsed && <div className="mb-3 flex items-center gap-3 rounded-lg bg-slate-50 p-2.5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={localSync.avatar || '/placeholder-avatar.png'} alt={localSync.name || 'Tài khoản'} className="h-9 w-9 rounded-full object-cover border border-slate-200" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-semibold text-slate-900">{localSync.name || 'Tài khoản'}</p>
+            <p className="truncate text-[11px] text-slate-500">{roleLabels[lmsRole] || 'Người dùng'}</p>
+          </div>
+          <MoreVertical className="h-4 w-4 shrink-0 text-slate-400" />
+        </div>}
         <Link href="/" title={collapsed ? 'Về trang chủ' : undefined} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition text-sm font-semibold">
           <Home className="w-4 h-4" />
           {!collapsed && <span>Về trang chủ</span>}
@@ -118,7 +137,7 @@ export default function LMSSidebar() {
         <Menu className="w-5 h-5" />
       </button>
       <div className={`lms-sidebar-backdrop lg:hidden ${mobileOpen ? 'lms-sidebar-backdrop-visible' : ''}`} onClick={() => setMobileOpen(false)} />
-      <aside className={`lms-sidebar ${mobileOpen ? 'lms-sidebar-open' : ''}`} style={{ width: collapsed ? '84px' : '260px', minHeight: '100vh' }}>
+      <aside className={`lms-sidebar ${mobileOpen ? 'lms-sidebar-open' : ''}`} style={{ width: collapsed ? '84px' : '280px', minHeight: '100vh' }}>
         {sidebarContent}
       </aside>
     </>
