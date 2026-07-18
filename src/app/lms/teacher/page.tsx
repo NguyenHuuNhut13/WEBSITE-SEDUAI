@@ -15,12 +15,15 @@ export default function TeacherDashboard() {
     try {
       const [classRes, subRes] = await Promise.all([
         fetch(`/api/lms/classes?teacherId=${encodeURIComponent(lmsUserId || '')}`),
-        fetch(`/api/lms/submissions?status=PENDING&teacherId=${encodeURIComponent(lmsUserId || '')}`),
+        fetch(`/api/lms/submissions?teacherId=${encodeURIComponent(lmsUserId || '')}`),
       ]);
       const classJson = await classRes.json();
       const subJson = await subRes.json();
       if (classJson.success) setClasses(classJson.data);
-      if (subJson.success) setPendingSubmissions(subJson.data);
+      if (subJson.success) {
+        // Bài AI_GRADED vẫn cần giáo viên review; chỉ ẩn bài đã REVIEWED.
+        setPendingSubmissions(subJson.data.filter((submission: any) => submission.status !== 'REVIEWED'));
+      }
     } catch (e) { console.error(e); }
     setLoading(false);
   }, [lmsUserId]);
@@ -45,7 +48,7 @@ export default function TeacherDashboard() {
 
   const stats = [
     { label: 'Lớp đang quản lý', value: classes.length, icon: <BookOpen className="w-6 h-6" />, bg: 'bg-blue-50', iconColor: 'text-blue-600' },
-    { label: 'Bài chờ chấm', value: pendingSubmissions.length, icon: <ClipboardCheck className="w-6 h-6" />, bg: 'bg-amber-50', iconColor: 'text-amber-600', highlight: pendingSubmissions.length > 0 },
+    { label: 'Bài cần xử lý', value: pendingSubmissions.length, icon: <ClipboardCheck className="w-6 h-6" />, bg: 'bg-amber-50', iconColor: 'text-amber-600', highlight: pendingSubmissions.length > 0 },
     { label: 'Tổng học sinh', value: classes.reduce((sum, c) => sum + (c._count?.students || 0), 0), icon: <Users className="w-6 h-6" />, bg: 'bg-emerald-50', iconColor: 'text-emerald-600' },
     { label: 'Tổng môn học', value: classes.reduce((sum, c) => sum + (c._count?.subjects || 0), 0), icon: <BarChart3 className="w-6 h-6" />, bg: 'bg-purple-50', iconColor: 'text-purple-600' },
   ];
@@ -131,7 +134,7 @@ export default function TeacherDashboard() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <ClipboardCheck className="w-5 h-5 text-amber-500" />
-              Bài tập chờ chấm
+              Bài tập cần xử lý
               <span className="ml-1 px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">{pendingSubmissions.length}</span>
             </h2>
             <Link href="/lms/teacher/grading" className="text-primary text-sm font-bold hover:underline">Xem tất cả →</Link>
@@ -143,8 +146,8 @@ export default function TeacherDashboard() {
                   <p className="text-sm font-bold text-slate-900">{sub.student?.name}</p>
                   <p className="text-xs text-slate-500">{sub.assignment?.title} · {new Date(sub.submittedAt).toLocaleDateString('vi-VN')}</p>
                 </div>
-                <span className="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-100">
-                  Chờ chấm
+                <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${sub.status === 'AI_GRADED' ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-amber-50 text-amber-700 border-amber-100'}`}>
+                  {sub.status === 'AI_GRADED' ? 'AI đã chấm - chờ review' : 'Chờ chấm AI'}
                 </span>
               </div>
             ))}
