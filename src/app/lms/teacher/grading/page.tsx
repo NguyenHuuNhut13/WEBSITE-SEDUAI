@@ -71,8 +71,6 @@ export default function TeacherGradingPage() {
     finally { setReviewingId(null); }
   };
 
-  if (loading) return <div className="flex items-center justify-center min-h-[50vh]"><div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
-
   const statusColors: Record<string, string> = {
     PENDING: 'bg-amber-50 text-amber-700',
     AI_GRADED: 'bg-blue-50 text-blue-700',
@@ -97,6 +95,8 @@ export default function TeacherGradingPage() {
       return matchesStatus && (!normalized || haystack.includes(normalized));
     });
   }, [query, statusFilter, submissions]);
+
+  if (loading) return <div className="flex items-center justify-center min-h-[50vh]"><div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
 
   return (
     <div className="space-y-6">
