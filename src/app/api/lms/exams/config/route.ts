@@ -25,9 +25,14 @@ function parseOptionalDate(value: unknown, fieldName: string) {
   return parsed;
 }
 
-function serializeConfig<T extends { password: string | null }>(config: T) {
+function serializeConfig<T extends { password: string | null; questionStatus: 'NOT_GENERATED' | 'GENERATED' | 'PUBLISHED' }>(config: T) {
   const { password, ...safeConfig } = config;
-  return { ...safeConfig, questions: undefined, hasPassword: Boolean(password) };
+  return {
+    ...safeConfig,
+    questions: undefined,
+    hasPassword: Boolean(password),
+    canStart: safeConfig.questionStatus === 'PUBLISHED',
+  };
 }
 
 async function assertCanReadConfig(
@@ -121,7 +126,6 @@ export async function GET(request: NextRequest) {
         ? { ...baseWhere, class: { teacherId: actor.id } }
         : {
             ...baseWhere,
-            questionStatus: 'PUBLISHED' as const,
             class: {
               status: 'ACTIVE' as const,
               students: { some: { studentId: actor.id } },

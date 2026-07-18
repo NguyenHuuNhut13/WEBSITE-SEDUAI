@@ -265,6 +265,21 @@ export default function StudentExamPage({ params }: { params: Promise<{ examConf
     );
   }
 
+  if (!config.canStart && config.questionStatus !== 'PUBLISHED') {
+    return (
+      <div className="mx-auto mt-12 max-w-md rounded-2xl border border-amber-200 bg-white p-8 text-center shadow-sm">
+        <AlertCircle className="mx-auto h-10 w-10 text-amber-500" />
+        <h1 className="mt-4 text-lg font-bold text-slate-900">Đề thi chưa sẵn sàng</h1>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          {config.questionStatus === 'GENERATED'
+            ? 'Giáo viên đã sinh câu hỏi nhưng chưa duyệt và công bố đề.'
+            : 'Giáo viên đang chuẩn bị ngân hàng câu hỏi cho bài thi này.'}
+        </p>
+        <Link href="/lms/student/exams" className="mt-5 inline-flex rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark">Quay lại danh sách bài thi</Link>
+      </div>
+    );
+  }
+
   // Password / Join Room Screen
   if (!started) {
     return (
