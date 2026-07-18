@@ -66,7 +66,7 @@ export default function CreateExamPage() {
         }),
       });
       const json = await res.json().catch(() => null);
-      if (res.ok && json?.success) router.push(`/lms/teacher/classes/${classId}`);
+      if (res.ok && json?.success) router.push(`/lms/teacher/classes/${classId}?tab=exams&examId=${encodeURIComponent(json.data.id)}`);
       else setError(json.error);
     } catch (e) { setError(e instanceof Error ? e.message : 'Không thể tạo cấu hình bài thi.'); }
     finally { setSaving(false); }
@@ -78,7 +78,7 @@ export default function CreateExamPage() {
         <Link href="/lms/teacher" className="p-2 rounded-xl hover:bg-slate-100 transition"><ArrowLeft className="w-5 h-5 text-slate-600" /></Link>
         <div>
           <h1 className="text-2xl font-black text-slate-900">Tạo đề thi</h1>
-          <p className="text-sm text-slate-500">Cấu hình thi — AI sẽ tự sinh câu hỏi khi học sinh vào thi</p>
+          <p className="text-sm text-slate-500">Tạo cấu hình, sinh ngân hàng câu hỏi, sau đó duyệt để học sinh được nhìn thấy đề thi.</p>
         </div>
       </div>
 
@@ -186,7 +186,7 @@ export default function CreateExamPage() {
 
       {/* Info */}
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs text-blue-700">
-        <strong>Lưu ý:</strong> Câu hỏi trắc nghiệm sẽ được AI tự động sinh khi học sinh bắt đầu thi. Bạn chỉ cần cấu hình số câu, thời gian và mật khẩu.
+        <strong>Quy trình:</strong> Sau khi tạo, mở tab <strong>Bài thi</strong> của lớp, bấm <strong>Sinh đề AI</strong> để tạo câu hỏi, kiểm tra nội dung rồi bấm <strong>Duyệt & công bố</strong>. Học sinh chỉ thấy đề sau bước công bố.
       </div>
 
       <button onClick={handleSubmit} disabled={saving}

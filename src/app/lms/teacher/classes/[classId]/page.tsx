@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, use, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, BookOpen, Users, FileText, BarChart3, PenTool } from 'lucide-react';
 
 export default function TeacherClassDetail({ params }: { params: Promise<{ classId: string }> }) {
   const { classId } = use(params);
+  const searchParams = useSearchParams();
   const [classData, setClassData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'subjects' | 'students' | 'exams'>('subjects');
@@ -23,6 +25,10 @@ export default function TeacherClassDetail({ params }: { params: Promise<{ class
   useEffect(() => {
     void loadClass();
   }, [loadClass]);
+
+  useEffect(() => {
+    if (searchParams.get('tab') === 'exams') setActiveTab('exams');
+  }, [searchParams]);
 
   const handleExamAction = async (examConfigId: string, action: 'generate' | 'publish') => {
     setExamActionId(examConfigId);
@@ -142,7 +148,7 @@ export default function TeacherClassDetail({ params }: { params: Promise<{ class
             <PenTool className="w-4 h-4" /> Tạo đề thi mới
           </Link>
           {classData.examConfigs?.map((exam: any) => (
-            <div key={exam.id} className="bg-white rounded-xl border border-slate-200 p-4 flex items-center justify-between">
+            <div key={exam.id} className={`bg-white rounded-xl border p-4 flex items-center justify-between ${searchParams.get('examId') === exam.id ? 'border-primary ring-2 ring-primary/10' : 'border-slate-200'}`}>
               <div>
                 <p className="text-sm font-bold text-slate-900">
                   {exam.examType === 'MIDTERM' ? '🏆 Giữa kỳ' : exam.examType === 'FINAL' ? '🎯 Cuối kỳ' : '📝 Quiz buổi'} — {exam.subject?.name}
