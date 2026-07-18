@@ -4,12 +4,11 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import LMSSidebar from '@/components/lms/LMSSidebar';
-import { Bell, ChevronDown, LogOut, Search } from 'lucide-react';
 
 export default function LMSLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { accessToken, isLoading, lmsRole, lmsUserId, lmsIdentityLoading, lmsIdentityError, localSync, logout } = useAuth();
+  const { accessToken, isLoading, lmsRole, lmsUserId, lmsIdentityLoading, lmsIdentityError } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !accessToken) {
@@ -77,46 +76,6 @@ export default function LMSLayout({ children }: { children: React.ReactNode }) {
     <div className="lms-shell flex min-h-screen bg-[#f8fafc]">
       <LMSSidebar />
       <div className="flex-1 min-h-screen flex flex-col overflow-x-hidden">
-        {/* Top Header Bar */}
-        <header className="sticky top-0 z-30 h-[76px] bg-white border-b border-slate-200 px-6 lg:px-8">
-          <div className="h-full max-w-[1440px] mx-auto flex items-center justify-between gap-6">
-            <div className="lg:hidden w-10" />
-            <div className="hidden md:flex items-center gap-2 text-sm text-slate-500">
-              <span className="font-medium">LMS</span>
-              <span className="text-slate-300">/</span>
-              <span className="font-semibold text-slate-900">Bảng điều khiển</span>
-            </div>
-            <div className="hidden lg:flex relative w-full max-w-sm ml-auto mr-2">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input aria-label="Tìm kiếm" placeholder="Tìm kiếm trong LMS..." className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10" />
-            </div>
-            <button className="relative hidden sm:flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-50 hover:text-primary transition" aria-label="Thông báo">
-              <Bell className="w-[18px] h-[18px]" />
-              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-rose-500 ring-2 ring-white" />
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-slate-900 truncate max-w-[180px]">{localSync.name || 'Người dùng'}</p>
-                <p className="text-xs font-medium text-slate-500">{lmsRole === 'ADMIN' ? 'Quản trị viên' : lmsRole === 'TEACHER' ? 'Giáo viên' : 'Học sinh'}</p>
-              </div>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={localSync.avatar || '/placeholder-avatar.png'}
-                alt={localSync.name}
-                className="w-10 h-10 rounded-full object-cover border border-slate-200"
-              />
-              <ChevronDown className="hidden sm:block w-4 h-4 text-slate-400" />
-              <button
-                onClick={() => { logout(); router.replace('/'); }}
-                className="p-2 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition"
-                title="Đăng xuất"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </header>
-
         {/* Main Content */}
         <main className="flex-1">
           <div className="p-5 sm:p-6 lg:p-8 max-w-[1440px] mx-auto w-full">
