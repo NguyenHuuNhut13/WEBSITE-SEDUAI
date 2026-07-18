@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import LMSSidebar from '@/components/lms/LMSSidebar';
-import { LogOut } from 'lucide-react';
+import { Bell, ChevronDown, LogOut, Search } from 'lucide-react';
 
 export default function LMSLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -29,7 +29,7 @@ export default function LMSLayout({ children }: { children: React.ReactNode }) {
 
   if (isLoading || lmsIdentityLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-14 h-14 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
           <p className="text-slate-500 text-sm font-semibold">Đang tải hệ thống LMS...</p>
@@ -42,7 +42,7 @@ export default function LMSLayout({ children }: { children: React.ReactNode }) {
 
   if (!lmsUserId) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 px-4">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
         <div className="w-full max-w-md rounded-2xl border border-rose-200/50 bg-white p-8 text-center shadow-2xl shadow-rose-500/5">
           <div className="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center mx-auto mb-4">
             <svg className="w-7 h-7 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -74,34 +74,38 @@ export default function LMSLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+    <div className="lms-shell flex min-h-screen bg-[#f8fafc]">
       <LMSSidebar />
       <div className="flex-1 min-h-screen flex flex-col overflow-x-hidden">
         {/* Top Header Bar */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-6 lg:px-8 py-3">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            {/* Spacer for mobile hamburger */}
+        <header className="sticky top-0 z-30 h-[76px] bg-white border-b border-slate-200 px-6 lg:px-8">
+          <div className="h-full max-w-[1440px] mx-auto flex items-center justify-between gap-6">
             <div className="lg:hidden w-10" />
-            {/* Breadcrumb-like section label */}
-            <div className="hidden lg:block">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                Hệ thống quản lý học tập
-              </p>
+            <div className="hidden md:flex items-center gap-2 text-sm text-slate-500">
+              <span className="font-medium">LMS</span>
+              <span className="text-slate-300">/</span>
+              <span className="font-semibold text-slate-900">Bảng điều khiển</span>
             </div>
-            {/* User info & logout */}
+            <div className="hidden lg:flex relative w-full max-w-sm ml-auto mr-2">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input aria-label="Tìm kiếm" placeholder="Tìm kiếm trong LMS..." className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10" />
+            </div>
+            <button className="relative hidden sm:flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-50 hover:text-primary transition" aria-label="Thông báo">
+              <Bell className="w-[18px] h-[18px]" />
+              <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-rose-500 ring-2 ring-white" />
+            </button>
             <div className="flex items-center gap-3">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold text-slate-900 truncate max-w-[180px]">{localSync.name}</p>
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                  {lmsRole === 'ADMIN' ? 'Quản trị viên' : lmsRole === 'TEACHER' ? 'Giáo viên' : 'Học sinh'}
-                </p>
+                <p className="text-sm font-bold text-slate-900 truncate max-w-[180px]">{localSync.name || 'Người dùng'}</p>
+                <p className="text-xs font-medium text-slate-500">{lmsRole === 'ADMIN' ? 'Quản trị viên' : lmsRole === 'TEACHER' ? 'Giáo viên' : 'Học sinh'}</p>
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={localSync.avatar || '/placeholder-avatar.png'}
                 alt={localSync.name}
-                className="w-9 h-9 rounded-xl object-cover border-2 border-slate-200"
+                className="w-10 h-10 rounded-full object-cover border border-slate-200"
               />
+              <ChevronDown className="hidden sm:block w-4 h-4 text-slate-400" />
               <button
                 onClick={() => { logout(); router.replace('/'); }}
                 className="p-2 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition"
@@ -115,7 +119,7 @@ export default function LMSLayout({ children }: { children: React.ReactNode }) {
 
         {/* Main Content */}
         <main className="flex-1">
-          <div className="p-6 lg:p-8 max-w-7xl mx-auto">
+          <div className="p-5 sm:p-6 lg:p-8 max-w-[1440px] mx-auto w-full">
             {children}
           </div>
         </main>

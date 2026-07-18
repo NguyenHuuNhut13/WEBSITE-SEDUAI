@@ -77,18 +77,18 @@ export default function StudentDashboard() {
   return (
     <div className="space-y-8">
       {/* Hero greeting */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary via-blue-600 to-indigo-600 p-6 lg:p-8 text-white shadow-xl shadow-primary/15">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />
-        <div className="absolute bottom-0 left-1/3 w-32 h-32 bg-white/5 rounded-full translate-y-1/2" />
+      <div className="lms-dashboard-banner relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 lg:p-8 text-slate-900 shadow-sm">
+        <div className="lms-banner-orb absolute top-0 right-0 w-64 h-64 rounded-full -translate-y-1/2 translate-x-1/4" />
+        <div className="lms-banner-orb absolute bottom-0 left-1/3 w-32 h-32 rounded-full translate-y-1/2" />
         <div className="relative">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-5 h-5 text-amber-300" />
-            <span className="text-xs font-bold uppercase tracking-wider text-white/70">Cổng học tập</span>
+            <Sparkles className="w-5 h-5 text-primary" />
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">Cổng học tập</span>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-black">
+          <h1 className="text-2xl lg:text-3xl font-black text-slate-900">
             Xin chào, {localSync.name || 'Học sinh'}! 👋
           </h1>
-          <p className="text-sm text-white/75 mt-2 max-w-lg">
+          <p className="text-sm text-slate-500 mt-2 max-w-lg">
             Xem bài giảng, nộp bài tập và tham gia làm bài thi trắc nghiệm ngay hôm nay.
           </p>
         </div>

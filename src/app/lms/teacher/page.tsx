@@ -53,21 +53,21 @@ export default function TeacherDashboard() {
   return (
     <div className="space-y-8">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-primary p-6 lg:p-8 text-white shadow-xl shadow-indigo-500/15">
-        <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/3 translate-x-1/4" />
-        <div className="absolute bottom-0 left-1/4 w-24 h-24 bg-white/5 rounded-full translate-y-1/2" />
+      <div className="lms-dashboard-banner relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 lg:p-8 text-slate-900 shadow-sm">
+        <div className="lms-banner-orb absolute top-0 right-0 w-48 h-48 rounded-full -translate-y-1/3 translate-x-1/4" />
+        <div className="lms-banner-orb absolute bottom-0 left-1/4 w-24 h-24 rounded-full translate-y-1/2" />
         <div className="relative flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-5 h-5 text-amber-300" />
-              <span className="text-xs font-bold uppercase tracking-wider text-white/70">Dashboard giáo viên</span>
+              <Sparkles className="w-5 h-5 text-primary" />
+              <span className="text-xs font-bold uppercase tracking-wider text-primary">Dashboard giáo viên</span>
             </div>
-            <h1 className="text-2xl lg:text-3xl font-black">Chào {localSync.name || 'Giáo viên'}! 🎓</h1>
-            <p className="text-sm text-white/75 mt-2">Quản lý lớp học, bài tập và đề thi</p>
+            <h1 className="text-2xl lg:text-3xl font-black text-slate-900">Chào {localSync.name || 'Giáo viên'}! 🎓</h1>
+            <p className="text-sm text-slate-500 mt-2">Quản lý lớp học, bài tập và đề thi</p>
           </div>
           <Link
             href="/lms/teacher/exams/create"
-            className="hidden sm:flex items-center gap-2 px-5 py-3 bg-white/15 backdrop-blur-sm border border-white/20 hover:bg-white/25 text-white rounded-xl font-bold text-sm transition shadow-lg"
+            className="hidden sm:flex items-center gap-2 px-5 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg font-bold text-sm transition shadow-sm"
           >
             <PenTool className="w-4 h-4" /> Tạo đề mới
           </Link>

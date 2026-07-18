@@ -56,20 +56,20 @@ export default function TeacherRealtimeDashboard({ params }: { params: Promise<{
 
       {/* Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-2xl p-5 shadow-xl">
-          <Users className="w-8 h-8 mb-2 opacity-80" />
-          <p className="text-3xl font-black">{stats.totalStudents}</p>
-          <p className="text-xs font-bold opacity-80">Học sinh</p>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-3"><Users className="w-5 h-5" /></div>
+          <p className="text-3xl font-black text-slate-900">{stats.totalStudents}</p>
+          <p className="text-xs font-bold text-slate-500">Học sinh</p>
         </div>
-        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-2xl p-5 shadow-xl">
-          <Target className="w-8 h-8 mb-2 opacity-80" />
-          <p className="text-3xl font-black">{stats.assignmentCompletion}%</p>
-          <p className="text-xs font-bold opacity-80">Hoàn thành bài tập</p>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3"><Target className="w-5 h-5" /></div>
+          <p className="text-3xl font-black text-slate-900">{stats.assignmentCompletion}%</p>
+          <p className="text-xs font-bold text-slate-500">Hoàn thành bài tập</p>
         </div>
-        <div className="bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-2xl p-5 shadow-xl">
-          <BarChart3 className="w-8 h-8 mb-2 opacity-80" />
-          <p className="text-3xl font-black">{stats.examCompletion}%</p>
-          <p className="text-xs font-bold opacity-80">Hoàn thành bài thi</p>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+          <div className="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center mb-3"><BarChart3 className="w-5 h-5" /></div>
+          <p className="text-3xl font-black text-slate-900">{stats.examCompletion}%</p>
+          <p className="text-xs font-bold text-slate-500">Hoàn thành bài thi</p>
         </div>
       </div>
 

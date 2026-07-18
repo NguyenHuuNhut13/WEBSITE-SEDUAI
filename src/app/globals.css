@@ -582,6 +582,7 @@ h1, h2, h3, h4, h5, h6 {
     position: fixed;
     top: 0;
     left: 0;
+    width: 260px !important;
     height: 100vh;
     transform: translateX(-100%);
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -707,18 +708,46 @@ h1, h2, h3, h4, h5, h6 {
   animation: lmsCountUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-/* Global Reset to remove all border-radius across the entire application */
-*, *::before, *::after {
-  border-radius: 0px !important;
+/* ======================== */
+/* TailAdmin-inspired LMS UI */
+/* ======================== */
+.lms-shell {
+  --lms-border: #e5e7eb;
+  --lms-muted: #667085;
+}
+.lms-shell button,
+.lms-shell a,
+.lms-shell input,
+.lms-shell select,
+.lms-shell textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+.lms-shell .lms-card {
+  border-color: #e5e7eb;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
+}
+.lms-shell .lms-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 24, 40, 0.07);
+}
+.lms-shell .lms-nav-active {
+  animation: none;
+  box-shadow: inset 3px 0 0 #0077bb;
+}
+.lms-shell table thead {
+  background: #f9fafb;
+}
+.lms-shell input,
+.lms-shell select,
+.lms-shell textarea {
+  border-radius: 0.5rem;
 }
 
-/* Exceptions: explicitly styled circular elements (status dots, avatars, slide dots) */
-.rounded-full,
-.avatar,
-.circle-dot,
-[class*="rounded-full"],
-[class*="avatar"] {
-  border-radius: 9999px !important;
+.lms-dashboard-banner {
+  border-left: 4px solid #0077bb;
+}
+.lms-dashboard-banner .lms-banner-orb {
+  background: rgba(0, 119, 187, 0.06);
 }
 
 
