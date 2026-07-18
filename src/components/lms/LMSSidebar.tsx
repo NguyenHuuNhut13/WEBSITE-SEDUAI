@@ -14,14 +14,11 @@ import {
   Shield,
   PenTool,
   BookMarked,
-  Home,
   Menu,
   X,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  Settings,
-  MoreVertical,
 } from 'lucide-react';
 
 interface NavItem {
@@ -54,7 +51,7 @@ export default function LMSSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
-  const { lmsRole, localSync } = useAuth();
+  const { lmsRole } = useAuth();
   const filteredItems = navItems.filter((item) => item.roles.includes(lmsRole));
   const activeItem = [...filteredItems]
     .sort((a, b) => b.href.length - a.href.length)
@@ -112,22 +109,6 @@ export default function LMSSidebar() {
         })}
       </nav>
 
-      <div className={`p-4 border-t border-slate-100 space-y-1 ${collapsed ? 'flex justify-center' : ''}`}>
-        {!collapsed && <div className="mb-3 flex items-center gap-3 rounded-lg bg-slate-50 p-2.5">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={localSync.avatar || '/placeholder-avatar.png'} alt={localSync.name || 'Tài khoản'} className="h-9 w-9 rounded-full object-cover border border-slate-200" />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-semibold text-slate-900">{localSync.name || 'Tài khoản'}</p>
-            <p className="truncate text-[11px] text-slate-500">{roleLabels[lmsRole] || 'Người dùng'}</p>
-          </div>
-          <MoreVertical className="h-4 w-4 shrink-0 text-slate-400" />
-        </div>}
-        <Link href="/" title={collapsed ? 'Về trang chủ' : undefined} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition text-sm font-semibold">
-          <Home className="w-4 h-4" />
-          {!collapsed && <span>Về trang chủ</span>}
-        </Link>
-        {!collapsed && <div className="flex items-center gap-3 px-3 py-2 text-xs text-slate-400"><Settings className="w-4 h-4" /> Cấu hình hệ thống</div>}
-      </div>
     </div>
   );
 
