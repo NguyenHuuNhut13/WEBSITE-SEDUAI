@@ -31,6 +31,15 @@ export async function POST(request: NextRequest) {
     if (actor.role === 'TEACHER' && config.class.teacherId !== actor.id) throw new LmsExamError('Bạn không phụ trách bài thi này', 403);
 
     if (action === 'generate') {
+      // AI generation requires a server-side provider key. Return an actionable
+      // error before loading lesson content so the teacher can fix deployment
+      // configuration instead of seeing a generic 503.
+      if (!process.env.GEMINI_API_KEY && !process.env.GROQ_API_KEY) {
+        throw new LmsExamError(
+          'Chưa cấu hình nhà cung cấp AI. Hãy thêm GEMINI_API_KEY hoặc GROQ_API_KEY vào biến môi trường server, sau đó khởi động/deploy lại.',
+          503,
+        );
+      }
       const questions = await generateDraftExamQuestions(config);
       const updated = await prisma.lmsExamConfig.update({
         where: { id: config.id },

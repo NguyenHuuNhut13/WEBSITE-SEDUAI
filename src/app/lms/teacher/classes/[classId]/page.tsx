@@ -12,6 +12,7 @@ export default function TeacherClassDetail({ params }: { params: Promise<{ class
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'subjects' | 'students' | 'exams'>('subjects');
   const [examActionId, setExamActionId] = useState<string | null>(null);
+  const [examError, setExamError] = useState<string | null>(null);
 
   const loadClass = useCallback(async () => {
     try {
@@ -32,6 +33,7 @@ export default function TeacherClassDetail({ params }: { params: Promise<{ class
 
   const handleExamAction = async (examConfigId: string, action: 'generate' | 'publish') => {
     setExamActionId(examConfigId);
+    setExamError(null);
     try {
       const response = await fetch('/api/lms/exams/questions', {
         method: 'POST',
@@ -42,7 +44,7 @@ export default function TeacherClassDetail({ params }: { params: Promise<{ class
       if (!response.ok || !json.success) throw new Error(json.error || 'Không thể cập nhật đề thi');
       await loadClass();
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Không thể cập nhật đề thi');
+      setExamError(error instanceof Error ? error.message : 'Không thể cập nhật đề thi');
     } finally {
       setExamActionId(null);
     }
@@ -144,6 +146,15 @@ export default function TeacherClassDetail({ params }: { params: Promise<{ class
 
       {activeTab === 'exams' && (
         <div className="space-y-3">
+          {examError && (
+            <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+              <p className="font-bold">Không thể sinh/cập nhật đề thi</p>
+              <p className="mt-1">{examError}</p>
+              {examError.includes('GEMINI_API_KEY') && (
+                <p className="mt-2 text-xs text-red-700">Sau khi thêm biến môi trường, hãy khởi động lại server hoặc redeploy rồi thử lại.</p>
+              )}
+            </div>
+          )}
           <Link href="/lms/teacher/exams/create" className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition w-fit">
             <PenTool className="w-4 h-4" /> Tạo đề thi mới
           </Link>

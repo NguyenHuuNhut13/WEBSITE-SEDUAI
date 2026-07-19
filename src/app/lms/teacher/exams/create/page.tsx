@@ -187,6 +187,7 @@ export default function CreateExamPage() {
       {/* Info */}
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs text-blue-700">
         <strong>Quy trình:</strong> Sau khi tạo, mở tab <strong>Bài thi</strong> của lớp, bấm <strong>Sinh đề AI</strong> để tạo câu hỏi, kiểm tra nội dung rồi bấm <strong>Duyệt & công bố</strong>. Học sinh chỉ thấy đề sau bước công bố.
+        <p className="mt-2">Sinh đề AI cần cấu hình <code className="font-bold">GEMINI_API_KEY</code> hoặc <code className="font-bold">GROQ_API_KEY</code> trên server.</p>
       </div>
 
       <button onClick={handleSubmit} disabled={saving}
