@@ -6,93 +6,8 @@ import Link from 'next/link';
 import { Search, GraduationCap, Headset, Mail, RefreshCw, ArrowUpDown, Tag, Wallet } from 'lucide-react';
 import CourseCard from '@/components/CourseCard';
 import { Course } from '@/data/courses';
-import { getEduCourses, ApiCourse } from '@/services/api';
-
-// Ảnh fallback theo danh mục
-const CATEGORY_FALLBACK_IMAGES: Record<string, string> = {
-  'Marketing & Bán hàng': 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop&q=80',
-  'Kinh doanh & Khởi nghiệp': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80',
-  'AI & Công nghệ': 'https://images.unsplash.com/photo-1677442136019-21780efad99a?w=800&auto=format&fit=crop&q=80',
-};
-const DEFAULT_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80';
-
-
-
-function extractCategory(acfCategory: unknown): string {
-  if (Array.isArray(acfCategory) && acfCategory.length > 0) {
-    const first = acfCategory[0];
-    if (first && typeof first === 'object' && 'title' in first) {
-      return String((first as { title: string }).title);
-    }
-  }
-  if (acfCategory && typeof acfCategory === 'object' && 'title' in acfCategory) {
-    return String((acfCategory as { title: string }).title);
-  }
-  if (typeof acfCategory === 'string' && acfCategory) {
-    return acfCategory;
-  }
-  return 'Khác';
-}
-
-function extractInstructor(acf: ApiCourse['acf']): string {
-  if (acf?.faculty && typeof acf.faculty === 'object' && 'title' in acf.faculty) {
-    return String((acf.faculty as { title: string }).title);
-  }
-  if (acf?.expactteacher && typeof acf.expactteacher === 'object' && 'title' in acf.expactteacher) {
-    return String((acf.expactteacher as { title: string }).title);
-  }
-  if (typeof acf?.expactteacher === 'string' && acf.expactteacher) {
-    return acf.expactteacher;
-  }
-  return 'Giảng viên SeduAi';
-}
-
-function parsePrice(value: unknown): number {
-  if (typeof value === 'number' && Number.isFinite(value)) return value;
-  if (typeof value === 'string' && value.trim() !== '') {
-    const parsed = Number(value);
-    if (Number.isFinite(parsed)) return parsed;
-  }
-  return 0;
-}
-
-function mapApiCourse(c: ApiCourse): Course {
-  const category = extractCategory(c.acf?.category);
-  const price = parsePrice(c.acf?.price);
-  const salePrice = parsePrice(c.acf?.sale_price);
-  const discountPrice = salePrice > 0 ? salePrice : price;
-  const image = c.acf?.featureimg || CATEGORY_FALLBACK_IMAGES[category] || DEFAULT_FALLBACK_IMAGE;
-
-  return {
-    slug: `api-course-${c.id}`,
-    title: typeof c.title === 'object' && c.title !== null && 'rendered' in c.title
-      ? (c.title as { rendered: string }).rendered
-      : String(c.title || ''),
-    description: c.acf?.description?.replace(/<[^>]*>/g, '') || 'Khóa học chính thức từ hệ thống SeduAi EduCenter.',
-    instructor: extractInstructor(c.acf),
-    level: 'Mọi trình độ',
-    duration: c.acf?.duration || '—',
-    student_count: 420 + (c.id % 150),
-    rating: 4.9,
-    discount_price: discountPrice,
-    price,
-    reviews_count: 24,
-    image,
-    category,
-    benefits: [
-      'Lộ trình chuẩn thực chiến SeduAi EduCenter',
-      'Thực hành dự án với sự hướng dẫn của chuyên gia',
-      'Đồng hành cùng Trợ lý AI giải đáp thắc mắc 24/7',
-    ],
-    syllabus: [
-      { title: 'Chương 1: Khởi động và kiến thức nền tảng', lessons: ['Bài 1: Giới thiệu khóa học', 'Bài 2: Chuẩn bị môi trường & công cụ'] },
-      { title: 'Chương 2: Thực chiến kỹ năng cốt lõi', lessons: ['Bài 3: Ứng dụng thực tế và thực hành chuyên sâu'] },
-    ],
-    reviews: [
-      { name: 'Học viên SeduAi', rating: 5, date: 'Vừa xong', comment: 'Khóa học rất chất lượng, giảng viên nhiệt tình, AI hỗ trợ trả lời rất nhanh.' },
-    ],
-  };
-}
+import { getEduCourses } from '@/services/api';
+import { mapApiCourseToCourse } from '@/lib/course-mapping';
 
 function CourseListContent() {
   const searchParams = useSearchParams();
@@ -115,7 +30,7 @@ function CourseListContent() {
     setLoading(true);
     getEduCourses().then((list) => {
       if (list && list.length > 0) {
-        setApiCoursesList(list.map(mapApiCourse));
+        setApiCoursesList(list.map(mapApiCourseToCourse));
       }
       setLoading(false);
     });
@@ -450,4 +365,3 @@ export default function CourseList() {
     </Suspense>
   );
 }
-

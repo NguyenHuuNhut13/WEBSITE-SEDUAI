@@ -23,6 +23,7 @@ import {
 import { courses, Course } from '@/data/courses';
 import CourseCard from '@/components/CourseCard';
 import { createLead, getEduCourses } from '@/services/api';
+import { getRelatedCourses } from '@/lib/course-mapping';
 import { htmlToPlainText } from '@/lib/plain-text';
 
 type TabKey = 'overview' | 'syllabus' | 'reviews' | 'instructor';
@@ -38,13 +39,26 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
 
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
+  const [relatedCourses, setRelatedCourses] = useState<Course[]>([]);
+  const [relatedLoading, setRelatedLoading] = useState(true);
 
   React.useEffect(() => {
+    const localRelated = (current: Course) => courses
+      .filter((item) => item.slug !== current.slug)
+      .sort((left, right) => Number(right.category === current.category) - Number(left.category === current.category))
+      .slice(0, 3);
+
     // 1. Check local courses first
     const local = courses.find((c) => c.slug === slug);
     if (local) {
       setCourse(local);
+      setRelatedCourses(localRelated(local));
       setLoading(false);
+      setRelatedLoading(true);
+      getEduCourses().then((list) => {
+        const apiRelated = getRelatedCourses(list, local, slug);
+        if (apiRelated.length > 0) setRelatedCourses(apiRelated);
+      }).finally(() => setRelatedLoading(false));
       return;
     }
 
@@ -252,11 +266,14 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
               intro: found.acf?.intro || found.acf?.description || ''
             };
             setCourse(mapped);
+            setRelatedCourses(getRelatedCourses(list, mapped, slug));
           }
         }
+        setRelatedLoading(false);
         setLoading(false);
       });
     } else {
+      setRelatedLoading(false);
       setLoading(false);
     }
   }, [slug]);
@@ -275,9 +292,6 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
   if (!course) {
     notFound();
   }
-
-  // Related courses (excluding current course, up to 3)
-  const relatedCourses = courses.filter((c) => c.slug !== slug).slice(0, 3);
 
   const toggleAccordion = (index: number) => {
     setOpenAccordions((prev) => ({
@@ -696,11 +710,19 @@ export default function CourseDetail({ params }: { params: Promise<{ slug: strin
               Xem tất cả <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {relatedCourses.map((c) => (
-              <CourseCard key={c.slug} course={c} />
-            ))}
-          </div>
+          {relatedLoading ? (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              {[0, 1, 2].map((item) => <div key={item} className="h-80 animate-pulse rounded-2xl border border-slate-200 bg-slate-100" />)}
+            </div>
+          ) : relatedCourses.length > 0 ? (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+              {relatedCourses.map((c) => <CourseCard key={c.slug} course={c} />)}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">
+              Chưa có khóa học phù hợp trong cùng danh mục.
+            </div>
+          )}
         </div>
       </section>
 
