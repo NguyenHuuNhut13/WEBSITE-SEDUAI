@@ -16,7 +16,7 @@ export class AiGradingUnavailableError extends Error {
 
 export class QuizGenerationUnavailableError extends Error {
   constructor(
-    message = 'SEDUAI chưa thể tạo đề thi từ học liệu. Vui lòng thử lại sau.',
+    message = 'Nhà cung cấp AI không phản hồi hoặc API key/hạn mức không hợp lệ. Kiểm tra GEMINI_API_KEY/GROQ_API_KEY và thử lại.',
     public status = 503,
   ) {
     super(message);
@@ -222,6 +222,7 @@ Trả về duy nhất JSON hợp lệ theo cấu trúc:
 }
 
 async function callSeduAiJson(prompt: string, maxOutputTokens: number): Promise<string> {
+  const providerFailures: string[] = [];
   if (process.env.GEMINI_API_KEY) {
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
@@ -237,8 +238,14 @@ async function callSeduAiJson(prompt: string, maxOutputTokens: number): Promise<
         const data = await response.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
         if (text) return text;
+        providerFailures.push('Gemini returned an empty response');
+      } else {
+        const details = (await response.text()).slice(0, 300);
+        providerFailures.push(`Gemini HTTP ${response.status}`);
+        console.warn('[AI Provider] Gemini request rejected:', response.status, details);
       }
     } catch (e) {
+      providerFailures.push('Gemini request failed');
       console.warn('[AI Provider] Gemini failed, checking fallback:', e);
     }
   }
@@ -261,13 +268,19 @@ async function callSeduAiJson(prompt: string, maxOutputTokens: number): Promise<
         const data = await response.json();
         const text = data.choices?.[0]?.message?.content;
         if (text) return text;
+        providerFailures.push('Groq returned an empty response');
+      } else {
+        const details = (await response.text()).slice(0, 300);
+        providerFailures.push(`Groq HTTP ${response.status}`);
+        console.warn('[AI Provider] Groq request rejected:', response.status, details);
       }
     } catch (e) {
+      providerFailures.push('Groq request failed');
       console.warn('[AI Provider] Groq failed, checking fallback:', e);
     }
   }
 
-  throw new Error('SEDUAI provider unavailable');
+  throw new Error(`SEDUAI provider unavailable${providerFailures.length ? ` (${providerFailures.join(', ')})` : ''}`);
 
   // Legacy demo fallback retained below for reference only; never reached in production.
   if (prompt.includes('chấm bài') || prompt.includes('đánh giá')) {
