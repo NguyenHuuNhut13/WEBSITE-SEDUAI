@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Bell, Search } from 'lucide-react';
+import { Bell, Home, LogOut, Search, UserRound, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import LMSSidebar from '@/components/lms/LMSSidebar';
@@ -18,8 +18,11 @@ type LmsNotification = {
 export default function LMSLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { accessToken, isLoading, lmsRole, lmsUserId, lmsIdentityLoading, lmsIdentityError, user } = useAuth();
+  const { accessToken, isLoading, lmsRole, lmsUserId, lmsIdentityLoading, lmsIdentityError, user, logout } = useAuth();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
   const [notifications, setNotifications] = useState<LmsNotification[]>([]);
   const [readNotificationIds, setReadNotificationIds] = useState<string[]>([]);
 
@@ -105,6 +108,19 @@ export default function LMSLayout({ children }: { children: React.ReactNode }) {
       if (lmsUserId) localStorage.setItem(`lms-read-notifications:${lmsUserId}`, JSON.stringify(next));
       return next;
     });
+  };
+
+  const handleLogout = async () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    setLogoutError('');
+    const success = await logout();
+    if (success) {
+      router.replace('/login');
+      return;
+    }
+    setLogoutError('Không thể đăng xuất. Vui lòng thử lại.');
+    setLoggingOut(false);
   };
 
   useEffect(() => {
@@ -238,18 +254,47 @@ export default function LMSLayout({ children }: { children: React.ReactNode }) {
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-2 border-l border-slate-200 pl-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden bg-primary/10 text-sm font-black text-primary" aria-hidden="true">
-                {user?.avatar ? (
-                  <img src={user.avatar} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  (user?.name || user?.username || 'U').charAt(0).toUpperCase()
-                )}
-              </div>
-              <div className="hidden text-right sm:block">
-                <p className="max-w-32 truncate text-sm font-bold text-slate-900">{user?.name || user?.username || 'Người dùng'}</p>
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{lmsRole}</p>
-              </div>
+            <div className="relative border-l border-slate-200 pl-3">
+              <button
+                type="button"
+                onClick={() => { setAccountOpen((open) => !open); setLogoutError(''); }}
+                className="flex items-center gap-2 text-left transition hover:bg-slate-50"
+                aria-label="Mở menu tài khoản"
+                aria-expanded={accountOpen}
+              >
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden bg-primary/10 text-sm font-black text-primary" aria-hidden="true">
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    (user?.name || user?.username || 'U').charAt(0).toUpperCase()
+                  )}
+                </div>
+                <div className="hidden text-right sm:block">
+                  <p className="max-w-32 truncate text-sm font-bold text-slate-900">{user?.name || user?.username || 'Người dùng'}</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{lmsRole}</p>
+                </div>
+              </button>
+              {accountOpen && (
+                <div className="absolute right-0 top-12 z-50 w-56 border border-slate-200 bg-white py-1 shadow-xl">
+                  <div className="border-b border-slate-100 px-4 py-3">
+                    <p className="truncate text-sm font-bold text-slate-900">{user?.name || user?.username || 'Người dùng'}</p>
+                    <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">{lmsRole}</p>
+                  </div>
+                  <Link href="/" onClick={() => setAccountOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-primary">
+                    <Home className="h-4 w-4" /> Về trang chủ
+                  </Link>
+                  <Link href="/profile" onClick={() => setAccountOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-primary">
+                    <UserRound className="h-4 w-4" /> Quản lý hồ sơ
+                  </Link>
+                  <div className="border-t border-slate-100 px-4 py-2">
+                    <button type="button" onClick={() => void handleLogout()} disabled={loggingOut} className="flex w-full items-center gap-3 py-2 text-sm font-semibold text-rose-600 transition hover:text-rose-700 disabled:opacity-50">
+                      {loggingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+                      {loggingOut ? 'Đang đăng xuất...' : 'Đăng xuất'}
+                    </button>
+                    {logoutError && <p className="mt-1 text-[11px] text-rose-600">{logoutError}</p>}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>
