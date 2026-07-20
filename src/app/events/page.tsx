@@ -133,11 +133,11 @@ export default function EventsPage() {
       {/* Header Banner */}
       <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-primary-dark text-white py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-15" />
-        <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-primary/15 rounded-full blur-3xl animate-blob" />
-        <div className="absolute bottom-0 left-1/3 w-56 h-56 bg-accent/10 rounded-full blur-3xl animate-blob" style={{ animationDelay: '5s' }} />
+        <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-primary/15 rounded-none blur-3xl animate-blob" />
+        <div className="absolute bottom-0 left-1/3 w-56 h-56 bg-accent/10 rounded-none blur-3xl animate-blob" style={{ animationDelay: '5s' }} />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-4">
-          <span className="text-[10px] uppercase font-black tracking-widest text-primary bg-white px-3.5 py-1.5 rounded-full inline-block">
+          <span className="text-[10px] uppercase font-black tracking-widest text-primary bg-white px-3.5 py-1.5 rounded-none inline-block">
             Sự kiện công nghệ & học thuật
           </span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight">
@@ -160,14 +160,14 @@ export default function EventsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 space-y-8">
         {/* Search and Filters */}
-        <div className="bg-white border border-slate-200 p-5 rounded-3xl shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between relative z-10">
+        <div className="bg-white border border-slate-200 p-5 rounded-none shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between relative z-10">
           {/* Category Pills */}
           <div className="flex flex-wrap gap-2 w-full md:w-auto">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4.5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-300 border cursor-pointer ${
+                className={`px-4.5 py-2.5 rounded-none text-xs font-bold transition-all duration-300 border cursor-pointer ${
                   selectedCategory === cat
                     ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20 scale-105'
                     : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
@@ -188,7 +188,7 @@ export default function EventsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Tìm sự kiện, diễn giả..."
-              className="w-full border border-slate-200 rounded-2xl pl-10 pr-4 py-2.5 text-xs bg-slate-50 text-slate-900 placeholder-slate-450 focus:bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
+              className="w-full border border-slate-200 rounded-none pl-10 pr-4 py-2.5 text-xs bg-slate-50 text-slate-900 placeholder-slate-450 focus:bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
             />
           </div>
         </div>
@@ -199,7 +199,7 @@ export default function EventsPage() {
             {filteredEvents.map((evt) => (
               <div
                 key={evt.id}
-                className={`bg-white rounded-3xl overflow-hidden border border-slate-200 shadow-sm flex flex-col justify-between hover:scale-[1.01] hover:shadow-md transition-all duration-500 group relative ${categoryGlowColors[evt.category]}`}
+                className={`bg-white rounded-none overflow-hidden border border-slate-200 shadow-sm flex flex-col justify-between hover:scale-[1.01] hover:shadow-md transition-all duration-500 group relative ${categoryGlowColors[evt.category]}`}
               >
                 <div>
                   {/* Premium Banner image block */}
@@ -208,15 +208,15 @@ export default function EventsPage() {
                     <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_45%,rgba(255,255,255,0.05)_50%,transparent_55%)] bg-[size:10px_10px] pointer-events-none" />
                     
                     <div className="flex items-start justify-between relative z-10">
-                      <span className={`px-3 py-1 rounded-full text-[9px] font-black border uppercase tracking-wider ${categoryBadgeColors[evt.category]} bg-white/10 backdrop-blur-md`}>
+                      <span className={`px-3 py-1 rounded-none text-[9px] font-black border uppercase tracking-wider ${categoryBadgeColors[evt.category]} bg-white/10 backdrop-blur-md`}>
                         {evt.category}
                       </span>
                       
                       <div className="flex items-center gap-1.5">
-                        <span className={`px-2.5 py-1 rounded-lg text-[9px] font-black tracking-wider uppercase ${statusBadgeColors[evt.status]}`}>
+                        <span className={`px-2.5 py-1 rounded-none text-[9px] font-black tracking-wider uppercase ${statusBadgeColors[evt.status]}`}>
                           {evt.status}
                         </span>
-                        <span className="bg-white/10 backdrop-blur-md rounded-lg px-2.5 py-1 text-[9px] font-black text-emerald-400 border border-emerald-400/20 uppercase tracking-wider">
+                        <span className="bg-white/10 backdrop-blur-md rounded-none px-2.5 py-1 text-[9px] font-black text-emerald-400 border border-emerald-400/20 uppercase tracking-wider">
                           Miễn phí
                         </span>
                       </div>
@@ -229,7 +229,7 @@ export default function EventsPage() {
                           {evt.speaker.split('(')[0].trim()}
                         </span>
                       </div>
-                      <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white/80 group-hover:bg-white group-hover:text-slate-950 transition-all duration-300">
+                      <div className="w-8 h-8 rounded-none bg-white/10 backdrop-blur-md flex items-center justify-center text-white/80 group-hover:bg-white group-hover:text-slate-950 transition-all duration-300">
                         <ArrowUpRight className="w-4 h-4" />
                       </div>
                     </div>
@@ -266,7 +266,7 @@ export default function EventsPage() {
                 <div className="px-6 pb-6 pt-2">
                   <button
                     onClick={() => handleOpenRegister(evt)}
-                    className="w-full py-3 bg-slate-100 hover:bg-primary text-slate-800 hover:text-white text-xs font-black rounded-xl transition-all duration-300 border border-slate-200 hover:border-primary shadow-sm hover:shadow-primary/20 cursor-pointer uppercase tracking-wider"
+                    className="w-full py-3 bg-slate-100 hover:bg-primary text-slate-800 hover:text-white text-xs font-black rounded-none transition-all duration-300 border border-slate-200 hover:border-primary shadow-sm hover:shadow-primary/20 cursor-pointer uppercase tracking-wider"
                   >
                     Đăng ký giữ chỗ
                   </button>
@@ -275,7 +275,7 @@ export default function EventsPage() {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-3xl py-20 border border-slate-200 text-center space-y-4 shadow-sm">
+          <div className="bg-white rounded-none py-20 border border-slate-200 text-center space-y-4 shadow-sm">
             <AlertCircle className="w-12 h-12 text-slate-400 mx-auto" />
             <div className="space-y-1">
               <h3 className="text-lg font-bold text-slate-800">Không tìm thấy sự kiện</h3>
@@ -288,17 +288,17 @@ export default function EventsPage() {
       {/* Registration Modal */}
       {registerEvent && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white border border-slate-200 w-full max-w-md rounded-3xl overflow-hidden shadow-2xl relative animate-slide-up-fade">
+          <div className="bg-white border border-slate-200 w-full max-w-md rounded-none overflow-hidden shadow-2xl relative animate-slide-up-fade">
             <button
               onClick={() => setRegisterEvent(null)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 text-slate-500 hover:text-slate-950 hover:bg-slate-200 hover:rotate-90 transition-all duration-300 cursor-pointer"
+              className="absolute top-4 right-4 p-2 rounded-none bg-slate-100 text-slate-500 hover:text-slate-950 hover:bg-slate-200 hover:rotate-90 transition-all duration-300 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
 
             {isSuccess ? (
               <div className="p-10 text-center space-y-5">
-                <div className="w-20 h-20 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto animate-scale-up">
+                <div className="w-20 h-20 rounded-none bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto animate-scale-up">
                   <CheckCircle className="w-10 h-10" />
                 </div>
                 <div className="space-y-2">
@@ -311,7 +311,7 @@ export default function EventsPage() {
             ) : (
               <form onSubmit={handleRegisterSubmit} className="p-6 sm:p-8 space-y-5">
                 <div className="space-y-2.5">
-                  <span className={`text-[9px] font-black px-2.5 py-1 rounded-md uppercase tracking-wider border ${categoryBadgeColors[registerEvent.category]} bg-slate-50`}>
+                  <span className={`text-[9px] font-black px-2.5 py-1 rounded-none uppercase tracking-wider border ${categoryBadgeColors[registerEvent.category]} bg-slate-50`}>
                     {registerEvent.category}
                   </span>
                   <h3 className="font-black text-slate-900 text-base sm:text-lg leading-snug mt-2">
@@ -336,7 +336,7 @@ export default function EventsPage() {
                         value={formData[field.key as keyof typeof formData]}
                         onChange={(e) => setFormData((prev) => ({ ...prev, [field.key]: e.target.value }))}
                         placeholder={field.placeholder}
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-none text-xs text-slate-900 focus:bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                       />
                     </div>
                   ))}
@@ -344,7 +344,7 @@ export default function EventsPage() {
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-primary hover:bg-primary-dark text-white text-xs font-black rounded-xl transition-all duration-300 shadow-lg shadow-primary/20 cursor-pointer uppercase tracking-wider"
+                  className="w-full py-3 bg-primary hover:bg-primary-dark text-white text-xs font-black rounded-none transition-all duration-300 shadow-lg shadow-primary/20 cursor-pointer uppercase tracking-wider"
                 >
                   Xác nhận đăng ký tham gia
                 </button>

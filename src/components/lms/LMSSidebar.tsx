@@ -64,8 +64,8 @@ export default function LMSSidebar() {
   const sidebarContent = (
     <div className="h-full flex flex-col bg-white border-r border-slate-200">
       <div className={`relative h-[76px] px-5 border-b border-slate-100 flex items-center ${collapsed ? 'justify-center' : 'justify-between'}`}>
-        <Link href="/lms" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm flex-shrink-0 group-hover:bg-primary-dark transition-colors">
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 rounded-none bg-primary flex items-center justify-center text-white shadow-sm flex-shrink-0 group-hover:bg-primary-dark transition-colors">
             <Brain className="w-5 h-5" strokeWidth={2.5} />
           </div>
           {!collapsed && <div className="overflow-hidden">
