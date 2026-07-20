@@ -571,21 +571,7 @@ h1, h2, h3, h4, h5, h6 {
 /* LMS System — Design System */
 /* ======================== */
 
-/* Sidebar */
-.lms-shell,
-.lms-shell *,
-.lms-shell *::before,
-.lms-shell *::after {
-  /* Flat LMS visual language: keep rounded corners only for the external
-     chatbot/ChatGPT surfaces, which are outside this shell. */
-  border-radius: 0 !important;
-}
-
-/* The shared Navbar also sits outside .lms-shell. Keep the whole LMS route
-   flat while leaving the floating chatbot's own rounded UI untouched. */
-body.lms-flat-ui *:not(.lms-chatbot):not(.lms-chatbot *) {
-  border-radius: 0 !important;
-}
+/* Global border-radius reset is handled at the bottom of this file */
 
 .lms-sidebar {
   flex-shrink: 0;
@@ -765,8 +751,10 @@ body.lms-flat-ui *:not(.lms-chatbot):not(.lms-chatbot *) {
   background: rgba(0, 119, 187, 0.06);
 }
 
-/* Flat site-wide surfaces. The full-screen ChatGPT workspace is intentionally excluded. */
-body *:not(.chatgpt-shell):not(.chatgpt-shell *) {
+/* Flat site-wide surfaces. Enforce 90-degree corners globally. */
+body *:not(.rounded-full):not([class*="avatar"]):not([class*="circle-dot"]),
+body *:not(.rounded-full):not([class*="avatar"]):not([class*="circle-dot"])::before,
+body *:not(.rounded-full):not([class*="avatar"]):not([class*="circle-dot"])::after {
   border-radius: 0 !important;
 }
 
