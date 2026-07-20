@@ -581,6 +581,12 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 0 !important;
 }
 
+/* The shared Navbar also sits outside .lms-shell. Keep the whole LMS route
+   flat while leaving the floating chatbot's own rounded UI untouched. */
+body.lms-flat-ui *:not(.lms-chatbot):not(.lms-chatbot *) {
+  border-radius: 0 !important;
+}
+
 .lms-sidebar {
   flex-shrink: 0;
   z-index: 40;
@@ -757,6 +763,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 .lms-dashboard-banner .lms-banner-orb {
   background: rgba(0, 119, 187, 0.06);
+}
+
+/* Flat site-wide surfaces. Chatbot and ChatGPT are intentionally excluded. */
+body *:not(.lms-chatbot):not(.lms-chatbot *):not(.chatgpt-shell):not(.chatgpt-shell *) {
+  border-radius: 0 !important;
 }
 
 

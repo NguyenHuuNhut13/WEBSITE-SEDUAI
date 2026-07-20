@@ -202,7 +202,7 @@ export default function FloatingChatbot() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 font-sans flex flex-col items-end">
+    <div className="lms-chatbot fixed bottom-6 right-6 z-50 font-sans flex flex-col items-end">
       {/* Chat Window Popup */}
       {isOpen && (
         <div className="w-[350px] sm:w-[380px] h-[520px] bg-white border border-slate-200/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col mb-4 animate-scale-up border-primary/10">

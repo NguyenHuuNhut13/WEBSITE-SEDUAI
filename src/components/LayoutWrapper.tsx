@@ -11,6 +11,12 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   const pathname = usePathname();
   // Ẩn toàn bộ Navbar và Footer khi ở trang AI Assistant (/ai-assistant) để có giao diện chuẩn Full-screen ChatGPT
   const isAiAssistant = pathname?.startsWith('/ai-assistant');
+  const isLms = pathname?.startsWith('/lms');
+
+  React.useEffect(() => {
+    document.body.classList.toggle('lms-flat-ui', Boolean(isLms));
+    return () => document.body.classList.remove('lms-flat-ui');
+  }, [isLms]);
 
   React.useEffect(() => {
     // Only run on client side
