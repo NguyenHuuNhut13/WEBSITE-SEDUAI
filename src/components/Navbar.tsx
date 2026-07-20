@@ -253,12 +253,12 @@ export default function Navbar() {
             isSticky 
               ? 'h-16 w-full' 
               : pathname === '/'
-                ? 'h-16 lg:h-20 w-full bg-[#0077bb]/90 backdrop-blur-xl border border-white/10 px-6 lg:px-8 rounded-2xl shadow-2xl'
+                ? 'h-16 lg:h-20 w-full bg-[#0077bb]/90 backdrop-blur-xl border border-white/10 px-6 lg:px-8 rounded-none shadow-2xl'
                 : 'h-16 w-full bg-transparent border-0 px-0'
           }`}>
             
             <Link href="/" onClick={() => handleLinkClick('/')} className="flex items-center space-x-2.5 group cursor-pointer py-2">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shadow-md transition duration-300 group-hover:scale-105 bg-white text-primary shadow-black/10">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-none flex items-center justify-center shadow-md transition duration-300 group-hover:scale-105 bg-white text-primary shadow-black/10">
                 <Brain className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div className="flex flex-col">
@@ -282,13 +282,13 @@ export default function Navbar() {
                         </span>
                         <ChevronDown className="w-3.5 h-3.5 transition duration-200 group-hover:rotate-180 text-white/70 group-hover:text-white" />
                       </span>
-                      <div className="absolute top-full left-0 w-64 bg-white border border-slate-100 rounded-2xl shadow-2xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 transform translate-y-2 group-hover:translate-y-0 text-slate-800">
+                      <div className="absolute top-full left-0 w-64 bg-white border border-slate-100 rounded-none shadow-2xl p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 transform translate-y-2 group-hover:translate-y-0 text-slate-800">
                         {link.submenu.map((sub) => (
                           <Link
                             key={sub.name}
                             href={sub.href}
                             onClick={() => handleLinkClick(sub.href)}
-                            className="block px-4 py-2.5 text-[11px] font-bold text-slate-700 hover:bg-primary/10 hover:text-primary rounded-xl transition"
+                            className="block px-4 py-2.5 text-[11px] font-bold text-slate-700 hover:bg-primary/10 hover:text-primary rounded-none transition"
                           >
                             {sub.name}
                           </Link>
@@ -334,14 +334,14 @@ export default function Navbar() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Tìm khóa học..."
-                    className="w-full border rounded-xl pl-3 pr-3 py-1.5 text-xs focus:outline-none focus:ring-2 bg-white/15 hover:bg-white/20 focus:bg-white/25 border-white/20 text-white placeholder-white/70 focus:ring-white/30"
+                    className="w-full border rounded-none pl-3 pr-3 py-1.5 text-xs focus:outline-none focus:ring-2 bg-white/15 hover:bg-white/20 focus:bg-white/25 border-white/20 text-white placeholder-white/70 focus:ring-white/30"
                     autoFocus={isSearchOpen}
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsSearchOpen(!isSearchOpen)}
-                  className="p-2 rounded-xl transition duration-200 flex items-center justify-center cursor-pointer hover:bg-white/10 text-white/95 hover:text-white"
+                  className="p-2 rounded-none transition duration-200 flex items-center justify-center cursor-pointer hover:bg-white/10 text-white/95 hover:text-white"
                   title="Tìm kiếm"
                 >
                   {isSearchOpen ? <X className="w-4 h-4" /> : <Search className="w-4 h-4" />}
@@ -351,7 +351,7 @@ export default function Navbar() {
               <Link
                 href="/ai-assistant"
                 onClick={() => handleLinkClick('/ai-assistant')}
-                className="p-2 rounded-xl transition duration-200 flex items-center justify-center relative cursor-pointer group hover:bg-white/10 text-amber-400 hover:text-amber-300"
+                className="p-2 rounded-none transition duration-200 flex items-center justify-center relative cursor-pointer group hover:bg-white/10 text-amber-400 hover:text-amber-300"
                 title="Mở AI Assistant"
               >
                 <Sparkles className="w-4 h-4 animate-pulse" />
@@ -365,7 +365,7 @@ export default function Navbar() {
                 <div className="relative">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center gap-2 border px-3 py-1.5 rounded-xl transition text-xs font-semibold cursor-pointer shadow-inner bg-white/15 hover:bg-white/25 border-white/30 text-white"
+                    className="flex items-center gap-2 border px-3 py-1.5 rounded-none transition text-xs font-semibold cursor-pointer shadow-inner bg-white/15 hover:bg-white/25 border-white/30 text-white"
                   >
                     <img
                       src={localSync.avatar}
@@ -375,15 +375,15 @@ export default function Navbar() {
                       decoding="async"
                     />
                     <span className="max-w-[90px] truncate font-bold">{localSync.name}</span>
-                    <div className="flex items-center gap-0.5 bg-amber-400 text-slate-950 font-extrabold px-1.5 py-0.5 rounded text-[10px] shadow-sm">
+                    <div className="flex items-center gap-0.5 bg-amber-400 text-slate-950 font-extrabold px-1.5 py-0.5 rounded-none text-[10px] shadow-sm">
                       <Award className="w-3 h-3 text-slate-950" />
                       <span>{localSync.point}</span>
                     </div>
                   </button>
 
                   {showUserMenu && (
-                    <div className="absolute right-0 top-full mt-2 w-60 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 text-slate-800 z-50 animate-scale-up">
-                      <div className="px-3 py-2.5 bg-slate-50 rounded-xl mb-1 border border-slate-100">
+                    <div className="absolute right-0 top-full mt-2 w-60 bg-white rounded-none shadow-2xl border border-slate-100 p-2 text-slate-800 z-50 animate-scale-up">
+                      <div className="px-3 py-2.5 bg-slate-50 rounded-none mb-1 border border-slate-100">
                         <p className="text-xs font-black text-slate-900 truncate">{localSync.name}</p>
                         <p className="text-[11px] text-amber-600 font-bold flex items-center gap-1 mt-0.5">
                           <Award className="w-3.5 h-3.5 fill-amber-400" /> Điểm VIP: {localSync.point} điểm
@@ -392,7 +392,7 @@ export default function Navbar() {
                       <Link
                         href="/profile"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-primary/10 hover:text-primary rounded-xl transition"
+                        className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-primary/10 hover:text-primary rounded-none transition"
                       >
                         <User className="w-4 h-4 text-primary" /> Quản lý tài khoản VIP
                       </Link>
@@ -403,7 +403,7 @@ export default function Navbar() {
                             router.push('/');
                           }
                         }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-xl transition text-left cursor-pointer mt-1 border-t border-slate-100 pt-2"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 rounded-none transition text-left cursor-pointer mt-1 border-t border-slate-100 pt-2"
                       >
                         <LogOut className="w-4 h-4" /> Đăng xuất tài khoản
                       </button>
@@ -413,7 +413,7 @@ export default function Navbar() {
               ) : (
                 <Link
                   href="/login"
-                  className="flex items-center gap-1.5 font-black px-4 py-2 rounded-xl text-xs transition duration-200 transform hover:scale-105 bg-white text-primary hover:bg-slate-100 shadow-lg shadow-white/10"
+                  className="flex items-center gap-1.5 font-black px-4 py-2 rounded-none text-xs transition duration-200 transform hover:scale-105 bg-white text-primary hover:bg-slate-100 shadow-lg shadow-white/10"
                 >
                   <LogIn className="w-3.5 h-3.5" /> Đăng nhập
                 </Link>
@@ -423,7 +423,7 @@ export default function Navbar() {
             <div className="flex items-center lg:hidden gap-2 sm:gap-3">
               <Link
                 href="/ai-assistant"
-                className="bg-amber-400 text-slate-950 px-2.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-1 shadow-sm"
+                className="bg-amber-400 text-slate-950 px-2.5 py-1.5 rounded-none text-xs font-black flex items-center gap-1 shadow-sm"
                 title="Mở AI Assistant"
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -433,7 +433,7 @@ export default function Navbar() {
               {accessToken ? (
                 <Link
                   href="/profile"
-                  className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white px-2.5 py-1.5 rounded-xl text-xs font-bold transition border border-white/20"
+                  className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white px-2.5 py-1.5 rounded-none text-xs font-bold transition border border-white/20"
                 >
                   <img src={localSync.avatar} className="w-5 h-5 rounded-full object-cover border border-white" loading="eager" decoding="async" />
                   <span className="text-amber-300 font-extrabold">{localSync.point}p</span>
@@ -441,7 +441,7 @@ export default function Navbar() {
               ) : (
                 <Link
                   href="/login"
-                  className="font-black px-3 py-1.5 rounded-xl text-xs shadow-md transition bg-white text-primary"
+                  className="font-black px-3 py-1.5 rounded-none text-xs shadow-md transition bg-white text-primary"
                 >
                   Đăng nhập
                 </Link>
@@ -449,7 +449,7 @@ export default function Navbar() {
 
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-xl focus:outline-none transition duration-200 border text-white hover:bg-white/15 border-white/20"
+                className="inline-flex items-center justify-center p-2 rounded-none focus:outline-none transition duration-200 border text-white hover:bg-white/15 border-white/20"
                 aria-label="Toggle Menu"
               >
                 {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -468,7 +468,7 @@ export default function Navbar() {
                   value={mobileSearchQuery}
                   onChange={(e) => setMobileSearchQuery(e.target.value)}
                   placeholder="Tìm kiếm..."
-                  className="w-full bg-slate-100 focus:bg-white border border-slate-200 focus:border-primary rounded-xl pl-4 pr-10 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition font-medium"
+                  className="w-full bg-slate-100 focus:bg-white border border-slate-200 focus:border-primary rounded-none pl-4 pr-10 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition font-medium"
                 />
                 <Search className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
               </div>
@@ -477,10 +477,10 @@ export default function Navbar() {
                 {navLinks.map((link) => {
                   if (link.submenu) {
                     return (
-                      <div key={link.name} className="border border-slate-100 rounded-2xl p-1 bg-slate-50/60">
+                      <div key={link.name} className="border border-slate-100 rounded-none p-1 bg-slate-50/60">
                         <button
                           onClick={() => setMobileCourseOpen(!mobileCourseOpen)}
-                          className="w-full flex items-center justify-between px-4 py-3 text-sm font-extrabold text-slate-800 uppercase tracking-wider rounded-xl hover:bg-slate-100 transition"
+                          className="w-full flex items-center justify-between px-4 py-3 text-sm font-extrabold text-slate-800 uppercase tracking-wider rounded-none hover:bg-slate-100 transition"
                         >
                           <span>{link.name}</span>
                           {mobileCourseOpen ? (
@@ -496,7 +496,7 @@ export default function Navbar() {
                                 key={sub.name}
                                 href={sub.href}
                                 onClick={() => handleLinkClick(sub.href)}
-                                className="block px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:bg-white hover:text-primary hover:shadow-sm transition"
+                                className="block px-4 py-2.5 rounded-none text-xs sm:text-sm font-semibold text-slate-600 hover:bg-white hover:text-primary hover:shadow-sm transition"
                               >
                                 {sub.name}
                               </Link>
@@ -514,7 +514,7 @@ export default function Navbar() {
                       key={link.name}
                       href={link.href}
                       onClick={() => handleLinkClick(link.href)}
-                      className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition ${
+                      className={`flex items-center justify-between px-4 py-3 rounded-none text-sm font-bold transition ${
                         isActive
                           ? 'bg-primary text-white shadow-md shadow-primary/20'
                           : 'text-slate-700 hover:bg-slate-100 hover:text-primary'
@@ -529,7 +529,7 @@ export default function Navbar() {
 
               <div className="pt-3 border-t border-slate-200">
                 {accessToken ? (
-                  <div className="bg-slate-900 text-white p-4 rounded-2xl space-y-3 shadow-xl">
+                  <div className="bg-slate-900 text-white p-4 rounded-none space-y-3 shadow-xl">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <img
@@ -541,7 +541,7 @@ export default function Navbar() {
                         />
                         <div>
                           <p className="text-xs font-black text-white">{localSync.name}</p>
-                          <span className="inline-flex items-center gap-1 bg-amber-400 text-slate-950 font-extrabold px-2 py-0.5 rounded text-[10px] mt-1">
+                          <span className="inline-flex items-center gap-1 bg-amber-400 text-slate-950 font-extrabold px-2 py-0.5 rounded-none text-[10px] mt-1">
                             <Award className="w-3 h-3 fill-slate-950" /> {localSync.point} điểm SeduAi
                           </span>
                         </div>
@@ -551,7 +551,7 @@ export default function Navbar() {
                       <Link
                         href="/profile"
                         onClick={() => setIsOpen(false)}
-                        className="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition"
+                        className="py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-white rounded-none text-xs font-bold flex items-center justify-center gap-1.5 transition"
                       >
                         <User className="w-3.5 h-3.5 text-primary" /> Hồ sơ VIP
                       </Link>
@@ -562,21 +562,21 @@ export default function Navbar() {
                             router.push('/');
                           }
                         }}
-                        className="py-2.5 px-3 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
+                        className="py-2.5 px-3 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white rounded-none text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer"
                       >
                         <LogOut className="w-3.5 h-3.5" /> Đăng xuất
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl text-center space-y-3">
+                  <div className="bg-slate-50 border border-slate-200 p-4 rounded-none text-center space-y-3">
                     <p className="text-xs text-slate-600 font-medium">
                       Đăng nhập để tích điểm & truy cập học tập với Giảng viên AI
                     </p>
                     <Link
                       href="/login"
                       onClick={() => setIsOpen(false)}
-                      className="w-full block py-3 bg-primary hover:bg-primary-dark text-white font-black rounded-xl text-xs shadow-md transition"
+                      className="w-full block py-3 bg-primary hover:bg-primary-dark text-white font-black rounded-none text-xs shadow-md transition"
                     >
                       🚀 Đăng Nhập / Đăng Ký
                     </Link>
