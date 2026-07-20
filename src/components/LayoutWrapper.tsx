@@ -3,14 +3,13 @@
 import React from 'react';
 import { usePathname } from 'next/navigation';
 import Navbar from '@/components/Navbar';
+
 import Footer from '@/components/Footer';
 import ScrollToTop from '@/components/ScrollToTop';
 import FloatingChatbot from '@/components/FloatingChatbot';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  // Ẩn toàn bộ Navbar và Footer khi ở trang AI Assistant (/ai-assistant) để có giao diện chuẩn Full-screen ChatGPT
-  const isAiAssistant = pathname?.startsWith('/ai-assistant');
   const isLms = pathname?.startsWith('/lms');
 
   React.useEffect(() => {
@@ -56,7 +55,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     };
   }, [pathname]);
 
-  const isStandaloneWorkspace = isAiAssistant || isLms;
+  const isStandaloneWorkspace = isLms;
 
   return (
     <>

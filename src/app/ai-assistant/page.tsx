@@ -352,7 +352,7 @@ export default function AiAssistantPage() {
   }
 
   return (
-    <div className="chatgpt-shell flex h-screen bg-slate-900 text-slate-100 overflow-hidden font-sans relative">
+    <div className="chatgpt-shell flex h-[calc(100vh-64px)] lg:h-[calc(100vh-124px)] min-h-[600px] bg-slate-900 text-slate-100 overflow-hidden font-sans relative">
       {/* Backdrop overlay cho Mobile khi mở Sidebar */}
       {isSidebarOpen && (
         <div
