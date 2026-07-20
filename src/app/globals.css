@@ -765,19 +765,9 @@ body.lms-flat-ui *:not(.lms-chatbot):not(.lms-chatbot *) {
   background: rgba(0, 119, 187, 0.06);
 }
 
-/* Flat site-wide surfaces. All elements are flat, including the chatgpt shell. */
-body * {
+/* Flat site-wide surfaces. The full-screen ChatGPT workspace is intentionally excluded. */
+body *:not(.chatgpt-shell):not(.chatgpt-shell *) {
   border-radius: 0 !important;
-}
-
-/* Exceptions: explicitly styled circular elements (status dots, avatars, slide dots) */
-body .rounded-full,
-body [class*="rounded-full"],
-body .avatar,
-body [class*="avatar"],
-body .circle-dot,
-body [class*="circle-dot"] {
-  border-radius: 9999px !important;
 }
 
 
