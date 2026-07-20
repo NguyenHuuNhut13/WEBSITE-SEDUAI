@@ -667,16 +667,16 @@ export default function ProfilePage() {
               <img
                 src={localSync.avatar}
                 alt={localSync.name}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-white shadow-xl"
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-none object-cover border-4 border-white shadow-xl"
               />
-              <div className="absolute bottom-0 right-0 bg-emerald-500 text-white p-1.5 rounded-full border-2 border-slate-900" title="Trạng thái: Hoạt động">
+              <div className="absolute bottom-0 right-0 bg-emerald-500 text-white p-1.5 rounded-none border-2 border-slate-900" title="Trạng thái: Hoạt động">
                 <CheckCircle className="w-3.5 h-3.5" />
               </div>
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-black">{localSync.name}</h1>
-                <span className="bg-amber-400 text-slate-950 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+                <span className="bg-amber-400 text-slate-950 font-extrabold text-[10px] px-2.5 py-0.5 rounded-none flex items-center gap-1 shadow-sm">
                   <Award className="w-3 h-3" /> VIP Member
                 </span>
               </div>
@@ -691,7 +691,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20">
+          <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-4 rounded-none border border-white/20">
             <div className="text-center px-4 border-r border-white/20">
               <p className="text-[10px] text-slate-300 uppercase tracking-wider font-bold">Điểm Thưởng</p>
               <p className="text-xl font-black text-amber-400 mt-0.5">{localSync.point}</p>
@@ -716,7 +716,7 @@ export default function ProfilePage() {
 
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed top-24 right-5 z-50 max-w-md w-full bg-white border-l-4 rounded-xl shadow-2xl p-4 flex items-center gap-3 animate-slide-in">
+        <div className="fixed top-24 right-5 z-50 max-w-md w-full bg-white border-l-4 rounded-none shadow-2xl p-4 flex items-center gap-3 animate-slide-in">
           {toast.type === 'success' ? (
             <CheckCircle className="w-6 h-6 text-emerald-500 flex-shrink-0" />
           ) : (
@@ -735,13 +735,13 @@ export default function ProfilePage() {
           {/* Box 1: Thông tin cá nhân */}
           <button
             onClick={() => setActiveTab('info')}
-            className={`p-5 rounded-2xl border text-left transition-all duration-300 hover:scale-102 hover:shadow-md cursor-pointer flex items-start gap-4 relative group ${
+            className={`p-5 rounded-none border text-left transition-all duration-300 hover:scale-102 hover:shadow-md cursor-pointer flex items-start gap-4 relative group ${
               activeTab === 'info'
                 ? 'bg-white border-primary shadow-lg ring-1 ring-primary/20'
                 : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
             }`}
           >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shrink-0 ${
+            <div className={`w-10 h-10 rounded-none flex items-center justify-center transition-all shrink-0 ${
               activeTab === 'info' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-650 group-hover:bg-primary/10 group-hover:text-primary'
             }`}>
               <User className="w-5 h-5" />
@@ -750,19 +750,19 @@ export default function ProfilePage() {
               <h3 className="text-xs font-bold text-slate-900">Thông tin cá nhân</h3>
               <p className="text-[10px] text-slate-500 mt-1 leading-normal">Cập nhật họ tên, điện thoại, giới tính, tỉnh thành</p>
             </div>
-            {activeTab === 'info' && <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-primary" />}
+            {activeTab === 'info' && <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-none bg-primary" />}
           </button>
 
           {/* Box 2: Đổi mật khẩu */}
           <button
             onClick={() => setActiveTab('password')}
-            className={`p-5 rounded-2xl border text-left transition-all duration-300 hover:scale-102 hover:shadow-md cursor-pointer flex items-start gap-4 relative group ${
+            className={`p-5 rounded-none border text-left transition-all duration-300 hover:scale-102 hover:shadow-md cursor-pointer flex items-start gap-4 relative group ${
               activeTab === 'password'
                 ? 'bg-white border-primary shadow-lg ring-1 ring-primary/20'
                 : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
             }`}
           >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shrink-0 ${
+            <div className={`w-10 h-10 rounded-none flex items-center justify-center transition-all shrink-0 ${
               activeTab === 'password' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-650 group-hover:bg-primary/10 group-hover:text-primary'
             }`}>
               <Lock className="w-5 h-5" />
@@ -771,19 +771,19 @@ export default function ProfilePage() {
               <h3 className="text-xs font-bold text-slate-900">Mật khẩu & Bảo mật</h3>
               <p className="text-[10px] text-slate-500 mt-1 leading-normal">Đổi mật khẩu tài khoản và dùng AI Generator</p>
             </div>
-            {activeTab === 'password' && <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-primary" />}
+            {activeTab === 'password' && <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-none bg-primary" />}
           </button>
 
           {/* Box 3: Đổi Avatar */}
           <button
             onClick={() => setActiveTab('avatar')}
-            className={`p-5 rounded-2xl border text-left transition-all duration-300 hover:scale-102 hover:shadow-md cursor-pointer flex items-start gap-4 relative group ${
+            className={`p-5 rounded-none border text-left transition-all duration-300 hover:scale-102 hover:shadow-md cursor-pointer flex items-start gap-4 relative group ${
               activeTab === 'avatar'
                 ? 'bg-white border-primary shadow-lg ring-1 ring-primary/20'
                 : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
             }`}
           >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shrink-0 ${
+            <div className={`w-10 h-10 rounded-none flex items-center justify-center transition-all shrink-0 ${
               activeTab === 'avatar' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-650 group-hover:bg-primary/10 group-hover:text-primary'
             }`}>
               <Camera className="w-5 h-5" />
@@ -792,19 +792,19 @@ export default function ProfilePage() {
               <h3 className="text-xs font-bold text-slate-900">Ảnh đại diện</h3>
               <p className="text-[10px] text-slate-500 mt-1 leading-normal">Đổi ảnh đại diện, phóng to, xoay góc avatar mới</p>
             </div>
-            {activeTab === 'avatar' && <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-primary" />}
+            {activeTab === 'avatar' && <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-none bg-primary" />}
           </button>
 
           {/* Box 4: Xác thực CCCD */}
           <button
             onClick={() => setActiveTab('cccd')}
-            className={`p-5 rounded-2xl border text-left transition-all duration-300 hover:scale-102 hover:shadow-md cursor-pointer flex items-start gap-4 relative group ${
+            className={`p-5 rounded-none border text-left transition-all duration-300 hover:scale-102 hover:shadow-md cursor-pointer flex items-start gap-4 relative group ${
               activeTab === 'cccd'
                 ? 'bg-white border-primary shadow-lg ring-1 ring-primary/20'
                 : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
             }`}
           >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all shrink-0 ${
+            <div className={`w-10 h-10 rounded-none flex items-center justify-center transition-all shrink-0 ${
               activeTab === 'cccd' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-650 group-hover:bg-primary/10 group-hover:text-primary'
             }`}>
               <CreditCard className="w-5 h-5" />
@@ -813,13 +813,13 @@ export default function ProfilePage() {
               <h3 className="text-xs font-bold text-slate-900">Xác thực CCCD</h3>
               <p className="text-[10px] text-slate-500 mt-1 leading-normal">Đăng ảnh CCCD và trích xuất quét bằng AI OCR</p>
             </div>
-            {activeTab === 'cccd' && <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-primary" />}
+            {activeTab === 'cccd' && <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-none bg-primary" />}
           </button>
         </div>
 
         {/* Dummy outer layout wrappers to preserve original closing tags nesting */}
         <div className="w-full">
-          <div className="w-full bg-white rounded-3xl shadow-md border border-slate-200 p-6 sm:p-8">
+          <div className="w-full bg-white rounded-none shadow-md border border-slate-200 p-6 sm:p-8">
             {/* TAB 1: User Info */}
             {activeTab === 'info' && (
               <div className="space-y-6 animate-fadeInUp">
@@ -839,7 +839,7 @@ export default function ProfilePage() {
                         required
                         value={infoForm.firstname}
                         onChange={(e) => setInfoForm({ ...infoForm, firstname: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50"
+                        className="w-full px-4 py-2.5 rounded-none border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -849,7 +849,7 @@ export default function ProfilePage() {
                         required
                         value={infoForm.lastname}
                         onChange={(e) => setInfoForm({ ...infoForm, lastname: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50"
+                        className="w-full px-4 py-2.5 rounded-none border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50"
                       />
                     </div>
                   </div>
@@ -861,7 +861,7 @@ export default function ProfilePage() {
                         type="tel"
                         value={infoForm.phone}
                         onChange={(e) => setInfoForm({ ...infoForm, phone: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50"
+                        className="w-full px-4 py-2.5 rounded-none border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -869,7 +869,7 @@ export default function ProfilePage() {
                       <select
                         value={infoForm.gender}
                         onChange={(e) => setInfoForm({ ...infoForm, gender: Number(e.target.value) })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50 font-semibold"
+                        className="w-full px-4 py-2.5 rounded-none border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50 font-semibold"
                       >
                         <option value={1}>Nam</option>
                         <option value={0}>Nữ</option>
@@ -881,7 +881,7 @@ export default function ProfilePage() {
                         type="date"
                         value={infoForm.dob}
                         onChange={(e) => setInfoForm({ ...infoForm, dob: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50"
+                        className="w-full px-4 py-2.5 rounded-none border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50"
                       />
                     </div>
                   </div>
@@ -893,7 +893,7 @@ export default function ProfilePage() {
                     <select
                       value={infoForm.province}
                       onChange={(e) => setInfoForm({ ...infoForm, province: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50 font-semibold"
+                      className="w-full px-4 py-2.5 rounded-none border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50 font-semibold"
                     >
                       <option value="">-- Chọn Tỉnh / Thành phố --</option>
                       {provinces.map((prov) => (
@@ -910,7 +910,7 @@ export default function ProfilePage() {
                       rows={3}
                       value={infoForm.intro}
                       onChange={(e) => setInfoForm({ ...infoForm, intro: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50 leading-relaxed"
+                      className="w-full px-4 py-2.5 rounded-none border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50 leading-relaxed"
                     ></textarea>
                   </div>
 
@@ -918,7 +918,7 @@ export default function ProfilePage() {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="px-6 py-3 bg-primary hover:bg-primary-dark disabled:bg-slate-300 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer"
+                      className="px-6 py-3 bg-primary hover:bg-primary-dark disabled:bg-slate-300 text-white font-bold text-xs rounded-none shadow-md transition flex items-center gap-2 cursor-pointer"
                     >
                       <Save className="w-4 h-4" /> {isLoading ? 'Đang cập nhật...' : 'Cập nhật thông tin cá nhân'}
                     </button>
@@ -938,7 +938,7 @@ export default function ProfilePage() {
                 </div>
 
                 {/* Random Password Generator Box */}
-                <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl p-6 shadow-lg border border-slate-700 space-y-4">
+                <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-none p-6 shadow-lg border border-slate-700 space-y-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-extrabold flex items-center gap-2 text-amber-400">
                       <Sparkles className="w-4 h-4" /> Trình tạo mật khẩu ngẫu nhiên
@@ -955,47 +955,47 @@ export default function ProfilePage() {
                         max="32"
                         value={pwdLength}
                         onChange={(e) => setPwdLength(Number(e.target.value))}
-                        className="w-full accent-primary h-1.5 bg-slate-700 rounded-lg cursor-pointer"
+                        className="w-full accent-primary h-1.5 bg-slate-700 rounded-none cursor-pointer"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-semibold">
-                      <label className="flex items-center gap-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-slate-700 cursor-pointer hover:border-primary">
+                      <label className="flex items-center gap-2 bg-slate-800/80 px-3 py-2 rounded-none border border-slate-700 cursor-pointer hover:border-primary">
                         <input
                           type="checkbox"
                           checked={useUpper}
                           onChange={(e) => setUseUpper(e.target.checked)}
-                          className="rounded text-primary focus:ring-0"
+                          className="rounded-none text-primary focus:ring-0"
                         />
                         <span>Chữ Hoa (A-Z)</span>
                       </label>
 
-                      <label className="flex items-center gap-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-slate-700 cursor-pointer hover:border-primary">
+                      <label className="flex items-center gap-2 bg-slate-800/80 px-3 py-2 rounded-none border border-slate-700 cursor-pointer hover:border-primary">
                         <input
                           type="checkbox"
                           checked={useLower}
                           onChange={(e) => setUseLower(e.target.checked)}
-                          className="rounded text-primary focus:ring-0"
+                          className="rounded-none text-primary focus:ring-0"
                         />
                         <span>Chữ thường (a-z)</span>
                       </label>
 
-                      <label className="flex items-center gap-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-slate-700 cursor-pointer hover:border-primary">
+                      <label className="flex items-center gap-2 bg-slate-800/80 px-3 py-2 rounded-none border border-slate-700 cursor-pointer hover:border-primary">
                         <input
                           type="checkbox"
                           checked={useNumbers}
                           onChange={(e) => setUseNumbers(e.target.checked)}
-                          className="rounded text-primary focus:ring-0"
+                          className="rounded-none text-primary focus:ring-0"
                         />
                         <span>Ký tự số (0-9)</span>
                       </label>
 
-                      <label className="flex items-center gap-2 bg-slate-800/80 px-3 py-2 rounded-xl border border-slate-700 cursor-pointer hover:border-primary">
+                      <label className="flex items-center gap-2 bg-slate-800/80 px-3 py-2 rounded-none border border-slate-700 cursor-pointer hover:border-primary">
                         <input
                           type="checkbox"
                           checked={useSymbols}
                           onChange={(e) => setUseSymbols(e.target.checked)}
-                          className="rounded text-primary focus:ring-0"
+                          className="rounded-none text-primary focus:ring-0"
                         />
                         <span>Đặc biệt (!@#$)</span>
                       </label>
@@ -1005,18 +1005,18 @@ export default function ProfilePage() {
                       <button
                         type="button"
                         onClick={handleGeneratePassword}
-                        className="w-full sm:w-auto px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+                        className="w-full sm:w-auto px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs rounded-none shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
                       >
                         <RefreshCw className="w-3.5 h-3.5" /> Tạo mật khẩu ngẫu nhiên
                       </button>
 
                       {generatedPassword && (
-                        <div className="flex items-center justify-between flex-grow w-full bg-slate-950 px-4 py-2.5 rounded-xl border border-slate-700 font-mono text-xs text-amber-400 font-bold">
+                        <div className="flex items-center justify-between flex-grow w-full bg-slate-950 px-4 py-2.5 rounded-none border border-slate-700 font-mono text-xs text-amber-400 font-bold">
                           <span className="truncate max-w-[240px]">{generatedPassword}</span>
                           <button
                             type="button"
                             onClick={handleApplyGeneratedPassword}
-                            className="bg-primary hover:bg-primary-dark text-white px-3 py-1 rounded-lg text-[11px] font-sans font-bold flex items-center gap-1 transition cursor-pointer"
+                            className="bg-primary hover:bg-primary-dark text-white px-3 py-1 rounded-none text-[11px] font-sans font-bold flex items-center gap-1 transition cursor-pointer"
                           >
                             <Copy className="w-3 h-3" /> Sử dụng MK này
                           </button>
@@ -1036,7 +1036,7 @@ export default function ProfilePage() {
                       value={passForm.old_password}
                       onChange={(e) => setPassForm({ ...passForm, old_password: e.target.value })}
                       placeholder="Nhập mật khẩu cũ của bạn..."
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50"
+                      className="w-full px-4 py-2.5 rounded-none border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50"
                     />
                   </div>
 
@@ -1048,7 +1048,7 @@ export default function ProfilePage() {
                       value={passForm.password}
                       onChange={(e) => setPassForm({ ...passForm, password: e.target.value })}
                       placeholder="Mật khẩu mới (có thể dùng nút Tạo MK ngẫu nhiên ở trên)..."
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50 font-mono"
+                      className="w-full px-4 py-2.5 rounded-none border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50 font-mono"
                     />
                   </div>
 
@@ -1060,7 +1060,7 @@ export default function ProfilePage() {
                       value={passForm.confirm_password}
                       onChange={(e) => setPassForm({ ...passForm, confirm_password: e.target.value })}
                       placeholder="Nhập lại mật khẩu mới..."
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50 font-mono"
+                      className="w-full px-4 py-2.5 rounded-none border border-slate-200 text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50 font-mono"
                     />
                   </div>
 
@@ -1068,7 +1068,7 @@ export default function ProfilePage() {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="px-6 py-3 bg-primary hover:bg-primary-dark disabled:bg-slate-300 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer"
+                      className="px-6 py-3 bg-primary hover:bg-primary-dark disabled:bg-slate-300 text-white font-bold text-xs rounded-none shadow-md transition flex items-center gap-2 cursor-pointer"
                     >
                       <Lock className="w-4 h-4" /> {isLoading ? 'Đang cập nhật...' : 'Cập nhật & Lưu Mật Khẩu'}
                     </button>
@@ -1094,7 +1094,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={() => setIsEditingAvatar(false)}
-                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition flex items-center gap-1 shrink-0 cursor-pointer"
+                      className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-none text-xs font-bold transition flex items-center gap-1 shrink-0 cursor-pointer"
                     >
                       <X className="w-4 h-4" /> Đóng chế độ chỉnh ảnh
                     </button>
@@ -1103,16 +1103,16 @@ export default function ProfilePage() {
 
                 {!isEditingAvatar ? (
                   /* STATE 1: Display Current Avatar & Upload CTA */
-                  <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-8 text-center space-y-6 shadow-sm max-w-2xl mx-auto">
+                  <div className="bg-slate-50 border border-slate-200/80 rounded-none p-8 text-center space-y-6 shadow-sm max-w-2xl mx-auto">
                     <div className="relative inline-block group">
-                      <div className="w-44 h-44 rounded-full overflow-hidden border-4 border-white shadow-2xl mx-auto relative bg-slate-900 flex items-center justify-center">
+                      <div className="w-44 h-44 rounded-none overflow-hidden border-4 border-white shadow-2xl mx-auto relative bg-slate-900 flex items-center justify-center">
                         <img
                           src={localSync.avatar || avatarPreview || '/placeholder-avatar.png'}
                           alt="Current Avatar"
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                         />
                       </div>
-                      <div className="absolute bottom-2 right-2 bg-primary text-white p-2.5 rounded-full shadow-lg border-2 border-white flex items-center justify-center">
+                      <div className="absolute bottom-2 right-2 bg-primary text-white p-2.5 rounded-none shadow-lg border-2 border-white flex items-center justify-center">
                         <Camera className="w-4 h-4" />
                       </div>
                     </div>
@@ -1145,7 +1145,7 @@ export default function ProfilePage() {
                       />
                       <label
                         htmlFor="avatar-upload-modern"
-                        className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary hover:bg-primary-dark text-white font-black text-xs rounded-2xl shadow-xl shadow-primary/25 hover:-translate-y-0.5 transition cursor-pointer duration-200"
+                        className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary hover:bg-primary-dark text-white font-black text-xs rounded-none shadow-xl shadow-primary/25 hover:-translate-y-0.5 transition cursor-pointer duration-200"
                       >
                         <Upload className="w-4 h-4" /> Tải lên ảnh mới và căn chỉnh...
                       </label>
@@ -1153,9 +1153,9 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   /* STATE 2: Modern Interactive Studio Card */
-                  <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 text-white shadow-2xl space-y-8 max-w-2xl mx-auto animate-fadeIn">
+                  <div className="bg-slate-900 border border-slate-800 rounded-none p-6 md:p-8 text-white shadow-2xl space-y-8 max-w-2xl mx-auto animate-fadeIn">
                     <div className="text-center space-y-1">
-                      <span className="inline-block px-3 py-1 bg-primary/20 text-primary-light font-extrabold text-[10px] uppercase tracking-wider rounded-full border border-primary/30">
+                      <span className="inline-block px-3 py-1 bg-primary/20 text-primary-light font-extrabold text-[10px] uppercase tracking-wider rounded-none border border-primary/30">
                         Chế độ căn chỉnh ảnh
                       </span>
                       <h3 className="text-base font-black text-white mt-1">Kéo thả trực tiếp trên khung ảnh tròn</h3>
@@ -1174,7 +1174,7 @@ export default function ProfilePage() {
                         onTouchStart={handleAvatarMouseDown}
                         onTouchMove={handleAvatarMouseMove}
                         onTouchEnd={handleAvatarMouseUp}
-                        className={`w-64 h-64 rounded-full overflow-hidden border-4 border-white/90 shadow-[0_0_50px_rgba(0,0,0,0.6)] relative bg-slate-950 flex items-center justify-center select-none ${
+                        className={`w-64 h-64 rounded-none overflow-hidden border-4 border-white/90 shadow-[0_0_50px_rgba(0,0,0,0.6)] relative bg-slate-950 flex items-center justify-center select-none ${
                           isAvatarDragging ? 'cursor-grabbing scale-[1.01]' : 'cursor-grab'
                         } transition-shadow duration-200`}
                       >
@@ -1188,26 +1188,26 @@ export default function ProfilePage() {
                           className="w-full h-full object-cover select-none pointer-events-none"
                         />
                         {/* Elegant Crosshair Grid */}
-                        <div className="absolute inset-0 border border-white/15 rounded-full pointer-events-none flex items-center justify-center">
+                        <div className="absolute inset-0 border border-white/15 rounded-none pointer-events-none flex items-center justify-center">
                           <div className="w-full h-[1px] bg-white/20 absolute"></div>
                           <div className="h-full w-[1px] bg-white/20 absolute"></div>
-                          <div className="w-3 h-3 border border-white/40 rounded-full absolute"></div>
+                          <div className="w-3 h-3 border border-white/40 rounded-none absolute"></div>
                         </div>
                       </div>
 
-                      <p className="text-[11px] text-slate-400 font-medium mt-3.5 flex items-center gap-1.5 bg-slate-800/80 px-3 py-1 rounded-full border border-slate-700/60">
+                      <p className="text-[11px] text-slate-400 font-medium mt-3.5 flex items-center gap-1.5 bg-slate-800/80 px-3 py-1 rounded-none border border-slate-700/60">
                         <Sliders className="w-3.5 h-3.5 text-primary-light" /> Nhấn & Kéo chuột/tay trong hình tròn để chỉnh vị trí
                       </p>
                     </div>
 
                     {/* Minimalist Controls Bar */}
-                    <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-4 md:p-5 max-w-lg mx-auto space-y-5">
+                    <div className="bg-slate-800/90 border border-slate-700/80 rounded-none p-4 md:p-5 max-w-lg mx-auto space-y-5">
                       {/* Zoom Slider */}
                       <div className="flex items-center gap-3">
                         <button
                           type="button"
                           onClick={() => setAvatarZoom((z) => Math.max(0.2, +(z - 0.1).toFixed(2)))}
-                          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-slate-300 hover:text-white transition cursor-pointer shrink-0"
+                          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-none text-slate-300 hover:text-white transition cursor-pointer shrink-0"
                           title="Thu nhỏ"
                         >
                           <ZoomOut className="w-4 h-4" />
@@ -1224,13 +1224,13 @@ export default function ProfilePage() {
                             step="0.01"
                             value={avatarZoom}
                             onChange={(e) => setAvatarZoom(parseFloat(e.target.value))}
-                            className="w-full accent-primary h-2 bg-slate-950 rounded-lg cursor-pointer"
+                            className="w-full accent-primary h-2 bg-slate-950 rounded-none cursor-pointer"
                           />
                         </div>
                         <button
                           type="button"
                           onClick={() => setAvatarZoom((z) => Math.min(5, +(z + 0.1).toFixed(2)))}
-                          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-slate-300 hover:text-white transition cursor-pointer shrink-0"
+                          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-none text-slate-300 hover:text-white transition cursor-pointer shrink-0"
                           title="Phóng to"
                         >
                           <ZoomIn className="w-4 h-4" />
@@ -1242,7 +1242,7 @@ export default function ProfilePage() {
                         <button
                           type="button"
                           onClick={() => setAvatarRotate((r) => Math.max(-180, r - 5))}
-                          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-slate-300 hover:text-white transition cursor-pointer shrink-0"
+                          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-none text-slate-300 hover:text-white transition cursor-pointer shrink-0"
                           title="Xoay trái"
                         >
                           <RotateCw className="w-4 h-4 -scale-x-100" />
@@ -1259,13 +1259,13 @@ export default function ProfilePage() {
                             step="1"
                             value={avatarRotate}
                             onChange={(e) => setAvatarRotate(parseInt(e.target.value))}
-                            className="w-full accent-primary h-2 bg-slate-950 rounded-lg cursor-pointer"
+                            className="w-full accent-primary h-2 bg-slate-950 rounded-none cursor-pointer"
                           />
                         </div>
                         <button
                           type="button"
                           onClick={() => setAvatarRotate((r) => Math.min(180, r + 5))}
-                          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-slate-300 hover:text-white transition cursor-pointer shrink-0"
+                          className="p-2 bg-slate-700 hover:bg-slate-600 rounded-none text-slate-300 hover:text-white transition cursor-pointer shrink-0"
                           title="Xoay phải"
                         >
                           <RotateCw className="w-4 h-4" />
@@ -1278,7 +1278,7 @@ export default function ProfilePage() {
                           <button
                             type="button"
                             onClick={() => setAvatarRotate((r) => (r + 90) % 360)}
-                            className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer text-[11px]"
+                            className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold rounded-none transition flex items-center gap-1.5 cursor-pointer text-[11px]"
                           >
                             <RotateCw className="w-3.5 h-3.5 text-primary-light" /> Xoay nhanh 90°
                           </button>
@@ -1290,7 +1290,7 @@ export default function ProfilePage() {
                               setAvatarPanX(0);
                               setAvatarPanY(0);
                             }}
-                            className="px-3 py-1.5 bg-slate-700/60 hover:bg-slate-600 text-slate-400 hover:text-slate-200 font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer text-[11px]"
+                            className="px-3 py-1.5 bg-slate-700/60 hover:bg-slate-600 text-slate-400 hover:text-slate-200 font-bold rounded-none transition flex items-center gap-1.5 cursor-pointer text-[11px]"
                           >
                             <RefreshCw className="w-3.5 h-3.5" /> Mặc định
                           </button>
@@ -1298,7 +1298,7 @@ export default function ProfilePage() {
 
                         <label
                           htmlFor="avatar-upload-modern"
-                          className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-xl transition cursor-pointer text-[11px] border border-slate-600 hover:border-primary-light"
+                          className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold rounded-none transition cursor-pointer text-[11px] border border-slate-600 hover:border-primary-light"
                         >
                           Chọn tệp khác...
                         </label>
@@ -1311,14 +1311,14 @@ export default function ProfilePage() {
                         type="button"
                         onClick={handleApplyAndSaveAvatar}
                         disabled={isLoading}
-                        className="w-full sm:w-auto min-w-[240px] px-8 py-4 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-light hover:to-primary disabled:from-slate-700 disabled:to-slate-700 text-white font-black text-xs rounded-2xl shadow-xl shadow-primary/30 transition flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02]"
+                        className="w-full sm:w-auto min-w-[240px] px-8 py-4 bg-gradient-to-r from-primary to-primary-dark hover:from-primary-light hover:to-primary disabled:from-slate-700 disabled:to-slate-700 text-white font-black text-xs rounded-none shadow-xl shadow-primary/30 transition flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.02]"
                       >
                         <CheckCircle className="w-4 h-4" /> {isLoading ? 'Đang cập nhật...' : 'Hoàn tất & Cập nhật ảnh đại diện'}
                       </button>
                       <button
                         type="button"
                         onClick={() => setIsEditingAvatar(false)}
-                        className="w-full sm:w-auto px-6 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-2xl transition cursor-pointer"
+                        className="w-full sm:w-auto px-6 py-4 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-none transition cursor-pointer"
                       >
                         Hủy bỏ
                       </button>
@@ -1343,14 +1343,14 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => setShowBusinessCard(false)}
-                    className="px-4 py-2 border border-slate-200 hover:border-primary text-slate-600 hover:text-primary font-bold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer bg-white"
+                    className="px-4 py-2 border border-slate-200 hover:border-primary text-slate-600 hover:text-primary font-bold text-xs rounded-none transition flex items-center gap-1.5 cursor-pointer bg-white"
                   >
                     <RefreshCw className="w-3.5 h-3.5" /> Quét/Cập nhật lại
                   </button>
                 </div>
 
                 {/* Info Note about Legal Data Privacy Protection */}
-                <div className="p-4 bg-emerald-50/50 border border-emerald-200 rounded-2xl text-xs text-emerald-900 leading-relaxed space-y-1">
+                <div className="p-4 bg-emerald-50/50 border border-emerald-200 rounded-none text-xs text-emerald-900 leading-relaxed space-y-1">
                   <p className="font-extrabold flex items-center gap-1 text-emerald-800">
                     <CheckCircle className="w-4 h-4 shrink-0" /> Bảo mật thông tin CCCD (Luật bảo vệ dữ liệu cá nhân)
                   </p>
@@ -1362,7 +1362,7 @@ export default function ProfilePage() {
                 {/* Premium Member Business Card Grid */}
                 <div className="flex flex-col items-center justify-center py-6">
                   {/* The actual premium digital membership business card */}
-                  <div className="w-full max-w-md h-64 rounded-3xl relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white shadow-2xl border border-slate-800/80 p-6 flex flex-col justify-between group hover:shadow-emerald-950/30 hover:shadow-2xl transition duration-500">
+                  <div className="w-full max-w-md h-64 rounded-none relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white shadow-2xl border border-slate-800/80 p-6 flex flex-col justify-between group hover:shadow-emerald-950/30 hover:shadow-2xl transition duration-500">
                     {/* Gloss Reflection Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out pointer-events-none"></div>
 
@@ -1372,7 +1372,7 @@ export default function ProfilePage() {
                     {/* Top Row: SEDU AI Logo & Member Status Indicator */}
                     <div className="flex justify-between items-start relative z-10">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/20">
+                        <div className="w-8 h-8 rounded-none bg-gradient-to-br from-primary to-emerald-400 flex items-center justify-center shadow-lg shadow-primary/20">
                           <Sparkles className="w-4.5 h-4.5 text-white" />
                         </div>
                         <div>
@@ -1381,8 +1381,8 @@ export default function ProfilePage() {
                         </div>
                       </div>
                       
-                      <div className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-[9px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping"></span>
+                      <div className="px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-none text-[9px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-none animate-ping"></span>
                         VERIFIED MEMBER
                       </div>
                     </div>
@@ -1390,11 +1390,11 @@ export default function ProfilePage() {
                     {/* Middle Row: User Photo & Bio details */}
                     <div className="flex items-center gap-4 relative z-10 my-auto">
                       {/* Avatar Frame */}
-                      <div className="w-16 h-16 rounded-full border-2 border-emerald-400/40 p-0.5 overflow-hidden bg-slate-900 shrink-0">
+                      <div className="w-16 h-16 rounded-none border-2 border-emerald-400/40 p-0.5 overflow-hidden bg-slate-900 shrink-0">
                         <img
                           src={avatarPreview || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'}
                           alt="Member Avatar"
-                          className="w-full h-full object-cover rounded-full"
+                          className="w-full h-full object-cover rounded-none"
                         />
                       </div>
                       
@@ -1442,7 +1442,7 @@ export default function ProfilePage() {
                       showNotification('success', 'Đang kết xuất và tải xuống Thẻ thành viên SEDU AI dạng PDF...');
                       window.print();
                     }}
-                    className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer border border-slate-800"
+                    className="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-none shadow-md transition flex items-center gap-2 cursor-pointer border border-slate-800"
                   >
                     <Upload className="w-4 h-4 rotate-180" /> Tải Xuống PDF (Print Card)
                   </button>
@@ -1452,7 +1452,7 @@ export default function ProfilePage() {
                       navigator.clipboard.writeText(`SEDU AI MEMBER: ${infoForm.lastname} ${infoForm.firstname} (ID: ${cccdForm.number ? `${cccdForm.number.slice(0, 3)}*******${cccdForm.number.slice(-3)}` : '079*******56'})`);
                       showNotification('success', 'Đã sao chép mã liên kết Thẻ thành viên vào bộ nhớ tạm!');
                     }}
-                    className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer"
+                    className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs rounded-none shadow-md transition flex items-center gap-2 cursor-pointer"
                   >
                     <Copy className="w-4 h-4" /> Sao Chép Mã Liên Kết Thẻ
                   </button>
@@ -1471,7 +1471,7 @@ export default function ProfilePage() {
 
                 {/* OCR Error Alert Box */}
                 {ocrError && (
-                  <div className="p-4 bg-red-50 border-2 border-red-300 rounded-2xl flex items-start gap-3.5 animate-shake shadow-sm">
+                  <div className="p-4 bg-red-50 border-2 border-red-300 rounded-none flex items-start gap-3.5 animate-shake shadow-sm">
                     <AlertCircle className="w-6 h-6 text-red-600 shrink-0 mt-0.5" />
                     <div className="flex-grow text-xs text-red-900 space-y-1">
                       <p className="font-black text-sm text-red-700">Không thể nhận diện thông tin trên thẻ:</p>
@@ -1489,14 +1489,14 @@ export default function ProfilePage() {
 
                 {/* OCR Scanning Banner with Progress Bar */}
                 {isOcrScanning && (
-                  <div className="p-4 bg-primary/10 border border-primary/30 rounded-2xl space-y-2">
+                  <div className="p-4 bg-primary/10 border border-primary/30 rounded-none space-y-2">
                     <div className="flex items-center gap-3 text-xs font-bold text-primary-dark">
                       <RefreshCw className="w-5 h-5 animate-spin text-primary shrink-0" />
                       <span>Đang quét và nhận diện văn bản trên thẻ... {ocrProgress > 0 ? `(${ocrProgress}%)` : ''}</span>
                     </div>
-                    <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                    <div className="w-full bg-slate-200 rounded-none h-2 overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-primary to-emerald-500 h-2 rounded-full transition-all duration-300 ease-out"
+                        className="bg-gradient-to-r from-primary to-emerald-500 h-2 rounded-none transition-all duration-300 ease-out"
                         style={{ width: `${Math.max(ocrProgress, 5)}%` }}
                       />
                     </div>
@@ -1504,7 +1504,7 @@ export default function ProfilePage() {
                 )}
 
                 <form onSubmit={handleSaveCccd} className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-none border border-slate-200">
                     <div className="space-y-1.5">
                       <label className="text-xs font-bold text-slate-700 flex items-center justify-between">
                         <span>Số CCCD *</span>
@@ -1516,7 +1516,7 @@ export default function ProfilePage() {
                         value={cccdForm.number}
                         onChange={(e) => setCccdForm({ ...cccdForm, number: e.target.value })}
                         placeholder="079099123456"
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-primary font-mono bg-white shadow-sm font-bold text-slate-900"
+                        className="w-full px-4 py-2.5 rounded-none border border-slate-300 text-xs focus:outline-none focus:border-primary font-mono bg-white shadow-sm font-bold text-slate-900"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -1529,7 +1529,7 @@ export default function ProfilePage() {
                         required
                         value={cccdForm.date}
                         onChange={(e) => setCccdForm({ ...cccdForm, date: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-primary bg-white shadow-sm font-bold text-slate-900"
+                        className="w-full px-4 py-2.5 rounded-none border border-slate-300 text-xs focus:outline-none focus:border-primary bg-white shadow-sm font-bold text-slate-900"
                       />
                     </div>
                     <div className="space-y-1.5">
@@ -1543,7 +1543,7 @@ export default function ProfilePage() {
                         value={cccdForm.place}
                         onChange={(e) => setCccdForm({ ...cccdForm, place: e.target.value })}
                         placeholder="Cục Cảnh sát QLHC về TTXH"
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:border-primary bg-white shadow-sm font-bold text-slate-900"
+                        className="w-full px-4 py-2.5 rounded-none border border-slate-300 text-xs focus:outline-none focus:border-primary bg-white shadow-sm font-bold text-slate-900"
                       />
                     </div>
                   </div>
@@ -1551,13 +1551,13 @@ export default function ProfilePage() {
                   {/* Upload Front & Back */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
                     {/* Front card */}
-                    <div className={`border rounded-2xl p-4 space-y-3 bg-slate-50/50 transition ${frontBase64 ? 'border-emerald-300 bg-emerald-50/30' : 'border-slate-200 hover:border-primary/50'}`}>
+                    <div className={`border rounded-none p-4 space-y-3 bg-slate-50/50 transition ${frontBase64 ? 'border-emerald-300 bg-emerald-50/30' : 'border-slate-200 hover:border-primary/50'}`}>
                       <p className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                         <CreditCard className="w-4 h-4 text-primary" /> Ảnh Mặt Trước *
                         {frontBase64 && <Check className="w-3.5 h-3.5 text-emerald-500 ml-auto" />}
                       </p>
 
-                      <div className="h-44 rounded-xl bg-slate-100 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center overflow-hidden relative group">
+                      <div className="h-44 rounded-none bg-slate-100 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center overflow-hidden relative group">
                         {frontBase64 ? (
                           <img src={frontBase64} alt="CCCD Front" className="w-full h-full object-cover" />
                         ) : (
@@ -1582,19 +1582,19 @@ export default function ProfilePage() {
                       />
                       <label
                         htmlFor="cccd-front"
-                        className="block text-center py-2.5 bg-white border border-slate-300 hover:border-primary rounded-xl text-xs font-bold text-slate-700 hover:text-primary cursor-pointer shadow-sm transition"
+                        className="block text-center py-2.5 bg-white border border-slate-300 hover:border-primary rounded-none text-xs font-bold text-slate-700 hover:text-primary cursor-pointer shadow-sm transition"
                       >
                         {frontBase64 ? 'Chọn lại ảnh mặt trước...' : 'Tải lên ảnh mặt trước...'}
                       </label>
                     </div>
 
                     {/* Back card */}
-                    <div className={`border rounded-2xl p-4 space-y-3 bg-slate-50/50 transition ${backBase64 ? 'border-emerald-300 bg-emerald-50/30' : 'border-slate-200 hover:border-primary/50'}`}>
+                    <div className={`border rounded-none p-4 space-y-3 bg-slate-50/50 transition ${backBase64 ? 'border-emerald-300 bg-emerald-50/30' : 'border-slate-200 hover:border-primary/50'}`}>
                       <p className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                         <CreditCard className="w-4 h-4 text-primary" /> Ảnh Mặt Sau *
                         {backBase64 && <Check className="w-3.5 h-3.5 text-emerald-500 ml-auto" />}
                       </p>
-                      <div className="h-44 rounded-xl bg-slate-100 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center overflow-hidden relative group">
+                      <div className="h-44 rounded-none bg-slate-100 border-2 border-dashed border-slate-300 flex flex-col items-center justify-center overflow-hidden relative group">
                         {backBase64 ? (
                           <img src={backBase64} alt="CCCD Back" className="w-full h-full object-cover" />
                         ) : (
@@ -1617,7 +1617,7 @@ export default function ProfilePage() {
                       />
                       <label
                         htmlFor="cccd-back"
-                        className="block text-center py-2.5 bg-white border border-slate-300 hover:border-primary rounded-xl text-xs font-bold text-slate-700 hover:text-primary cursor-pointer shadow-sm transition"
+                        className="block text-center py-2.5 bg-white border border-slate-300 hover:border-primary rounded-none text-xs font-bold text-slate-700 hover:text-primary cursor-pointer shadow-sm transition"
                       >
                         {backBase64 ? 'Chọn lại ảnh mặt sau...' : 'Tải lên ảnh mặt sau...'}
                       </label>
@@ -1630,7 +1630,7 @@ export default function ProfilePage() {
                       type="button"
                       onClick={() => handleScanCccdOcr(frontBase64, backBase64)}
                       disabled={!frontBase64 || !backBase64 || isOcrScanning}
-                      className={`w-full py-3.5 font-black text-sm rounded-2xl shadow-lg transition flex items-center justify-center gap-2.5 cursor-pointer ${
+                      className={`w-full py-3.5 font-black text-sm rounded-none shadow-lg transition flex items-center justify-center gap-2.5 cursor-pointer ${
                         frontBase64 && backBase64 && !isOcrScanning
                           ? 'bg-gradient-to-r from-primary to-emerald-500 hover:from-primary-dark hover:to-emerald-600 text-white shadow-primary/25'
                           : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
@@ -1649,7 +1649,7 @@ export default function ProfilePage() {
                     <button
                       type="submit"
                       disabled={isLoading || isOcrScanning}
-                      className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-dark disabled:bg-slate-300 text-white font-black text-xs rounded-xl shadow-lg shadow-primary/25 transition flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-dark disabled:bg-slate-300 text-white font-black text-xs rounded-none shadow-lg shadow-primary/25 transition flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Save className="w-4 h-4" /> {isLoading ? 'Đang gửi CCCD lên API...' : 'Hoàn tất & Lưu hồ sơ định danh CCCD'}
                     </button>
