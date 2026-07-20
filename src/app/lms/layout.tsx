@@ -91,9 +91,18 @@ export default function LMSLayout({ children }: { children: React.ReactNode }) {
               <Bell className="h-5 w-5" />
               <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 bg-rose-500" />
             </button>
-            <div className="hidden border-l border-slate-200 pl-3 text-right sm:block">
-              <p className="max-w-32 truncate text-sm font-bold text-slate-900">{user?.name || user?.username || 'Người dùng'}</p>
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{lmsRole}</p>
+            <div className="flex items-center gap-2 border-l border-slate-200 pl-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden bg-primary/10 text-sm font-black text-primary" aria-hidden="true">
+                {user?.avatar ? (
+                  <img src={user.avatar} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  (user?.name || user?.username || 'U').charAt(0).toUpperCase()
+                )}
+              </div>
+              <div className="hidden text-right sm:block">
+                <p className="max-w-32 truncate text-sm font-bold text-slate-900">{user?.name || user?.username || 'Người dùng'}</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{lmsRole}</p>
+              </div>
             </div>
           </div>
         </header>
