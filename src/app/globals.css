@@ -765,8 +765,8 @@ body.lms-flat-ui *:not(.lms-chatbot):not(.lms-chatbot *) {
   background: rgba(0, 119, 187, 0.06);
 }
 
-/* Flat site-wide surfaces. Chatbot and ChatGPT are intentionally excluded. */
-body *:not(.lms-chatbot):not(.lms-chatbot *):not(.chatgpt-shell):not(.chatgpt-shell *) {
+/* Flat site-wide surfaces. The full-screen ChatGPT workspace is intentionally excluded. */
+body *:not(.chatgpt-shell):not(.chatgpt-shell *) {
   border-radius: 0 !important;
 }
 
