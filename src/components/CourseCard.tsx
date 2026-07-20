@@ -15,7 +15,7 @@ export default function CourseCard({ course }: CourseCardProps) {
   const isNew = discountPercent === 0;
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden flex flex-col group h-full card-hover-lift card-shine glow-border">
+    <div className="bg-white border border-slate-200/80 rounded-none shadow-sm overflow-hidden flex flex-col group h-full card-hover-lift card-shine glow-border">
       {/* Course Image */}
       <div className="relative overflow-hidden aspect-video bg-slate-100">
         <img
@@ -36,19 +36,19 @@ export default function CourseCard({ course }: CourseCardProps) {
         </div>
 
         {/* Category badge */}
-        <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-primary text-white font-bold text-[10px] tracking-wider uppercase shadow-md">
+        <span className="absolute top-3 left-3 px-3 py-1 rounded-none bg-primary text-white font-bold text-[10px] tracking-wider uppercase shadow-md">
           {course.category}
         </span>
 
         {/* Dynamic badge: Bestseller / Discount */}
         {isBestseller && (
-          <span className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-amber-500 text-white font-extrabold text-[10px] flex items-center gap-1 shadow-md">
+          <span className="absolute top-3 right-3 px-2.5 py-1 rounded-none bg-amber-500 text-white font-extrabold text-[10px] flex items-center gap-1 shadow-md">
             <Flame className="w-3 h-3" />
             Bán chạy
           </span>
         )}
         {!isBestseller && discountPercent > 0 && (
-          <span className="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-rose-500 text-white font-extrabold text-[10px] shadow-md">
+          <span className="absolute top-3 right-3 px-2.5 py-1 rounded-none bg-rose-500 text-white font-extrabold text-[10px] shadow-md">
             -{discountPercent}%
           </span>
         )}
@@ -99,7 +99,7 @@ export default function CourseCard({ course }: CourseCardProps) {
           </div>
           <Link
             href={`/courses/${course.slug}`}
-            className="px-4 py-2.5 bg-primary/10 text-primary group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-blue-600 group-hover:text-white font-bold text-xs rounded-xl transition-all duration-400 flex items-center gap-1.5 shadow-sm group-hover:shadow-primary/25 group-hover:shadow-md"
+            className="px-4 py-2.5 bg-primary/10 text-primary group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-blue-600 group-hover:text-white font-bold text-xs rounded-none transition-all duration-400 flex items-center gap-1.5 shadow-sm group-hover:shadow-primary/25 group-hover:shadow-md"
           >
             Chi tiết <ArrowRight className="w-3.5 h-3.5" />
           </Link>

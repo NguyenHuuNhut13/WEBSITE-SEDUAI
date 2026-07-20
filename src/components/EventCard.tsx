@@ -18,12 +18,12 @@ export default function EventCard({ event }: EventCardProps) {
   };
 
   return (
-    <div className="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm hover-lift-glow card-shine glow-border flex flex-col justify-between group h-full relative overflow-hidden">
+    <div className="bg-white border border-slate-200/80 rounded-none p-6 shadow-sm hover-lift-glow card-shine glow-border flex flex-col justify-between group h-full relative overflow-hidden">
       <div className="space-y-4">
         {/* Card Header: Category & Date */}
         <div className="flex justify-between items-center">
           <span
-            className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border ${
+            className={`px-3 py-1 rounded-none text-[10px] font-extrabold uppercase tracking-wider border ${
               categoryColors[event.category] || 'bg-slate-100 text-slate-600 border-slate-200'
             }`}
           >
@@ -31,7 +31,7 @@ export default function EventCard({ event }: EventCardProps) {
           </span>
           
           {/* Minimalist Date badge */}
-          <span className="text-[10px] font-extrabold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-150 uppercase tracking-widest flex items-center gap-1.5">
+          <span className="text-[10px] font-extrabold text-slate-400 bg-slate-50 px-2.5 py-1 rounded-none border border-slate-150 uppercase tracking-widest flex items-center gap-1.5">
             <CalendarDays className="w-3.5 h-3.5" />
             {day} {month}
           </span>
