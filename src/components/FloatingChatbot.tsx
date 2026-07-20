@@ -205,15 +205,15 @@ export default function FloatingChatbot() {
     <div className="lms-chatbot fixed bottom-6 right-6 z-50 font-sans flex flex-col items-end">
       {/* Chat Window Popup */}
       {isOpen && (
-        <div className="w-[350px] sm:w-[380px] h-[520px] bg-white border border-slate-200/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col mb-4 animate-scale-up border-primary/10">
+        <div className="w-[350px] sm:w-[380px] h-[520px] bg-white border border-slate-200/80 rounded-none shadow-2xl overflow-hidden flex flex-col mb-4 animate-scale-up border-primary/10">
           {/* Header */}
           <div className="bg-gradient-to-r from-primary to-blue-600 px-5 py-4 flex items-center justify-between text-white shadow-md">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-none bg-white/20 flex items-center justify-center">
                   <Bot className="w-5.5 h-5.5 text-white" />
                 </div>
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-primary"></span>
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-none bg-emerald-400 border-2 border-primary"></span>
               </div>
               <div>
                 <h3 className="font-bold text-xs leading-none flex items-center gap-1">
@@ -225,14 +225,14 @@ export default function FloatingChatbot() {
             <div className="flex items-center gap-1">
               <button
                 onClick={handleReset}
-                className="p-1.5 rounded-lg hover:bg-white/10 text-white/80 hover:text-white transition cursor-pointer"
+                className="p-1.5 rounded-none hover:bg-white/10 text-white/80 hover:text-white transition cursor-pointer"
                 title="Bắt đầu tư vấn mới"
               >
                 <RefreshCw className="w-4.5 h-4.5" />
               </button>
               <button
                 onClick={handleToggle}
-                className="p-1.5 rounded-lg hover:bg-white/10 text-white/80 hover:text-white transition cursor-pointer"
+                className="p-1.5 rounded-none hover:bg-white/10 text-white/80 hover:text-white transition cursor-pointer"
               >
                 <X className="w-4.5 h-4.5" />
               </button>
@@ -251,7 +251,7 @@ export default function FloatingChatbot() {
                   }`}
                 >
                   {isAI && (
-                    <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex-shrink-0 flex items-center justify-center text-xs font-bold">
+                    <div className="w-7 h-7 rounded-none bg-primary/10 text-primary flex-shrink-0 flex items-center justify-center text-xs font-bold">
                       <Bot className="w-4 h-4" />
                     </div>
                   )}
@@ -259,8 +259,8 @@ export default function FloatingChatbot() {
                     <div
                       className={`text-xs p-3 leading-relaxed shadow-sm ${
                         isAI
-                          ? 'bg-white border border-slate-100 rounded-2xl rounded-tl-none text-slate-700'
-                          : 'bg-primary text-white rounded-2xl rounded-tr-none'
+                          ? 'bg-white border border-slate-100 rounded-none rounded-none-none text-slate-700'
+                          : 'bg-primary text-white rounded-none rounded-none-none'
                       } whitespace-pre-line`}
                     >
                       {msg.isHtml ? htmlToPlainText(msg.text) : msg.text}
@@ -275,7 +275,7 @@ export default function FloatingChatbot() {
                         {msg.suggestedCourses.map((course) => (
                           <div
                             key={course.id}
-                            className="bg-white border border-primary/10 hover:border-primary/30 rounded-xl p-3 shadow-sm transition flex flex-col gap-1.5"
+                            className="bg-white border border-primary/10 hover:border-primary/30 rounded-none p-3 shadow-sm transition flex flex-col gap-1.5"
                           >
                             <div className="flex justify-between items-start gap-2">
                               <h4 className="font-bold text-[11px] text-slate-900 line-clamp-1">
@@ -283,7 +283,7 @@ export default function FloatingChatbot() {
                                   ? (course.title as { rendered: string }).rendered 
                                   : String(course.title || '')}
                               </h4>
-                              <span className="text-[9px] bg-primary-light text-primary font-bold px-1.5 py-0.25 rounded">
+                              <span className="text-[9px] bg-primary-light text-primary font-bold px-1.5 py-0.25 rounded-none">
                                 #{course.id}
                               </span>
                             </div>
@@ -312,10 +312,10 @@ export default function FloatingChatbot() {
 
             {isThinking && (
               <div className="flex items-start gap-2.5 max-w-[85%]">
-                <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex-shrink-0 flex items-center justify-center text-xs font-bold">
+                <div className="w-7 h-7 rounded-none bg-primary/10 text-primary flex-shrink-0 flex items-center justify-center text-xs font-bold">
                   <Bot className="w-4 h-4" />
                 </div>
-                <div className="bg-white border border-slate-100 rounded-2xl rounded-tl-none p-3 shadow-sm text-xs text-slate-400 flex items-center gap-1.5">
+                <div className="bg-white border border-slate-100 rounded-none rounded-none-none p-3 shadow-sm text-xs text-slate-400 flex items-center gap-1.5">
                   <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
                   <span>AI đang kết nối CRM...</span>
                 </div>
@@ -336,7 +336,7 @@ export default function FloatingChatbot() {
                     <button
                       key={opt}
                       onClick={() => handleTextSubmit(opt)}
-                      className="px-2.5 py-1.5 text-[10px] font-semibold rounded-xl border border-primary/20 text-primary bg-primary-light/50 hover:bg-primary hover:text-white transition duration-200 cursor-pointer"
+                      className="px-2.5 py-1.5 text-[10px] font-semibold rounded-none border border-primary/20 text-primary bg-primary-light/50 hover:bg-primary hover:text-white transition duration-200 cursor-pointer"
                     >
                       {opt}
                     </button>
@@ -345,7 +345,7 @@ export default function FloatingChatbot() {
                     <button
                       key={opt}
                       onClick={() => handleTextSubmit(opt)}
-                      className="px-2.5 py-1.5 text-[10px] font-semibold rounded-xl border border-primary/20 text-primary bg-primary-light/50 hover:bg-primary hover:text-white transition duration-200 cursor-pointer"
+                      className="px-2.5 py-1.5 text-[10px] font-semibold rounded-none border border-primary/20 text-primary bg-primary-light/50 hover:bg-primary hover:text-white transition duration-200 cursor-pointer"
                     >
                       {opt}
                     </button>
@@ -354,7 +354,7 @@ export default function FloatingChatbot() {
                     <button
                       key={opt}
                       onClick={() => handleTextSubmit(opt)}
-                      className="px-2.5 py-1.5 text-[10px] font-semibold rounded-xl border border-primary/20 text-primary bg-primary-light/50 hover:bg-primary hover:text-white transition duration-200 cursor-pointer"
+                      className="px-2.5 py-1.5 text-[10px] font-semibold rounded-none border border-primary/20 text-primary bg-primary-light/50 hover:bg-primary hover:text-white transition duration-200 cursor-pointer"
                     >
                       {opt}
                     </button>
@@ -363,7 +363,7 @@ export default function FloatingChatbot() {
                     <button
                       key={opt}
                       onClick={() => handleTextSubmit(opt)}
-                      className="px-2.5 py-1.5 text-[10px] font-semibold rounded-xl border border-primary/20 text-primary bg-primary-light/50 hover:bg-primary hover:text-white transition duration-200 cursor-pointer"
+                      className="px-2.5 py-1.5 text-[10px] font-semibold rounded-none border border-primary/20 text-primary bg-primary-light/50 hover:bg-primary hover:text-white transition duration-200 cursor-pointer"
                     >
                       {opt}
                     </button>
@@ -399,26 +399,26 @@ export default function FloatingChatbot() {
                             ? 'Nhập địa điểm học (ví dụ: Online)...'
                             : 'Nhập số điện thoại (ví dụ: 0912345678)...'
                   }
-                  className="flex-grow px-3.5 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50/50"
+                  className="flex-grow px-3.5 py-2.5 text-xs border border-slate-200 rounded-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-slate-50/50"
                   autoFocus
                 />
                 <button
                   type="submit"
                   disabled={!chatInput.trim()}
-                  className="px-4 py-2.5 bg-primary hover:bg-primary-dark disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold text-xs rounded-xl transition duration-200 flex items-center gap-1 cursor-pointer"
+                  className="px-4 py-2.5 bg-primary hover:bg-primary-dark disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold text-xs rounded-none transition duration-200 flex items-center gap-1 cursor-pointer"
                 >
                   Gửi <Send className="w-3.5 h-3.5" />
                 </button>
               </form>
             ) : (
               <div className="space-y-3">
-                <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-[10px] text-emerald-800 space-y-1 shadow-inner animate-scale-up">
+                <div className="p-3 bg-emerald-50 border border-emerald-100 rounded-none text-[10px] text-emerald-800 space-y-1 shadow-inner animate-scale-up">
                   <div className="flex items-center justify-between font-bold">
                     <span className="flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Đã lưu thông tin tư vấn thành công!
                     </span>
                     {lead.leadId && (
-                      <span className="bg-emerald-600 text-white px-1.5 py-0.25 rounded text-[8px]">
+                      <span className="bg-emerald-600 text-white px-1.5 py-0.25 rounded-none text-[8px]">
                         Lead ID: #{lead.leadId}
                       </span>
                     )}
@@ -432,7 +432,7 @@ export default function FloatingChatbot() {
                 </div>
                 <button
                   onClick={handleReset}
-                  className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/50"
+                  className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs rounded-none transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200/50"
                 >
                   <RefreshCw className="w-4 h-4 text-slate-500" /> Nhập yêu cầu tư vấn mới
                 </button>
@@ -460,7 +460,7 @@ export default function FloatingChatbot() {
 
         {/* New message notification badge */}
         {hasNewMessage && !isOpen && (
-          <span className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-rose-500 text-white font-extrabold text-[10px] rounded-full flex items-center justify-center shadow-lg border-2 border-white animate-bounce">
+          <span className="absolute -top-1.5 -right-1.5 w-6 h-6 bg-rose-500 text-white font-extrabold text-[10px] rounded-none flex items-center justify-center shadow-lg border-2 border-white animate-bounce">
             1
           </span>
         )}

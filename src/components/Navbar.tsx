@@ -186,7 +186,7 @@ export default function Navbar() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2 group cursor-default">
-                <div className="w-7 h-7 rounded-full bg-slate-900 border border-slate-700/80 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition">
+                <div className="w-7 h-7 rounded-none bg-slate-900 border border-slate-700/80 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition">
                   <MapPin className="w-3.5 h-3.5" />
                 </div>
                 <span>
@@ -196,7 +196,7 @@ export default function Navbar() {
               </div>
 
               <div className="flex items-center gap-2 group">
-                <div className="w-7 h-7 rounded-full bg-slate-900 border border-slate-700/80 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition">
+                <div className="w-7 h-7 rounded-none bg-slate-900 border border-slate-700/80 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition">
                   <Mail className="w-3.5 h-3.5" />
                 </div>
                 <span>
@@ -208,7 +208,7 @@ export default function Navbar() {
               </div>
 
               <div className="flex items-center gap-2 group">
-                <div className="w-7 h-7 rounded-full bg-slate-900 border border-slate-700/80 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition">
+                <div className="w-7 h-7 rounded-none bg-slate-900 border border-slate-700/80 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition">
                   <Phone className="w-3.5 h-3.5" />
                 </div>
                 <span>
@@ -219,20 +219,20 @@ export default function Navbar() {
             </div>
 
             <div className="flex items-center gap-4">
-              <span className="text-[11px] bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1.5">
+              <span className="text-[11px] bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-none font-bold flex items-center gap-1.5">
                 <ShieldCheck className="w-3 h-3 text-emerald-400" /> Hệ thống AI EduTech Chuẩn 5 Sao
               </span>
               <div className="flex items-center gap-1.5">
-                <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
+                <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-none border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
                   <FacebookIcon className="w-3.5 h-3.5" />
                 </a>
-                <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
+                <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-none border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
                   <TwitterIcon className="w-3.5 h-3.5" />
                 </a>
-                <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
+                <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-none border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
                   <LinkedinIcon className="w-3.5 h-3.5" />
                 </a>
-                <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-full border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
+                <a href="#" onClick={(e) => e.preventDefault()} className="w-7 h-7 rounded-none border border-slate-800 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white transition">
                   <YoutubeIcon className="w-3.5 h-3.5" />
                 </a>
               </div>
@@ -356,8 +356,8 @@ export default function Navbar() {
               >
                 <Sparkles className="w-4 h-4 animate-pulse" />
                 <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-none bg-amber-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-none h-2.5 w-2.5 bg-amber-500"></span>
                 </span>
               </Link>
 
@@ -370,7 +370,7 @@ export default function Navbar() {
                     <img
                       src={localSync.avatar}
                       alt={localSync.name}
-                      className="w-6 h-6 rounded-full object-cover border border-white/60"
+                      className="w-6 h-6 rounded-none object-cover border border-white/60"
                       loading="eager"
                       decoding="async"
                     />
@@ -435,7 +435,7 @@ export default function Navbar() {
                   href="/profile"
                   className="flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white px-2.5 py-1.5 rounded-none text-xs font-bold transition border border-white/20"
                 >
-                  <img src={localSync.avatar} className="w-5 h-5 rounded-full object-cover border border-white" loading="eager" decoding="async" />
+                  <img src={localSync.avatar} className="w-5 h-5 rounded-none object-cover border border-white" loading="eager" decoding="async" />
                   <span className="text-amber-300 font-extrabold">{localSync.point}p</span>
                 </Link>
               ) : (
@@ -535,7 +535,7 @@ export default function Navbar() {
                         <img
                           src={localSync.avatar}
                           alt={localSync.name}
-                          className="w-10 h-10 rounded-full object-cover border-2 border-primary shadow"
+                          className="w-10 h-10 rounded-none object-cover border-2 border-primary shadow"
                           loading="eager"
                           decoding="async"
                         />
