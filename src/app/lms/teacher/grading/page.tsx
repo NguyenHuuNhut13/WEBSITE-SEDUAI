@@ -15,23 +15,43 @@ function getSubmissionFiles(value: unknown): Array<{ name: string; url: string }
   }
 }
 
+function getExamTypeLabel(type: string) {
+  if (type === 'MIDTERM') return 'Giữa kỳ';
+  if (type === 'FINAL') return 'Cuối kỳ';
+  return 'Quiz buổi học';
+}
+
 export default function TeacherGradingPage() {
   const { lmsUserId } = useAuth();
   const [submissions, setSubmissions] = useState<any[]>([]);
+  const [examResults, setExamResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [gradingId, setGradingId] = useState<string | null>(null);
   const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [selectedSub, setSelectedSub] = useState<any>(null);
+  const [selectedExam, setSelectedExam] = useState<any>(null);
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'AI_GRADED' | 'REVIEWED'>('ALL');
 
   const loadSubmissions = useCallback(async () => {
     try {
-      const res = await fetch(`/api/lms/submissions?teacherId=${encodeURIComponent(lmsUserId || '')}`);
-      const json = await res.json();
-      if (!res.ok || !json.success) throw new Error(json.error || 'Không thể tải danh sách bài nộp.');
-      setSubmissions(json.data);
+      const [submissionResponse, examResponse] = await Promise.all([
+        fetch(`/api/lms/submissions?teacherId=${encodeURIComponent(lmsUserId || '')}`),
+        fetch('/api/lms/exams/results'),
+      ]);
+      const [submissionJson, examJson] = await Promise.all([
+        submissionResponse.json(),
+        examResponse.json(),
+      ]);
+      if (!submissionResponse.ok || !submissionJson.success) {
+        throw new Error(submissionJson.error || 'Không thể tải danh sách bài nộp.');
+      }
+      if (!examResponse.ok || !examJson.success) {
+        throw new Error(examJson.error || 'Không thể tải kết quả bài thi.');
+      }
+      setSubmissions(submissionJson.data);
+      setExamResults(examJson.data);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Không thể tải danh sách bài nộp.');
     } finally {
@@ -50,6 +70,7 @@ export default function TeacherGradingPage() {
       if (!res.ok || !json.success) throw new Error(json.error || 'SEDUAI chưa thể chấm bài.');
       setSubmissions((prev) => prev.map((s) => s.id === id ? json.data : s));
       setSelectedSub(json.data);
+      setSelectedExam(null);
     } catch (e) { setError(e instanceof Error ? e.message : 'SEDUAI chưa thể chấm bài.'); }
     setGradingId(null);
   };
@@ -82,11 +103,11 @@ export default function TeacherGradingPage() {
     REVIEWED: 'Đã review',
   };
   const counts = useMemo(() => ({
-    all: submissions.length,
+    all: submissions.length + examResults.length,
     pending: submissions.filter((item) => item.status === 'PENDING').length,
     ai: submissions.filter((item) => item.status === 'AI_GRADED').length,
     reviewed: submissions.filter((item) => item.status === 'REVIEWED').length,
-  }), [submissions]);
+  }), [examResults.length, submissions]);
   const filteredSubmissions = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return submissions.filter((sub) => {
@@ -95,6 +116,13 @@ export default function TeacherGradingPage() {
       return matchesStatus && (!normalized || haystack.includes(normalized));
     });
   }, [query, statusFilter, submissions]);
+  const filteredExamResults = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    return examResults.filter((result) => {
+      const haystack = `${result.student?.name || ''} ${result.examConfig?.subject?.name || ''} ${getExamTypeLabel(result.examConfig?.examType || '')}`.toLowerCase();
+      return !normalized || haystack.includes(normalized);
+    });
+  }, [examResults, query]);
 
   if (loading) return <div className="flex items-center justify-center min-h-[50vh]"><div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
 
@@ -119,7 +147,7 @@ export default function TeacherGradingPage() {
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
-          { label: 'Tổng bài nộp', value: counts.all, icon: <FileText className="h-5 w-5" />, color: 'text-slate-600', bg: 'bg-slate-100' },
+          { label: 'Tổng bài cần theo dõi', value: counts.all, icon: <FileText className="h-5 w-5" />, color: 'text-slate-600', bg: 'bg-slate-100' },
           { label: 'Chờ chấm', value: counts.pending, icon: <Sparkles className="h-5 w-5" />, color: 'text-amber-600', bg: 'bg-amber-50' },
           { label: 'AI đã chấm', value: counts.ai, icon: <Star className="h-5 w-5" />, color: 'text-blue-600', bg: 'bg-blue-50' },
           { label: 'Đã review', value: counts.reviewed, icon: <CheckCircle className="h-5 w-5" />, color: 'text-emerald-600', bg: 'bg-emerald-50' },
@@ -155,7 +183,7 @@ export default function TeacherGradingPage() {
             <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400 text-sm">Chưa có bài nộp</div>
           ) : (
             filteredSubmissions.map((sub) => (
-              <div key={sub.id} onClick={() => setSelectedSub(sub)}
+              <div key={sub.id} onClick={() => { setSelectedSub(sub); setSelectedExam(null); }}
                 className={`cursor-pointer rounded-xl border bg-white p-4 transition hover:border-primary/30 hover:shadow-sm ${
                   selectedSub?.id === sub.id ? 'border-primary ring-2 ring-primary/10' : 'border-slate-200'
                 }`}>
@@ -172,6 +200,37 @@ export default function TeacherGradingPage() {
                   )}
                   {sub.files && <span className="flex items-center gap-1 text-xs font-medium text-slate-400"><Paperclip className="h-3 w-3" /> File đính kèm</span>}
                   <span className="text-xs text-slate-400">{new Date(sub.submittedAt).toLocaleDateString('vi-VN')}</span>
+                </div>
+              </div>
+            ))
+          )}
+
+          <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-5">
+            <h2 className="text-base font-bold text-slate-900">Kết quả bài thi ({filteredExamResults.length})</h2>
+            <span className="text-xs text-slate-400">Hệ thống tự chấm</span>
+          </div>
+          {filteredExamResults.length === 0 ? (
+            <div className="rounded-xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-400">Chưa có học sinh hoàn thành bài thi</div>
+          ) : (
+            filteredExamResults.map((result) => (
+              <div
+                key={result.id}
+                onClick={() => { setSelectedExam(result); setSelectedSub(null); }}
+                className={`cursor-pointer rounded-xl border bg-white p-4 transition hover:border-primary/30 hover:shadow-sm ${
+                  selectedExam?.id === result.id ? 'border-primary ring-2 ring-primary/10' : 'border-slate-200'
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-sm font-bold text-slate-900">{result.student?.name}</span>
+                  <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">Đã chấm</span>
+                </div>
+                <p className="mt-1 text-xs text-slate-500">
+                  {getExamTypeLabel(result.examConfig?.examType)} · {result.examConfig?.subject?.name || 'Môn học'}
+                </p>
+                <div className="mt-2 flex items-center gap-3 text-xs">
+                  <span className="font-bold text-primary"><Star className="mr-1 inline h-3 w-3" />{result.score}/10</span>
+                  <span className="text-slate-400">{result.correctCount}/{result.totalQuestions} câu đúng</span>
+                  {result.finishedAt && <span className="text-slate-400">{new Date(result.finishedAt).toLocaleDateString('vi-VN')}</span>}
                 </div>
               </div>
             ))
@@ -265,10 +324,36 @@ export default function TeacherGradingPage() {
                 </div>
               )}
             </>
+          ) : selectedExam ? (
+            <div className="space-y-4">
+              <div className="rounded-xl border border-slate-200 bg-white p-5">
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="mb-1 text-xs font-medium text-slate-400">{selectedExam.examConfig?.subject?.name || 'Môn học'}</p>
+                    <h3 className="text-base font-bold text-slate-900">{getExamTypeLabel(selectedExam.examConfig?.examType)}</h3>
+                    <p className="mt-1 text-xs text-slate-500">Học sinh: {selectedExam.student?.name} · {selectedExam.finishedAt ? new Date(selectedExam.finishedAt).toLocaleString('vi-VN') : 'Chưa hoàn thành'}</p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">Đã tự động chấm</span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-lg bg-emerald-50 p-4 text-center">
+                    <p className="text-2xl font-black text-emerald-700">{selectedExam.score}/10</p>
+                    <p className="mt-1 text-xs font-semibold text-emerald-700">Điểm bài thi</p>
+                  </div>
+                  <div className="rounded-lg bg-blue-50 p-4 text-center">
+                    <p className="text-2xl font-black text-blue-700">{selectedExam.correctCount}/{selectedExam.totalQuestions}</p>
+                    <p className="mt-1 text-xs font-semibold text-blue-700">Câu trả lời đúng</p>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
+                Bài thi trắc nghiệm đã được hệ thống chấm tự động. Giáo viên có thể xem kết quả tại đây; không cần review thủ công như bài tập tự luận.
+              </div>
+            </div>
           ) : (
             <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
               <Eye className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500 text-sm">Chọn bài nộp để xem chi tiết và chấm điểm</p>
+              <p className="text-slate-500 text-sm">Chọn bài tập hoặc kết quả bài thi để xem chi tiết</p>
             </div>
           )}
         </div>

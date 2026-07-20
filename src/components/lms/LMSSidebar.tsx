@@ -16,8 +16,6 @@ import {
   BookMarked,
   Menu,
   X,
-  ChevronLeft,
-  ChevronRight,
   ChevronDown,
 } from 'lucide-react';
 
@@ -78,8 +76,14 @@ export default function LMSSidebar() {
         <button onClick={() => setMobileOpen(false)} className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition" aria-label="Đóng menu">
           <X className="w-5 h-5" />
         </button>
-        <button onClick={() => setCollapsed((value) => !value)} className="hidden lg:flex absolute -right-3 top-[64px] z-10 w-6 h-6 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm hover:text-primary transition" aria-label={collapsed ? 'Mở rộng menu' : 'Thu gọn menu'}>
-          {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+        <button
+          onClick={() => setCollapsed((value) => !value)}
+          className="hidden lg:flex absolute -right-4 top-5 z-10 w-8 h-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm hover:border-primary/30 hover:text-primary transition"
+          aria-label={collapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
+          aria-expanded={!collapsed}
+          title={collapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
+        >
+          <Menu className="w-4 h-4" strokeWidth={2.25} />
         </button>
       </div>
 
