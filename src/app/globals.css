@@ -572,6 +572,15 @@ h1, h2, h3, h4, h5, h6 {
 /* ======================== */
 
 /* Sidebar */
+.lms-shell,
+.lms-shell *,
+.lms-shell *::before,
+.lms-shell *::after {
+  /* Flat LMS visual language: keep rounded corners only for the external
+     chatbot/ChatGPT surfaces, which are outside this shell. */
+  border-radius: 0 !important;
+}
+
 .lms-sidebar {
   flex-shrink: 0;
   z-index: 40;
