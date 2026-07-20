@@ -445,12 +445,12 @@ export default function FloatingChatbot() {
       {/* Floating Toggle Button */}
       <button
         onClick={handleToggle}
-        className="relative w-14 h-14 bg-gradient-to-tr from-primary to-blue-600 rounded-full flex items-center justify-center text-white shadow-2xl hover:scale-110 transition duration-300 group cursor-pointer"
+        className="relative w-14 h-14 bg-gradient-to-tr from-primary to-blue-600 rounded-none flex items-center justify-center text-white shadow-2xl hover:scale-110 transition duration-300 group cursor-pointer"
         title="Trò chuyện cùng trợ lý tuyển sinh SeduAi"
       >
         {/* Pulsing glow ring */}
-        <span className="absolute inset-0 rounded-full bg-primary/30 animate-ping group-hover:animate-none scale-105"></span>
-        <span className="absolute inset-0 rounded-full border-2 border-white/20 scale-100 group-hover:scale-105 transition duration-300"></span>
+        <span className="absolute inset-0 rounded-none bg-primary/30 animate-ping group-hover:animate-none scale-105"></span>
+        <span className="absolute inset-0 rounded-none border-2 border-white/20 scale-100 group-hover:scale-105 transition duration-300"></span>
 
         {isOpen ? (
           <X className="w-6 h-6 transform hover:rotate-90 transition duration-300" />

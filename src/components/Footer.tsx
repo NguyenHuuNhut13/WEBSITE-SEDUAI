@@ -257,7 +257,7 @@ export default function Footer() {
       {/* Back to Top Button — with progress ring */}
       <button
         onClick={scrollToTop}
-        className={`fixed z-40 transition-all duration-500 rounded-full bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-110 hover:shadow-primary/50 cursor-pointer animate-glow-border w-12 h-12 ${
+        className={`fixed z-40 transition-all duration-500 rounded-none bg-primary hover:bg-primary-dark text-white shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-110 hover:shadow-primary/50 cursor-pointer animate-glow-border w-12 h-12 ${
           isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         } ${
           isChatbotOpen
