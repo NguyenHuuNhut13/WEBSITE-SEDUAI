@@ -2,13 +2,14 @@
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { Bell, Search } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import LMSSidebar from '@/components/lms/LMSSidebar';
 
 export default function LMSLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { accessToken, isLoading, lmsRole, lmsUserId, lmsIdentityLoading, lmsIdentityError } = useAuth();
+  const { accessToken, isLoading, lmsRole, lmsUserId, lmsIdentityLoading, lmsIdentityError, user } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !accessToken) {
@@ -75,8 +76,28 @@ export default function LMSLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="lms-shell flex min-h-screen bg-[#f8fafc]">
       <LMSSidebar />
-      <div className="flex-1 min-h-screen flex flex-col overflow-x-hidden">
-        {/* Main Content */}
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-hidden">
+        <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-5 sm:px-6 lg:px-8">
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400">SeduAi LMS</p>
+            <p className="truncate text-sm font-semibold text-slate-900">Không gian quản lý học tập</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden items-center gap-2 border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-400 md:flex">
+              <Search className="h-4 w-4" />
+              <span>Tìm kiếm trong LMS</span>
+            </div>
+            <button type="button" className="relative p-2 text-slate-500 transition hover:bg-slate-100 hover:text-primary" aria-label="Thông báo">
+              <Bell className="h-5 w-5" />
+              <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 bg-rose-500" />
+            </button>
+            <div className="hidden border-l border-slate-200 pl-3 text-right sm:block">
+              <p className="max-w-32 truncate text-sm font-bold text-slate-900">{user?.name || user?.username || 'Người dùng'}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{lmsRole}</p>
+            </div>
+          </div>
+        </header>
+
         <main className="flex-1">
           <div className="p-5 sm:p-6 lg:p-8 max-w-[1440px] mx-auto w-full">
             {children}

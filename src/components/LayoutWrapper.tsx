@@ -56,13 +56,15 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     };
   }, [pathname]);
 
+  const isStandaloneWorkspace = isAiAssistant || isLms;
+
   return (
     <>
-      {!isAiAssistant && <Navbar />}
+      {!isStandaloneWorkspace && <Navbar />}
       <main className="flex-grow flex flex-col w-full">{children}</main>
-      {!isAiAssistant && <Footer />}
-      {!isAiAssistant && <FloatingChatbot />}
-      <ScrollToTop />
+      {!isStandaloneWorkspace && <Footer />}
+      {!isStandaloneWorkspace && <FloatingChatbot />}
+      {!isStandaloneWorkspace && <ScrollToTop />}
     </>
   );
 }
