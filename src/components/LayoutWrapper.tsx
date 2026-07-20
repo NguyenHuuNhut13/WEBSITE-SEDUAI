@@ -55,15 +55,15 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     };
   }, [pathname]);
 
-  const isStandaloneWorkspace = isLms;
+  const isAiAssistant = pathname?.startsWith('/ai-assistant');
 
   return (
     <>
-      {!isStandaloneWorkspace && <Navbar />}
+      {!isLms && <Navbar />}
       <main className="flex-grow flex flex-col w-full">{children}</main>
-      {!isStandaloneWorkspace && <Footer />}
-      {!isStandaloneWorkspace && <FloatingChatbot />}
-      {!isStandaloneWorkspace && <ScrollToTop />}
+      {!isLms && !isAiAssistant && <Footer />}
+      {!isLms && !isAiAssistant && <FloatingChatbot />}
+      {!isLms && !isAiAssistant && <ScrollToTop />}
     </>
   );
 }
