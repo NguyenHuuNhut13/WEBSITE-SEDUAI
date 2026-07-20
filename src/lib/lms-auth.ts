@@ -1,8 +1,69 @@
 import type { NextRequest } from 'next/server';
 import type { LmsUser, Prisma, UserRole } from '@prisma/client';
+import { createHash } from 'node:crypto';
 import prisma from '@/lib/prisma';
 
 const ACCOUNT_API_BASE = 'https://account.nks.vn/api/nks/user';
+const VERIFIED_SESSION_TTL_MS = 5 * 60 * 1000;
+const verifiedSessionCache = new Map<string, { user: LmsUser; expiresAt: number }>();
+
+function getSessionCacheKey(token: string) {
+  return createHash('sha256').update(token).digest('hex');
+}
+
+function getCachedSession(token: string) {
+  const key = getSessionCacheKey(token);
+  const cached = verifiedSessionCache.get(key);
+  if (!cached) return null;
+  if (cached.expiresAt <= Date.now()) {
+    verifiedSessionCache.delete(key);
+    return null;
+  }
+  return cached.user;
+}
+
+function cacheVerifiedSession(token: string, user: LmsUser) {
+  verifiedSessionCache.set(getSessionCacheKey(token), {
+    user,
+    expiresAt: Date.now() + VERIFIED_SESSION_TTL_MS,
+  });
+}
+
+function assertLmsRole(user: LmsUser, roles?: UserRole[]) {
+  if (roles && !roles.includes(user.role)) {
+    throw new LmsAuthError('Bạn không có quyền thực hiện thao tác này', 403);
+  }
+  return user;
+}
+
+async function fetchNksAccount(token: string) {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await fetch(ACCOUNT_API_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ access_token: token }),
+        cache: 'no-store',
+        signal: AbortSignal.timeout(4000),
+      });
+      // NKS occasionally returns a transient 5xx while restarting. Retry once
+      // before falling back to the short-lived verified session cache.
+      if (response.status >= 500 && attempt === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 150));
+        continue;
+      }
+      return response;
+    } catch (error) {
+      lastError = error;
+      if (attempt === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 150));
+        continue;
+      }
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error('NKS account request failed');
+}
 
 export class LmsAuthError extends Error {
   constructor(message: string, public status = 401) {
@@ -24,17 +85,13 @@ export async function requireLmsUser(request: NextRequest, roles?: UserRole[]): 
   // a recovery path for older sessions that have not restored the cookie yet.
   const token = request.cookies.get('seduai_access_token')?.value || bearer;
   if (!token) throw new LmsAuthError('Bạn chưa đăng nhập', 401);
+  const cachedUser = getCachedSession(token);
 
   let response: Response;
   try {
-    response = await fetch(ACCOUNT_API_BASE, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ access_token: token }),
-      cache: 'no-store',
-      signal: AbortSignal.timeout(8000),
-    });
+    response = await fetchNksAccount(token);
   } catch {
+    if (cachedUser) return assertLmsRole(cachedUser, roles);
     throw new LmsAuthError('Không thể xác minh phiên đăng nhập NKS. Vui lòng thử lại.', 503);
   }
   if (!response.ok) {
@@ -42,8 +99,10 @@ export async function requireLmsUser(request: NextRequest, roles?: UserRole[]): 
       throw new LmsAuthError('Phiên đăng nhập không hợp lệ hoặc đã hết hạn', 401);
     }
     if (response.status === 429) {
+      if (cachedUser) return assertLmsRole(cachedUser, roles);
       throw new LmsAuthError('Dịch vụ NKS đang giới hạn yêu cầu. Vui lòng thử lại sau.', 429);
     }
+    if (cachedUser) return assertLmsRole(cachedUser, roles);
     throw new LmsAuthError('Dịch vụ xác thực NKS đang tạm thời gián đoạn. Vui lòng thử lại.', 503);
   }
 
@@ -51,6 +110,7 @@ export async function requireLmsUser(request: NextRequest, roles?: UserRole[]): 
   try {
     payload = await response.json() as Record<string, any>;
   } catch {
+    if (cachedUser) return assertLmsRole(cachedUser, roles);
     throw new LmsAuthError('Dịch vụ NKS trả về phản hồi không hợp lệ. Vui lòng thử lại.', 502);
   }
   if (payload?.success === false || payload?.error) {
@@ -66,8 +126,8 @@ export async function requireLmsUser(request: NextRequest, roles?: UserRole[]): 
     throw new LmsAuthError(error.message, 400);
   }
 
-  if (roles && !roles.includes(user.role)) throw new LmsAuthError('Bạn không có quyền thực hiện thao tác này', 403);
-  return user;
+  cacheVerifiedSession(token, user);
+  return assertLmsRole(user, roles);
 }
 
 export async function syncLmsUser(account: any): Promise<LmsUser> {
