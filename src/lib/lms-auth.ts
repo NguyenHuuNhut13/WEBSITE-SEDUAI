@@ -86,12 +86,12 @@ export async function requireLmsUser(request: NextRequest, roles?: UserRole[]): 
   const token = request.cookies.get('seduai_access_token')?.value || bearer;
   if (!token) throw new LmsAuthError('Bạn chưa đăng nhập', 401);
   const cachedUser = getCachedSession(token);
+  if (cachedUser) return assertLmsRole(cachedUser, roles);
 
   let response: Response;
   try {
     response = await fetchNksAccount(token);
   } catch {
-    if (cachedUser) return assertLmsRole(cachedUser, roles);
     throw new LmsAuthError('Không thể xác minh phiên đăng nhập NKS. Vui lòng thử lại.', 503);
   }
   if (!response.ok) {
