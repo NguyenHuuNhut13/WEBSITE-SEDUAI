@@ -92,6 +92,34 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
     }
   };
 
+  const handleExpandContentFromActivities = async () => {
+    if (!lessonActivities.trim()) {
+      setOperationError('Vui lòng nhập Sườn tiến trình hoạt động ở Bước 1 trước khi triển khai nội dung chi tiết.');
+      return;
+    }
+    setSaving(true);
+    setOperationError('');
+    try {
+      const response = await fetch('/api/lms/ai/expand-lesson-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subjectName: subject.name,
+          lessonTitle: lessonTitle || 'Bài học',
+          lessonObjectives,
+          lessonActivities,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || 'Không thể triển khai nội dung bài học bằng AI.');
+      setLessonContent(result.data.content);
+    } catch (error) {
+      setOperationError(error instanceof Error ? error.message : 'Không thể triển khai nội dung bài học bằng AI.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleAiGenerateAssignment = async (lesson: any) => {
     setSaving(true);
     setOperationError('');
@@ -483,17 +511,28 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
                   {/* STEP 2: NỘI DUNG BÀI HỌC & HỌC LIỆU */}
                   {lessonStep === 2 && (
                     <div className="space-y-3 bg-white p-3.5 border border-slate-200">
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-black text-slate-800 uppercase tracking-wider block flex items-center justify-between">
-                          <span>📖 Nội dung bài giảng chi tiết (Dành cho học sinh đọc học)</span>
-                          <span className="text-[10px] text-slate-500 font-normal lowercase">(hỗ trợ Markdown)</span>
-                        </label>
+                      <div className="space-y-1.5">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <label className="text-[11px] font-black text-slate-800 uppercase tracking-wider block">
+                            📖 Nội dung bài giảng chi tiết (Dành cho học sinh đọc học)
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={handleExpandContentFromActivities}
+                            disabled={saving}
+                            className="flex items-center gap-1.5 px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-none text-[11px] font-bold shadow cursor-pointer transition"
+                          >
+                            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
+                            ✨ AI Khai Triển Chi Tiết Từ Sườn Bước 1
+                          </button>
+                        </div>
                         <textarea
                           value={lessonContent}
                           onChange={(e) => setLessonContent(e.target.value)}
-                          rows={8}
-                          placeholder="Triển khai chi tiết kiến thức, mã nguồn code blocks, công thức bám sát sườn hoạt độngở Bước 1..."
-                          className="w-full px-3 py-2 rounded-none border border-slate-300 text-xs focus:outline-none focus:border-primary font-mono bg-slate-50/50 resize-y"
+                          rows={9}
+                          placeholder="Triển khai chi tiết kiến thức chuyên sâu, mã nguồn code blocks, công thức hoặc từ vựng được AI phát triển từ sườn ở Bước 1..."
+                          className="w-full px-3 py-2.5 rounded-none border border-slate-300 text-xs focus:outline-none focus:border-primary font-mono bg-slate-50/50 resize-y leading-relaxed"
                         />
                       </div>
 

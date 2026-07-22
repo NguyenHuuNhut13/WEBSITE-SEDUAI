@@ -509,16 +509,12 @@ ${domainContext.guidelines}
 ${onlineContextPrompt}
 
 QUY TRÌNH BIÊN SOẠN BẮT BỘC (2 BƯỚC SƯ PHẠM):
-- BƯỚC 1 (Xây dựng sườn cho giáo viên): Xây dựng "Sườn tiến trình hoạt động" (activities) cho giáo viên bao gồm 4 phần:
-  1. Mở đầu / Khởi động (đặt tình huống, tạo động lực)
-  2. Khám phá / Hình thành kiến thức (các mục kiến thức trọng tâm)
-  3. Luyện tập / Thực hành (bài tập tại lớp, thực hành code / mẫu câu / công thức)
-  4. Vận dụng & Dặn dò (ứng dụng thực tế và bài tập mở rộng)
+- BƯỚC 1 (Xây dựng sườn cho giáo viên): Xây dựng "Sườn tiến trình hoạt động" (activities) cho giáo viên bao gồm 4 phần (Mở đầu, Khám phá kiến thức, Luyện tập, Vận dụng dặn dò).
 
 - BƯỚC 2 (Phát triển nội dung bài học chi tiết): Dựa trên chính Sườn tiến trình hoạt động đã lập ở BƯỚC 1, hãy triển khai "Nội dung bài giảng chi tiết" (content) bằng Markdown phong phú cho học sinh đọc học:
-  + Mọi phần trong 'content' phải bám sát và khai triển chi tiết theo từng hoạt động ở 'activities'.
-  + Viết đầy đủ kiến thức chuyên môn, ví dụ minh họa trực quan, mã nguồn code blocks (nếu là môn Lập trình/CNTT), mẫu hội thoại/từ vựng (nếu là môn Tiếng Anh), hoặc công thức & lời giải mẫu (nếu là môn Toán/KHTN).
-  + Tuyệt đối KHÔNG viết chung chung hay nội dung sơ sài.
+  + Tuyệt đối KHÔNG bê y chang hay copy lại đoạn sườn gạch đầu dòng từ 'activities'.
+  + Khai triển từng mục trong 'activities' thành các đoạn văn giảng giải kiến thức chuyên sâu, kèm ví dụ minh họa trực quan, mã nguồn code blocks (nếu là môn Lập trình/CNTT), mẫu hội thoại/từ vựng (nếu là môn Tiếng Anh), hoặc công thức & lời giải mẫu từng bước (nếu là môn Toán/KHTN).
+  + Viết bài đọc hoàn chỉnh, khoa học, đầy đủ lý thuyết và ví dụ thực hành cho học sinh tự nghiên cứu.
 
 Trả về duy nhất một chuỗi JSON hợp lệ theo cấu trúc sau (không bao gồm chữ hay định dạng khác ngoài JSON):
 {
@@ -526,7 +522,7 @@ Trả về duy nhất một chuỗi JSON hợp lệ theo cấu trúc sau (không
   "objectives": "Mục tiêu bài học (Kiến thức, Kỹ năng, Thái độ)",
   "preparation": "Chuẩn bị của giáo viên (Slide, máy tính, học liệu) và học sinh (Máy tính, tài liệu)",
   "activities": "Sườn tiến trình hoạt động giảng dạy 4 bước chi tiết dành cho giáo viên",
-  "content": "Nội dung bài giảng chi tiết bằng Markdown phong phú dành cho học sinh, được triển khai hoàn chỉnh theo đúng sườn tiến trình ở trên",
+  "content": "Nội dung bài giảng chi tiết bằng Markdown phong phú dành cho học sinh, được khai triển sâu theo sườn tiến trình ở trên (không copy lại sườn)",
   "assessment": "Tiêu chí đánh giá hoàn thành bài học"
 }`;
 
@@ -536,25 +532,58 @@ Trả về duy nhất một chuỗi JSON hợp lệ theo cấu trúc sau (không
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
       throw new Error('Mô hình AI trả về dữ liệu bài học không đúng định dạng JSON.');
     }
-    const objectivesText = stringifyAiField(parsed.objectives);
-    const preparationText = stringifyAiField(parsed.preparation);
-    const activitiesText = stringifyAiField(parsed.activities);
-    let contentText = stringifyAiField(parsed.content);
-    if (!contentText.trim()) {
-      contentText = `### 📖 Nội dung bài giảng chi tiết\n${activitiesText}`;
-    }
-
     return {
       title: typeof parsed.title === 'string' ? parsed.title : (onlineLessonData?.realTitle || `Buổi ${orderIndex} - ${lessonType === 'THEORY' ? 'Lý thuyết' : 'Thực hành'}`),
-      objectives: objectivesText,
-      preparation: preparationText,
-      activities: activitiesText,
-      content: contentText,
+      objectives: stringifyAiField(parsed.objectives),
+      preparation: stringifyAiField(parsed.preparation),
+      activities: stringifyAiField(parsed.activities),
+      content: stringifyAiField(parsed.content),
       assessment: stringifyAiField(parsed.assessment)
     };
   } catch (error: any) {
     console.error('SEDUAI generateLessonPlan failed:', error);
     throw new Error(error?.message || 'Không thể sinh bài học tự động bằng AI. Vui lòng kiểm tra lại cấu hình hoặc thử lại sau.');
+  }
+}
+
+/**
+ * Triển khai chi tiết Nội dung bài học (content) cho học sinh từ Sườn tiến trình (activities) ở Bước 1
+ */
+export async function expandLessonContentFromActivities(
+  subjectName: string,
+  lessonTitle: string,
+  lessonObjectives: string,
+  lessonActivities: string
+): Promise<string> {
+  const domainContext = getSubjectDomainContext(subjectName);
+  const prompt = `Bạn là SEDUAI, chuyên gia biên soạn giáo trình và tài liệu học tập chi tiết cho học sinh.
+
+Dựa trên SƯỜN TIẾN TRÌNH HOẠT ĐỘNG SƯ PHẠM dưới đây của giáo viên cho bài học "${lessonTitle}" (môn "${subjectName}"):
+Mục tiêu bài học: ${lessonObjectives || 'Nắm vững kiến thức trọng tâm bài học'}
+Sườn tiến trình activities:
+${lessonActivities || 'Mở đầu ➔ Khám phá kiến thức ➔ Luyện tập ➔ Vận dụng'}
+
+${domainContext.guidelines}
+
+YÊU CẦU BIÊN SOẠN NỘI DUNG CHI TIẾT (CONTENT) DÀNH CHO HỌC SINH:
+- Tuyệt đối KHÔNG bê y chang hay copy lại đoạn sườn gạch đầu dòng của activities.
+- Khai triển từng mục hoạt động trong sườn thành bài đọc học tập chi tiết bằng Markdown phong phú:
+  + Giảng giải kiến thức chuyên môn từng khái niệm, định nghĩa.
+  + Cung cấp ví dụ minh họa trực quan, mã nguồn code blocks (nếu là Lập trình), từ vựng/mẫu câu (nếu là Tiếng Anh), hoặc công thức & bài giải từng bước (nếu là Toán/KHTN).
+  + Hướng dẫn thực hành từng bước cho học sinh tự đọc và học tại nhà.
+
+Trả về duy nhất một chuỗi JSON hợp lệ theo định dạng: {"content": "Nội dung bài giảng chi tiết bằng Markdown phong phú..."}`;
+
+  try {
+    const raw = await callSeduAiJson(prompt, 3000);
+    const parsed = parseProviderJson(raw) as any;
+    if (parsed && typeof parsed === 'object' && 'content' in parsed) {
+      return stringifyAiField(parsed.content);
+    }
+    return typeof parsed === 'string' ? parsed : stringifyAiField(parsed);
+  } catch (error) {
+    console.error('expandLessonContentFromActivities failed:', error);
+    throw new Error('Không thể tự động triển khai nội dung chi tiết từ sườn hoạt động. Vui lòng thử lại.');
   }
 }
 
