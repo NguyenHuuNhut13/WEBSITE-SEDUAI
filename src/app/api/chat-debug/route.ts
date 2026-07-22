@@ -18,6 +18,9 @@ export async function GET() {
       : 'Định dạng key không hợp lệ';
     
     const configs = [
+      { model: 'gemini-3.6-flash', version: 'v1beta' },
+      { model: 'gemini-3.5-flash', version: 'v1beta' },
+      { model: 'gemini-3.0-flash', version: 'v1beta' },
       { model: 'gemini-2.0-flash', version: 'v1beta' },
       { model: 'gemini-2.0-flash-lite', version: 'v1beta' },
     ];

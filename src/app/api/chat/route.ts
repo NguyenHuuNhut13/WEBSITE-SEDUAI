@@ -14,8 +14,11 @@ async function callGemini(messages: any[], systemPrompt: string): Promise<string
     parts: [{ text: m.content || '' }]
   }));
 
-  // Official active Gemini 2.0 models
+  // Priority order: Gemini 3.6 Flash -> Gemini 3.5 Flash -> Gemini 2.0 Flash
   const configs = [
+    { model: 'gemini-3.6-flash', version: 'v1beta' },
+    { model: 'gemini-3.5-flash', version: 'v1beta' },
+    { model: 'gemini-3.0-flash', version: 'v1beta' },
     { model: 'gemini-2.0-flash', version: 'v1beta' },
     { model: 'gemini-2.0-flash-lite', version: 'v1beta' },
   ];
