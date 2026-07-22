@@ -408,6 +408,31 @@ async function callSeduAiJson(prompt: string, maxOutputTokens: number): Promise<
   return JSON.stringify({ questions: questionsList });
 }
 
+function stringifyAiField(val: any): string {
+  if (!val) return '';
+  if (typeof val === 'string') return val;
+  if (Array.isArray(val)) {
+    return val
+      .map((item, idx) => {
+        if (typeof item === 'string') return `${idx + 1}. ${item}`;
+        if (typeof item === 'object' && item !== null) {
+          const parts = Object.entries(item)
+            .map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : v}`)
+            .join(' | ');
+          return `${idx + 1}. ${parts}`;
+        }
+        return `${idx + 1}. ${String(item)}`;
+      })
+      .join('\n');
+  }
+  if (typeof val === 'object') {
+    return Object.entries(val)
+      .map(([k, v]) => `- **${k}**: ${typeof v === 'object' ? JSON.stringify(v) : v}`)
+      .join('\n');
+  }
+  return String(val);
+}
+
 function parseProviderJson(raw: string): unknown {
   const normalized = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
   return JSON.parse(normalized) as unknown;
@@ -449,12 +474,12 @@ Quy tắc bắt buộc:
       throw new Error('AI response is not an object');
     }
     return {
-      title: String(parsed.title || `Buổi ${orderIndex} - ${lessonType === 'THEORY' ? 'Lý thuyết' : 'Thực hành'}`),
-      objectives: String(parsed.objectives || ''),
-      preparation: String(parsed.preparation || ''),
-      activities: String(parsed.activities || ''),
-      content: String(parsed.content || ''),
-      assessment: String(parsed.assessment || '')
+      title: typeof parsed.title === 'string' ? parsed.title : `Buổi ${orderIndex} - ${lessonType === 'THEORY' ? 'Lý thuyết' : 'Thực hành'}`,
+      objectives: stringifyAiField(parsed.objectives),
+      preparation: stringifyAiField(parsed.preparation),
+      activities: stringifyAiField(parsed.activities),
+      content: stringifyAiField(parsed.content),
+      assessment: stringifyAiField(parsed.assessment)
     };
   } catch (error) {
     console.error('SEDUAI generateLessonPlan failed:', error);
@@ -495,9 +520,9 @@ Quy tắc bắt buộc:
       throw new Error('AI response is not an object');
     }
     return {
-      title: String(parsed.title || `Bài tập về nhà: ${lessonTitle}`),
-      description: String(parsed.description || ''),
-      rubric: String(parsed.rubric || '')
+      title: typeof parsed.title === 'string' ? parsed.title : `Bài tập về nhà: ${lessonTitle}`,
+      description: stringifyAiField(parsed.description),
+      rubric: stringifyAiField(parsed.rubric)
     };
   } catch (error) {
     console.error('SEDUAI generateLessonAssignment failed:', error);
