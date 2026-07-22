@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useEffect, use } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, Save, Loader2, Plus, FileText, Beaker } from 'lucide-react';
+import { ArrowLeft, BookOpen, Save, Loader2, Plus, FileText, Beaker, Sparkles } from 'lucide-react';
 
 function toLocalDateTimeInput(value: string) {
   const date = new Date(value);
@@ -39,6 +39,101 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
   const [allowResubmission, setAllowResubmission] = useState(false);
   const [assignmentDueDate, setAssignmentDueDate] = useState('');
   const [operationError, setOperationError] = useState('');
+
+  const handleAiGenerateLesson = async (type: string, order: number) => {
+    setSaving(true);
+    setOperationError('');
+    try {
+      const response = await fetch('/api/lms/ai/generate-lesson', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subjectName: subject.name,
+          lessonType: type,
+          orderIndex: order
+        })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || 'Không thể sinh nội dung bài học bằng AI.');
+      
+      const { title, objectives, preparation, activities, content, assessment } = result.data;
+      setLessonTitle(title);
+      setLessonObjectives(objectives);
+      setLessonPreparation(preparation);
+      setLessonActivities(activities);
+      setLessonContent(content);
+      setLessonAssessment(assessment);
+    } catch (error) {
+      setOperationError(error instanceof Error ? error.message : 'Không thể sinh nội dung bài học bằng AI.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAiGenerateAssignment = async (lesson: any) => {
+    setSaving(true);
+    setOperationError('');
+    try {
+      const response = await fetch('/api/lms/ai/generate-assignment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lessonTitle: lesson.title,
+          lessonObjectives: lesson.objectives || '',
+          lessonContent: lesson.content || ''
+        })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.error || 'Không thể sinh bài tập bằng AI.');
+      
+      const { title, description, rubric } = result.data;
+      setAssignmentTitle(title);
+      setAssignmentDescription(description);
+      setAssignmentRubric(rubric);
+    } catch (error) {
+      setOperationError(error instanceof Error ? error.message : 'Không thể sinh bài tập bằng AI.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleAiGenerateLessonQuiz = async (lessonId: string) => {
+    setSaving(true);
+    setOperationError('');
+    try {
+      const response = await fetch('/api/lms/ai/generate-lesson-quiz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lessonId }),
+      });
+      const json = await response.json();
+      if (!response.ok || !json.success) throw new Error(json.error || 'Không thể sinh Quiz bằng AI.');
+      await loadSubject();
+    } catch (error) {
+      setOperationError(error instanceof Error ? error.message : 'Không thể sinh Quiz bằng AI.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePublishQuiz = async (examConfigId: string) => {
+    setSaving(true);
+    setOperationError('');
+    try {
+      const response = await fetch('/api/lms/exams/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ examConfigId, action: 'publish' }),
+      });
+      const json = await response.json();
+      if (!response.ok || !json.success) throw new Error(json.error || 'Không thể công bố đề thi');
+      await loadSubject();
+    } catch (error) {
+      setOperationError(error instanceof Error ? error.message : 'Không thể công bố đề thi');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const loadSubject = useCallback(async () => {
     try {
@@ -225,40 +320,51 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
         const isEditing = editingLesson === lesson?.id;
 
         return (
-          <div key={`${type}-${order}`} className={`bg-white rounded-xl border p-4 transition ${
+          <div key={`${type}-${order}`} className={`bg-white rounded-none border p-4 transition ${
             lesson ? 'border-slate-200' : 'border-dashed border-slate-300'
           }`}>
             {lesson ? (
               isEditing ? (
                 <div className="space-y-3">
-                  <input type="text" value={lessonTitle} onChange={(e) => setLessonTitle(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                  <div className="flex items-center justify-between gap-3">
+                    <input type="text" value={lessonTitle} onChange={(e) => setLessonTitle(e.target.value)}
+                      className="w-full px-3 py-2 rounded-none border border-slate-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                    <button
+                      type="button"
+                      onClick={() => handleAiGenerateLesson(type, order)}
+                      disabled={saving}
+                      className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-gradient-to-tr from-primary to-blue-600 hover:from-primary-dark hover:to-blue-700 disabled:opacity-50 text-white rounded-none font-bold text-xs shadow transition cursor-pointer"
+                    >
+                      {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                      Soạn giáo án AI
+                    </button>
+                  </div>
                   <textarea value={lessonObjectives} onChange={(e) => setLessonObjectives(e.target.value)} rows={2} placeholder="Mục tiêu / yêu cầu cần đạt"
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm" />
+                    className="w-full px-3 py-2 rounded-none border border-slate-200 text-sm" />
                   <textarea value={lessonPreparation} onChange={(e) => setLessonPreparation(e.target.value)} rows={2} placeholder="Chuẩn bị"
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm" />
+                    className="w-full px-3 py-2 rounded-none border border-slate-200 text-sm" />
                   <textarea value={lessonActivities} onChange={(e) => setLessonActivities(e.target.value)} rows={4} placeholder="Tiến trình: Mở đầu, hình thành kiến thức, luyện tập, vận dụng"
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm" />
+                    className="w-full px-3 py-2 rounded-none border border-slate-200 text-sm" />
                   <textarea value={lessonContent} onChange={(e) => setLessonContent(e.target.value)} rows={6}
                     placeholder="Nhập nội dung bài học..."
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-y" />
+                    className="w-full px-3 py-2 rounded-none border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-y" />
                   <textarea value={lessonAssessment} onChange={(e) => setLessonAssessment(e.target.value)} rows={2} placeholder="Đánh giá / tiêu chí hoàn thành"
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm" />
-                  <label className="block rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600">
+                    className="w-full px-3 py-2 rounded-none border border-slate-200 text-sm" />
+                  <label className="block rounded-none border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600">
                     Học liệu đính kèm
                     <input type="file" multiple className="mt-2 block w-full text-xs" onChange={(event) => setLessonFiles(Array.from(event.target.files || []))} />
                   </label>
-                  <select value={lessonStatus} onChange={(e) => setLessonStatus(e.target.value)} className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm">
+                  <select value={lessonStatus} onChange={(e) => setLessonStatus(e.target.value)} className="w-full px-3 py-2 rounded-none border border-slate-200 text-sm">
                     <option value="DRAFT">Bản nháp</option>
                     <option value="PUBLISHED">Công bố cho học sinh</option>
                     <option value="ARCHIVED">Lưu trữ</option>
                   </select>
                   <div className="flex gap-2">
                     <button onClick={() => updateLesson(lesson.id)} disabled={saving}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition cursor-pointer disabled:opacity-50">
+                      className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-none text-xs font-bold hover:bg-blue-700 transition cursor-pointer disabled:opacity-50">
                       {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Lưu
                     </button>
-                    <button onClick={() => setEditingLesson(null)} className="px-3 py-2 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200 transition cursor-pointer">
+                    <button onClick={() => setEditingLesson(null)} className="px-3 py-2 bg-slate-100 text-slate-600 rounded-none text-xs font-bold hover:bg-slate-200 transition cursor-pointer">
                       Hủy
                     </button>
                   </div>
@@ -299,22 +405,102 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
                     </div>
                   ))}
                 </div>
+                {/* Quiz Section */}
+                <div className="mt-3 pt-3 border-t border-slate-100">
+                  <h5 className="text-xs font-bold text-slate-700 flex items-center gap-1.5 mb-2">
+                    <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" /> Quiz ôn tập buổi học
+                  </h5>
+                  {(() => {
+                    const quizConfig = subject.examConfigs?.find(
+                      (config: any) =>
+                        config.examType === 'LESSON_QUIZ' &&
+                        config.lessonOrder === order &&
+                        config.lessonType === type
+                    );
+
+                    if (!quizConfig) {
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => handleAiGenerateLessonQuiz(lesson.id)}
+                          disabled={saving}
+                          className="flex items-center gap-1 text-xs font-extrabold text-primary hover:underline cursor-pointer disabled:opacity-50"
+                        >
+                          ✨ Sinh Quiz trắc nghiệm AI
+                        </button>
+                      );
+                    }
+
+                    return (
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 border border-slate-200/65 px-3 py-2 rounded-none text-xs">
+                        <div>
+                          <p className="font-bold text-slate-800">
+                            {quizConfig.questionStatus === 'GENERATED' ? '📝 Đã sinh câu hỏi (Chờ duyệt)' : '✅ Quiz đã công bố'}
+                          </p>
+                          <p className="text-slate-500 mt-0.5">
+                            {quizConfig.questionCount} câu hỏi · {quizConfig.durationMinutes} phút {quizConfig.questionStatus === 'PUBLISHED' && `· ${quizConfig._count?.results || 0} lượt thi`}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {quizConfig.questionStatus === 'GENERATED' && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handlePublishQuiz(quizConfig.id)}
+                                disabled={saving}
+                                className="font-bold text-emerald-700 hover:underline cursor-pointer disabled:opacity-50"
+                              >
+                                Duyệt & Công bố
+                              </button>
+                              <span className="text-slate-300">|</span>
+                            </>
+                          )}
+                          {quizConfig.questionStatus !== 'PUBLISHED' && (
+                            <button
+                              type="button"
+                              onClick={() => handleAiGenerateLessonQuiz(lesson.id)}
+                              disabled={saving}
+                              className="font-bold text-primary hover:underline cursor-pointer disabled:opacity-50"
+                            >
+                              Sinh lại đề
+                            </button>
+                          )}
+                          {quizConfig.questionStatus === 'PUBLISHED' && (
+                            <span className="font-bold text-emerald-600">Sẵn sàng</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
                 {assignmentLessonId === lesson.id ? (
-                  <div className="mt-3 space-y-2 rounded-xl bg-slate-50 p-3">
-                    <input value={assignmentTitle} onChange={(event) => setAssignmentTitle(event.target.value)} placeholder="Tên bài tập *"
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+                  <div className="mt-3 space-y-2 rounded-none bg-slate-50 p-3 border border-slate-200">
+                    <div className="flex items-center justify-between gap-3">
+                      <input value={assignmentTitle} onChange={(event) => setAssignmentTitle(event.target.value)} placeholder="Tên bài tập *"
+                        className="w-full rounded-none border border-slate-200 px-3 py-2 text-sm" />
+                      <button
+                        type="button"
+                        onClick={() => handleAiGenerateAssignment(lesson)}
+                        disabled={saving}
+                        className="shrink-0 flex items-center gap-1.5 px-3 py-2.5 bg-gradient-to-tr from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 disabled:opacity-50 text-white rounded-none font-bold text-xs shadow transition cursor-pointer"
+                      >
+                        {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                        Sinh bài tập AI
+                      </button>
+                    </div>
                     <textarea value={assignmentDescription} onChange={(event) => setAssignmentDescription(event.target.value)} placeholder="Yêu cầu và tiêu chí chấm bài"
-                      rows={3} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+                      rows={3} className="w-full rounded-none border border-slate-200 px-3 py-2 text-sm" />
                     <textarea value={assignmentRubric} onChange={(event) => setAssignmentRubric(event.target.value)} placeholder="Rubric: tiêu chí và số điểm cho từng tiêu chí"
-                      rows={3} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+                      rows={3} className="w-full rounded-none border border-slate-200 px-3 py-2 text-sm" />
                     <label className="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" checked={allowLateSubmission} onChange={(event) => setAllowLateSubmission(event.target.checked)} /> Cho phép nộp trễ</label>
                     <label className="flex items-center gap-2 text-xs text-slate-600"><input type="checkbox" checked={allowResubmission} onChange={(event) => setAllowResubmission(event.target.checked)} /> Cho phép nộp lại</label>
                     <input type="datetime-local" value={assignmentDueDate} onChange={(event) => setAssignmentDueDate(event.target.value)}
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
+                      className="w-full rounded-none border border-slate-200 px-3 py-2 text-sm" />
                     <div className="flex gap-2">
                       <button onClick={() => editingAssignmentId ? updateAssignment() : createAssignment(lesson.id)} disabled={saving || !assignmentTitle.trim()}
-                        className="rounded-lg bg-amber-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">{editingAssignmentId ? 'Lưu bài tập' : 'Tạo bài tập'}</button>
-                      <button onClick={resetAssignmentForm} className="rounded-lg bg-white px-3 py-2 text-xs font-bold text-slate-600">Hủy</button>
+                        className="rounded-none bg-amber-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">{editingAssignmentId ? 'Lưu bài tập' : 'Tạo bài tập'}</button>
+                      <button onClick={resetAssignmentForm} className="rounded-none bg-white px-3 py-2 text-xs font-bold text-slate-600 border border-slate-200">Hủy</button>
                     </div>
                   </div>
                 ) : (
@@ -333,7 +519,7 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Link href={`/lms/teacher/classes/${subject.classId}`} className="p-2 rounded-xl hover:bg-slate-100 transition">
+        <Link href={`/lms/teacher/classes/${subject.classId}`} className="p-2 rounded-none hover:bg-slate-100 transition">
           <ArrowLeft className="w-5 h-5 text-slate-600" />
         </Link>
         <div>
@@ -343,7 +529,7 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
       </div>
 
       {operationError && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+        <div className="rounded-none border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
           {operationError}
         </div>
       )}

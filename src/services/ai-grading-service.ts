@@ -395,3 +395,95 @@ function parseProviderJson(raw: string): unknown {
   const normalized = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
   return JSON.parse(normalized) as unknown;
 }
+
+export async function generateLessonPlan(
+  subjectName: string,
+  lessonType: 'THEORY' | 'PRACTICAL',
+  orderIndex: number
+): Promise<{
+  title: string;
+  objectives: string;
+  preparation: string;
+  activities: string;
+  content: string;
+  assessment: string;
+}> {
+  const prompt = `Bạn là SEDUAI, hệ thống thiết kế giáo án chuyên nghiệp dành cho giáo viên.
+Hãy biên soạn một giáo án chi tiết và hấp dẫn cho môn học "${subjectName}", buổi thứ ${orderIndex} (${lessonType === 'THEORY' ? 'Lý thuyết' : 'Thực hành'}).
+
+Quy tắc bắt buộc:
+- Viết bằng Tiếng Việt.
+- Nội dung bài học (content) phải chi tiết, khoa học, bám sát chuyên môn, viết dưới dạng Markdown phong phú (sử dụng tiêu đề, danh sách, bảng dữ liệu, các khối mã nguồn/code block nếu là môn Tin học/Lập trình).
+- Thời lượng một buổi học ước tính khoảng 90-120 phút.
+- Trả về duy nhất một chuỗi JSON hợp lệ theo cấu trúc sau (không bao gồm chữ hay định dạng khác ngoài JSON):
+{
+  "title": "Tiêu đề cụ thể của buổi học này (ví dụ: Buổi 1 - Khái niệm cơ bản...)",
+  "objectives": "Mục tiêu bài học (Kiến thức, Kỹ năng, Thái độ)",
+  "preparation": "Chuẩn bị của giáo viên và học sinh",
+  "activities": "Tiến trình hoạt động giảng dạy chi tiết (Mở đầu, hình thành kiến thức, luyện tập, vận dụng)",
+  "content": "Nội dung bài giảng chi tiết bằng markdown (đây là phần bài đọc/tài liệu học tập chính cho học sinh, phải viết thật đầy đủ và chi tiết kiến thức)",
+  "assessment": "Tiêu chí đánh giá hoàn thành bài học"
+}`;
+
+  try {
+    const raw = await callSeduAiJson(prompt, 3000);
+    const parsed = parseProviderJson(raw) as any;
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new Error('AI response is not an object');
+    }
+    return {
+      title: String(parsed.title || `Buổi ${orderIndex} - ${lessonType === 'THEORY' ? 'Lý thuyết' : 'Thực hành'}`),
+      objectives: String(parsed.objectives || ''),
+      preparation: String(parsed.preparation || ''),
+      activities: String(parsed.activities || ''),
+      content: String(parsed.content || ''),
+      assessment: String(parsed.assessment || '')
+    };
+  } catch (error) {
+    console.error('SEDUAI generateLessonPlan failed:', error);
+    throw new Error('Không thể kết nối dịch vụ AI để soạn bài học. Vui lòng thử lại sau.');
+  }
+}
+
+export async function generateLessonAssignment(
+  lessonTitle: string,
+  lessonObjectives: string,
+  lessonContent: string
+): Promise<{
+  title: string;
+  description: string;
+  rubric: string;
+}> {
+  const prompt = `Bạn là SEDUAI, hệ thống biên soạn bài tập về nhà và rubric đánh giá cho giáo viên.
+Hãy biên soạn 1 bài tập tự luận về nhà/bài tập thực hành bám sát bài học sau:
+- Tiêu đề bài học: "${lessonTitle}"
+- Mục tiêu bài học: "${lessonObjectives}"
+- Nội dung bài học (tóm tắt hoặc tham khảo): "${lessonContent.slice(0, 5000)}"
+
+Quy tắc bắt buộc:
+- Viết bằng Tiếng Việt.
+- Mô tả bài tập (description) phải rõ ràng, kích thích tư duy thực hành, định dạng markdown.
+- Rubric chấm điểm phải chi tiết (ví dụ: Trình bày: 2đ, Thuật toán chính xác: 5đ, Tối ưu/Sáng tạo: 3đ).
+- Trả về duy nhất một chuỗi JSON hợp lệ theo cấu trúc sau (không bao gồm chữ hay định dạng khác ngoài JSON):
+{
+  "title": "Tiêu đề ngắn gọn của bài tập",
+  "description": "Yêu cầu chi tiết của bài tập (định dạng markdown)",
+  "rubric": "Tiêu chí chấm điểm chi tiết từng phần (rubric)"
+}`;
+
+  try {
+    const raw = await callSeduAiJson(prompt, 2000);
+    const parsed = parseProviderJson(raw) as any;
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new Error('AI response is not an object');
+    }
+    return {
+      title: String(parsed.title || `Bài tập về nhà: ${lessonTitle}`),
+      description: String(parsed.description || ''),
+      rubric: String(parsed.rubric || '')
+    };
+  } catch (error) {
+    console.error('SEDUAI generateLessonAssignment failed:', error);
+    throw new Error('Không thể kết nối dịch vụ AI để soạn bài tập. Vui lòng thử lại sau.');
+  }
+}

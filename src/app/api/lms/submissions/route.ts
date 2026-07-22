@@ -3,7 +3,59 @@ import { Prisma, type SubmissionStatus } from '@prisma/client';
 import prisma from '@/lib/prisma';
 import { LmsRequestError, canManageActiveClass, lmsErrorResponse, requireLmsUser, withClassLock } from '@/lib/lms-auth';
 import { enumValue, normalizeAttachments, optionalDate, optionalLongText, requiredText } from '@/lib/lms-input';
-import { isAiGradingMarker } from '@/services/ai-grading-service';
+import { isAiGradingMarker, gradeAssignment, AI_GRADING_MARKER_PREFIX } from '@/services/ai-grading-service';
+import { randomUUID } from 'node:crypto';
+
+// Background grading function
+function triggerBackgroundAiGrading(submissionId: string) {
+  void (async () => {
+    try {
+      // 1. Fetch submission details
+      const sub = await prisma.lmsSubmission.findUnique({
+        where: { id: submissionId },
+        include: { assignment: true },
+      });
+      if (!sub || !sub.content || sub.status !== 'PENDING') return;
+
+      // Set marking tag to prevent race conditions
+      const gradingMarker = `${AI_GRADING_MARKER_PREFIX}${randomUUID()}`;
+      const claim = await prisma.lmsSubmission.updateMany({
+        where: { id: submissionId, status: 'PENDING', aiReview: null },
+        data: { aiReview: gradingMarker },
+      });
+      if (claim.count !== 1) return;
+
+      // 2. Call AI grading
+      const grading = await gradeAssignment(
+        sub.assignment.title,
+        sub.assignment.rubric || sub.assignment.description || '',
+        sub.content
+      );
+
+      // 3. Save grading result
+      await prisma.lmsSubmission.update({
+        where: { id: submissionId },
+        data: {
+          grade: grading.grade,
+          aiReview: grading.aiReview,
+          status: 'AI_GRADED',
+        },
+      });
+      console.log(`[Auto AI Grade] Successfully graded submission ${submissionId}`);
+    } catch (err) {
+      console.error(`[Auto AI Grade] Error grading submission ${submissionId}:`, err);
+      // Revert aiReview marker so it can be retried manually
+      try {
+        await prisma.lmsSubmission.updateMany({
+          where: { id: submissionId, status: 'PENDING', aiReview: { startsWith: AI_GRADING_MARKER_PREFIX } },
+          data: { aiReview: null },
+        });
+      } catch (e) {
+        console.error(`[Auto AI Grade] Failed to reset marker for ${submissionId}:`, e);
+      }
+    }
+  })();
+}
 
 const SUBMISSION_STATUSES = ['PENDING', 'AI_GRADED', 'REVIEWED'] as const satisfies readonly SubmissionStatus[];
 const studentSummarySelect = { id: true, username: true, name: true, avatar: true } as const;
@@ -133,6 +185,10 @@ export async function POST(request: NextRequest) {
         },
       });
     });
+
+    if (submission && submission.id && submission.content) {
+      triggerBackgroundAiGrading(submission.id);
+    }
 
     return NextResponse.json({ success: true, data: submission });
   } catch (error: any) {
