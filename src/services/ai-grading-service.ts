@@ -362,132 +362,11 @@ async function callSeduAiJson(prompt: string, maxOutputTokens: number): Promise<
     }
   }
 
-  console.warn('[AI Provider] Realtime AI API unavailable or quota limit reached. Falling back to SeduAi Hybrid Demo Engine.', providerFailures);
-
-  if (prompt.includes('giáo án') || prompt.includes('thiết kế giáo án')) {
-    return JSON.stringify({
-      title: "Bài học: Kiến thức cốt lõi & Phương pháp ứng dụng thực tế",
-      objectives: "- Kiến thức: Nắm vững các khái niệm và nguyên lý hoạt động căn bản của bài học.\n- Kỹ năng: Phân tích vấn đề, tự giải quyết các bài tập ứng dụng thực tế.\n- Thái độ: Tự giác học tập, tư duy khoa học và chủ động sáng tạo.",
-      preparation: "- Giáo viên: Máy tính, bài giảng slide, học liệu thực hành mẫu.\n- Học sinh: Máy tính, tài liệu ghi chép và môi trường lập trình/học tập sẵn sàng.",
-      activities: "1. Khởi động (10p): Ôn lại kiến thức cũ, đặt câu hỏi tình huống thực tế.\n2. Hình thành kiến thức (40p): Giảng giải khái niệm chính, minh họa ví dụ trực quan.\n3. Thực hành (35p): Học sinh tự thực hiện bài tập tại lớp dưới sự hướng dẫn.\n4. Tổng kết (5p): Giao bài tập về nhà và dặn dò chuẩn bị cho buổi học tiếp theo.",
-      content: "### 📚 Bài giảng chi tiết: Kiến thức & Phương pháp ứng dụng\n\n#### 1. Đặt vấn đề & Khái niệm ban đầu\nTrong quá trình học tập và làm việc chuyên nghiệp, việc làm chủ các công cụ và phương pháp cốt lõi là vô cùng quan trọng. Bài học hôm nay sẽ giúp các em từng bước khám phá quy trình chuẩn.\n\n#### 2. Nguyên lý hoạt động cốt lõi\n- **Đầu vào (Input):** Thu thập dữ liệu và xác định đúng yêu cầu bài toán.\n- **Xử lý (Processing):** Sử dụng các mô hình, công thức và thuật toán phù hợp.\n- **Đầu ra (Output):** Trả về kết quả chính xác, tối ưu hiệu năng.\n\n```python\n# Đoạn mã mẫu minh họa quy trình xử lý\ndef process_data(data):\n    # Tiền xử lý dữ liệu\n    cleaned = [x.strip() for x in data if x]\n    return cleaned\n```\n\n#### 3. Tóm tắt & Luyện tập\nHãy ghi nhớ các bước trên và áp dụng trực tiếp vào bài tập bên dưới.",
-      assessment: "- Đánh giá quá trình: Mức độ tương tác và hoàn thành bài tập thực hành trên lớp.\n- Đánh giá sản phẩm: Bài nộp tự luận và kết quả bài test quiz ngẫu nhiên."
-    });
+  if (providerFailures.length > 0) {
+    throw new Error(`Dịch vụ AI (Gemini/Groq) không thể phản hồi. Lý do: ${providerFailures.join('; ')}. Vui lòng kiểm tra lại API Key hoặc thử lại sau ít phút.`);
   }
 
-  if (prompt.includes('bài tập về nhà') || prompt.includes('bài tập')) {
-    return JSON.stringify({
-      title: "Bài tập ứng dụng thực hành kiến thức bài học",
-      description: "### 📝 Yêu cầu bài tập tự luận\n1. Hãy tóm tắt lại 3 nội dung trọng tâm nhất mà bạn đã học được trong buổi học.\n2. Viết một chương trình/bài luận ngắn (khoảng 300-500 từ) giải quyết tình huống thực tế liên quan đến chủ đề bài học.\n3. Đính kèm mã nguồn hoặc ảnh chụp kết quả thực thi (nếu có).",
-      rubric: "Thang điểm 10:\n- Trình bày mạch lạc, đúng yêu cầu đề bài: 3.0 điểm\n- Phân tích chính xác, đầy đủ nội dung kiến thức: 4.0 điểm\n- Tính sáng tạo và ứng dụng thực tế cao: 3.0 điểm"
-    });
-  }
-  if (prompt.includes('chấm bài') || prompt.includes('đánh giá')) {
-    return JSON.stringify({
-      grade: 8.5,
-      strengths: ["Bài làm trình bày rõ ràng, mạch lạc.", "Bám sát các yêu cầu thực tiễn của đề bài."],
-      issues: ["Cần phân tích sâu thêm các giải pháp thay thế."],
-      suggestions: ["Tham khảo thêm tài liệu nghiên cứu chuyên sâu của SeduAi."],
-      summary: "Bài viết đạt yêu cầu chuyên môn cao, thể hiện sự am hiểu kiến thức và bài tập."
-    });
-  }
-
-  const requestedMatch = prompt.match(/Hãy tạo đúng (\d+) câu hỏi/);
-  const requestedCount = requestedMatch?.[1];
-  const count = requestedCount ? parseInt(requestedCount!, 10) : 10;
-  const sampleQuestions = [
-    {
-      content: "Mô hình học máy nào tối ưu hóa dựa trên gradient descent?",
-      options: ["Linear Regression", "Decision Tree", "K-Means", "Random Forest"],
-      correctAnswer: 0,
-      explanation: "Linear Regression và các mô hình tuyến tính thường tối ưu hóa bằng thuật toán Gradient Descent."
-    },
-    {
-      content: "Trong Machine Learning, thuật ngữ 'Overfitting' nghĩa là gì?",
-      options: [
-        "Mô hình quá khớp với dữ liệu huấn luyện và dự báo kém trên dữ liệu mới",
-        "Mô hình quá đơn giản không học được dữ liệu",
-        "Mô hình học quá nhanh",
-        "Dữ liệu huấn luyện bị thiếu"
-      ],
-      correctAnswer: 0,
-      explanation: "Overfitting xảy ra khi mô hình học cả nhiễu trong dữ liệu tập train dẫn đến mất khả năng tổng quát hóa."
-    },
-    {
-      content: "Thuật toán nào sau đây thuộc nhóm học có giám sát (Supervised Learning)?",
-      options: ["K-Means Clustering", "Support Vector Machine (SVM)", "Principal Component Analysis (PCA)", "Apriori"],
-      correctAnswer: 1,
-      explanation: "SVM là thuật toán phân lớp và hồi quy thuộc nhóm học có giám sát."
-    },
-    {
-      content: "Độ đo phổ biến nào dùng để đánh giá bài toán phân lớp (Classification)?",
-      options: ["Mean Squared Error (MSE)", "R-squared", "Accuracy & F1-Score", "Mean Absolute Error (MAE)"],
-      correctAnswer: 2,
-      explanation: "Accuracy, Precision, Recall và F1-Score là các độ đo chính của bài toán phân lớp."
-    },
-    {
-      content: "Học không giám sát (Unsupervised Learning) thường áp dụng cho bài toán nào?",
-      options: ["Phân lớp (Classification)", "Hồi quy (Regression)", "Phân cụm dữ liệu (Clustering)", "Dự báo chuỗi thời gian"],
-      correctAnswer: 2,
-      explanation: "Phân cụm (Clustering) và giảm chiều dữ liệu là các bài toán cốt lõi của học không giám sát."
-    },
-    {
-      content: "Ý nghĩa của hàm kích hoạt (Activation Function) trong mạng nơ-ron là gì?",
-      options: [
-        "Giúp mô hình hội tụ nhanh hơn",
-        "Đưa tính phi tuyến vào mô hình để giải bài toán phức tạp",
-        "Giảm kích thước của đầu vào",
-        "Lưu trữ trọng số nơ-ron"
-      ],
-      correctAnswer: 1,
-      explanation: "Hàm kích hoạt đưa tính phi tuyến (non-linearity) giúp mạng nơ-ron biểu diễn các hàm số phức tạp."
-    },
-    {
-      content: "Thuật toán Random Forest hoạt động dựa trên nguyên lý nào?",
-      options: ["Bagging (kết hợp các cây độc lập)", "Boosting (cập nhật trọng số tuần tự)", "Phân cụm khoảng cách", "Tìm đường biên tối ưu"],
-      correctAnswer: 0,
-      explanation: "Random Forest là mô hình Ensemble sử dụng kỹ thuật Bagging kết hợp nhiều Decision Tree."
-    },
-    {
-      content: "Trong Deep Learning, lớp tích chập (Convolutional Layer) thường dùng cho dữ liệu nào?",
-      options: ["Dữ liệu dạng bảng", "Dữ liệu âm thanh thô", "Hình ảnh và không gian 2D/3D", "Văn bản chưa xử lý"],
-      correctAnswer: 2,
-      explanation: "CNN với các bộ lọc tích chập cực kỳ tối ưu trong việc trích xuất đặc trưng hình ảnh."
-    },
-    {
-      content: "Thuật ngữ 'Epoch' trong huấn luyện mạng nơ-ron nghĩa là gì?",
-      options: [
-        "Một lượt đi qua toàn bộ tập dữ liệu huấn luyện",
-        "Số lượng trọng số cần cập nhật",
-        "Thời gian huấn luyện 1 giây",
-        "Kích thước của một mini-batch"
-      ],
-      correctAnswer: 0,
-      explanation: "Một Epoch hoàn thành khi toàn bộ dữ liệu huấn luyện được đưa qua mạng nơ-ron 1 lần (forward + backward)."
-    },
-    {
-      content: "Độ đo MSE (Mean Squared Error) đo lường sai số dưới dạng nào?",
-      options: [
-        "Tổng trị tuyệt đối sai số",
-        "Trung bình bình phương sai số giữa thực tế và dự báo",
-        "Tỷ lệ dự báo chính xác",
-        "Độ lệch chuẩn của biến mục tiêu"
-      ],
-      correctAnswer: 1,
-      explanation: "MSE tính trung bình bình phương độ lệch giữa nhãn thực tế và giá trị dự báo."
-    }
-  ];
-
-  const questionsList = [];
-  for (let i = 0; i < count; i++) {
-    const sample = sampleQuestions[i % sampleQuestions.length];
-    questionsList.push({
-      ...sample,
-      content: `[Demo AI] Câu ${i + 1}: ${sample.content}`,
-    });
-  }
-
-  return JSON.stringify({ questions: questionsList });
+  throw new Error('Chưa cấu hình nhà cung cấp AI (GEMINI_API_KEY hoặc GROQ_API_KEY) trên hệ thống server.');
 }
 
 function stringifyAiField(val: any): string {
@@ -542,7 +421,7 @@ function parseProviderJson(raw: string): unknown {
     } catch {}
   }
 
-  throw new Error('Không thể giải mã dữ liệu JSON từ AI.');
+  throw new Error('Mô hình AI trả về phản hồi không đúng cấu trúc JSON.');
 }
 
 export async function generateLessonPlan(
@@ -581,7 +460,7 @@ Quy tắc biên soạn bắt buộc:
     const raw = await callSeduAiJson(prompt, 3000);
     const parsed = parseProviderJson(raw) as any;
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      throw new Error('AI response is not an object');
+      throw new Error('Mô hình AI trả về dữ liệu bài học không đúng định dạng JSON.');
     }
     return {
       title: typeof parsed.title === 'string' ? parsed.title : `Buổi ${orderIndex} - ${lessonType === 'THEORY' ? 'Lý thuyết' : 'Thực hành'}`,
@@ -591,16 +470,9 @@ Quy tắc biên soạn bắt buộc:
       content: stringifyAiField(parsed.content),
       assessment: stringifyAiField(parsed.assessment)
     };
-  } catch (error) {
-    console.error('SEDUAI generateLessonPlan failed, using resilient fallback:', error);
-    return {
-      title: `Buổi ${orderIndex}: ${subjectName} (${lessonType === 'THEORY' ? 'Lý thuyết' : 'Thực hành'})`,
-      objectives: '- Kiến thức: Nắm vững các khái niệm và nguyên lý hoạt động căn bản của bài học.\n- Kỹ năng: Phân tích vấn đề, tự giải quyết các bài tập ứng dụng thực tế.\n- Thái độ: Tự giác học tập, tư duy khoa học và chủ động sáng tạo.',
-      preparation: '- Giáo viên: Máy tính, bài giảng slide, học liệu thực hành mẫu.\n- Học sinh: Máy tính, tài liệu ghi chép và môi trường học tập sẵn sàng.',
-      activities: '1. Khởi động (10p): Ôn lại kiến thức cũ, đặt câu hỏi tình huống thực tế.\n2. Hình thành kiến thức (40p): Giảng giải khái niệm chính, minh họa ví dụ trực quan.\n3. Thực hành (35p): Học sinh tự thực hiện bài tập tại lớp dưới sự hướng dẫn.\n4. Tổng kết (5p): Giao bài tập về nhà và dặn dò chuẩn bị cho buổi học tiếp theo.',
-      content: `### 📚 Bài giảng chi tiết môn ${subjectName} (Buổi ${orderIndex})\n\n#### 1. Đặt vấn đề & Khái niệm ban đầu\nNội dung bài học giúp học sinh từng bước nắm vững các công cụ và phương pháp chuyên môn.\n\n#### 2. Nguyên lý hoạt động cốt lõi\n- **Đầu vào (Input):** Thu thập dữ liệu và xác định đúng yêu cầu bài toán.\n- **Xử lý (Processing):** Sử dụng các mô hình, công thức và thuật toán phù hợp.\n- **Đầu ra (Output):** Trả về kết quả chính xác, tối ưu hiệu năng.\n\n#### 3. Tóm tắt & Luyện tập\nHãy ghi nhớ các bước trên và áp dụng trực tiếp vào bài tập bên dưới.`,
-      assessment: '- Đánh giá quá trình: Mức độ tương tác và hoàn thành bài tập thực hành trên lớp.\n- Đánh giá sản phẩm: Bài nộp tự luận và kết quả bài test quiz ngẫu nhiên.'
-    };
+  } catch (error: any) {
+    console.error('SEDUAI generateLessonPlan failed:', error);
+    throw new Error(error?.message || 'Không thể sinh bài học tự động bằng AI. Vui lòng kiểm tra lại cấu hình hoặc thử lại sau.');
   }
 }
 

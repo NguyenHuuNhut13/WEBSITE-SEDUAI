@@ -2,7 +2,7 @@
 
 import { useCallback, useState, useEffect, use } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, Save, Loader2, Plus, FileText, Beaker, Sparkles } from 'lucide-react';
+import { ArrowLeft, BookOpen, Save, Loader2, Plus, FileText, Beaker, Sparkles, AlertCircle } from 'lucide-react';
 
 function toLocalDateTimeInput(value: string) {
   const date = new Date(value);
@@ -561,8 +561,22 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
       </div>
 
       {operationError && (
-        <div className="rounded-none border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
-          {operationError}
+        <div className="flex items-center justify-between rounded-none border border-rose-300 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800 shadow-sm animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2.5">
+            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+            <div>
+              <span className="font-extrabold text-rose-900 block text-xs uppercase tracking-wider">Thông báo lỗi từ hệ thống:</span>
+              <span>{operationError}</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOperationError('')}
+            className="text-rose-500 hover:text-rose-800 font-bold ml-4 text-base cursor-pointer shrink-0"
+            title="Đóng thông báo"
+          >
+            ✕
+          </button>
         </div>
       )}
 
