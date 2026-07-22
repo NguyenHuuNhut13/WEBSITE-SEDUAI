@@ -4,6 +4,7 @@ import { useCallback, useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { ArrowLeft, Send, Sparkles, Loader2, Star, FileText, Upload } from 'lucide-react';
+import MarkdownContent from '@/components/MarkdownContent';
 
 export default function StudentAssignmentSubmission({ params }: { params: Promise<{ assignmentId: string }> }) {
   const { assignmentId } = use(params);
@@ -138,16 +139,22 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
 
       {/* Assignment Description */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900 flex items-center gap-1.5 mb-2">
-          <FileText className="w-4 h-4 text-slate-500" /> Đề bài & Yêu cầu bài tập
+        <h2 className="text-sm font-bold text-slate-900 flex items-center gap-1.5 mb-3 pb-2 border-b border-slate-100">
+          <FileText className="w-4 h-4 text-primary" /> Đề bài & Yêu cầu bài tập
         </h2>
-        <div className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">
-          {assignment.description || 'Chưa có mô tả bài tập chi tiết.'}
+        <div className="text-sm text-slate-700 leading-relaxed">
+          {assignment.description ? (
+            <MarkdownContent content={assignment.description} />
+          ) : (
+            <p className="text-slate-400 italic">Chưa có mô tả bài tập chi tiết.</p>
+          )}
         </div>
         {assignment.rubric && (
-          <div className="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
-            <p className="font-bold">Tiêu chí chấm điểm</p>
-            <p className="mt-2 whitespace-pre-wrap">{assignment.rubric}</p>
+          <div className="mt-5 rounded-none bg-amber-50/80 border border-amber-200 p-4 text-sm text-amber-950">
+            <p className="font-extrabold text-xs uppercase tracking-wider text-amber-900 mb-2 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" /> Rubric & Tiêu chí chấm điểm:
+            </p>
+            <MarkdownContent content={assignment.rubric} />
           </div>
         )}
       </div>

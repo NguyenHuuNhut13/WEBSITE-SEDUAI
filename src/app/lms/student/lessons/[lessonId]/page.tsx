@@ -3,6 +3,7 @@
 import { useState, useEffect, use, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Download, ChevronRight, AlertCircle, RefreshCw } from 'lucide-react';
+import MarkdownContent from '@/components/MarkdownContent';
 
 interface LessonAttachment {
   name?: string;
@@ -117,12 +118,17 @@ export default function StudentLessonDetail({ params }: { params: Promise<{ less
             <h2 className="text-base font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100">Nội dung bài học</h2>
             <div className="prose max-w-none text-slate-700 leading-relaxed text-sm">
               {lesson.content ? (
-                <div className="whitespace-pre-wrap break-words">{lesson.content}</div>
+                <MarkdownContent content={lesson.content} />
               ) : (
                 <p className="text-slate-400 italic">Bài học này chưa có nội dung chi tiết.</p>
               )}
             </div>
-            {lesson.objectives && <section className="mt-6 rounded-none bg-blue-50 p-4 border border-blue-100"><h3 className="text-sm font-bold text-blue-900">Mục tiêu bài học</h3><p className="mt-2 whitespace-pre-wrap text-sm text-blue-800">{lesson.objectives.includes('[object Object]') ? 'Nội dung mục tiêu đang được cập nhật.' : lesson.objectives}</p></section>}
+            {lesson.objectives && (
+              <section className="mt-6 rounded-none bg-blue-50/80 p-4 border border-blue-200">
+                <h3 className="text-sm font-bold text-blue-900 mb-2">Mục tiêu bài học</h3>
+                <MarkdownContent content={lesson.objectives.includes('[object Object]') ? 'Nội dung mục tiêu đang được cập nhật.' : lesson.objectives} />
+              </section>
+            )}
             <button
               type="button"
               onClick={async () => {
