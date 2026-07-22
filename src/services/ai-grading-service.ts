@@ -424,6 +424,65 @@ function parseProviderJson(raw: string): unknown {
   throw new Error('Mô hình AI trả về phản hồi không đúng cấu trúc JSON.');
 }
 
+/**
+ * Ánh xạ tên môn học Tiếng Việt sang Topic Slug trên Khan Academy / Online Edu API
+ */
+export function getSubjectApiSlug(subjectName: string): string {
+  const name = subjectName.toLowerCase();
+  if (name.includes('lập trình') || name.includes('tin') || name.includes('code') || name.includes('web') || name.includes('js') || name.includes('html')) {
+    return 'html-css-js';
+  }
+  if (name.includes('python') || name.includes('sql') || name.includes('dữ liệu') || name.includes('data')) {
+    return 'sql';
+  }
+  if (name.includes('anh') || name.includes('english') || name.includes('grammar') || name.includes('ngữ pháp') || name.includes('ielts')) {
+    return 'grammar';
+  }
+  if (name.includes('toán') || name.includes('math') || name.includes('đại số') || name.includes('giải tích')) {
+    return 'algebra';
+  }
+  if (name.includes('hình') || name.includes('geometry')) {
+    return 'geometry';
+  }
+  if (name.includes('lý') || name.includes('vật lý') || name.includes('physics')) {
+    return 'physics';
+  }
+  if (name.includes('hóa') || name.includes('chemistry')) {
+    return 'chemistry';
+  }
+  if (name.includes('sinh') || name.includes('biology')) {
+    return 'biology';
+  }
+  return 'computer-programming';
+}
+
+/**
+ * Gọi API Online lấy bài học thật phân bổ vào từng buổi học
+ */
+export async function fetchOnlineApiLessonData(subjectName: string, orderIndex: number) {
+  const topicSlug = getSubjectApiSlug(subjectName);
+  try {
+    const response = await fetch(`https://www.khanacademy.org/api/v1/topic/${topicSlug}`, {
+      signal: AbortSignal.timeout(3500)
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    if (!data || !Array.isArray(data.children) || data.children.length === 0) return null;
+
+    const childIndex = (orderIndex - 1) % data.children.length;
+    const lessonItem = data.children[childIndex];
+    return {
+      topicTitle: data.title || subjectName,
+      realTitle: lessonItem?.title || `Chủ đề ${orderIndex}`,
+      realDescription: lessonItem?.description || data.description || '',
+      realUrl: lessonItem?.url || '',
+    };
+  } catch (error) {
+    console.warn(`Online API fetch for ${subjectName} timed out or failed, using AI fallback context:`, error);
+    return null;
+  }
+}
+
 export async function generateLessonPlan(
   subjectName: string,
   lessonType: 'THEORY' | 'PRACTICAL',
@@ -437,10 +496,17 @@ export async function generateLessonPlan(
   assessment: string;
 }> {
   const domainContext = getSubjectDomainContext(subjectName);
+  const onlineLessonData = await fetchOnlineApiLessonData(subjectName, orderIndex);
+
+  const onlineContextPrompt = onlineLessonData
+    ? `\nTHÔNG TIN BÀI HỌC THẬT TỪ ONLINE EDU API:\n- Chủ đề gốc từ API: "${onlineLessonData.topicTitle}"\n- Tiêu đề bài học thật cho Buổi thứ ${orderIndex}: "${onlineLessonData.realTitle}"\n- Mô tả chi tiết từ API: "${onlineLessonData.realDescription}"\nHãy lấy thông tin từ API trên làm nòng cốt để phát triển bài giảng hoàn chỉnh.`
+    : '';
+
   const prompt = `Bạn là SEDUAI, hệ thống thiết kế giáo án và tài liệu học tập chuyên nghiệp chuẩn sư phạm.
 Hãy biên soạn một giáo án chi tiết và tài liệu học tập chuẩn hóa cho môn học "${subjectName}", buổi thứ ${orderIndex} (${lessonType === 'THEORY' ? 'Lý thuyết' : 'Thực hành'}).
 
 ${domainContext.guidelines}
+${onlineContextPrompt}
 
 QUY TRÌNH BIÊN SOẠN BẮT BỘC (2 BƯỚC SƯ PHẠM):
 - BƯỚC 1 (Xây dựng sườn cho giáo viên): Xây dựng "Sườn tiến trình hoạt động" (activities) cho giáo viên bao gồm 4 phần:
@@ -471,7 +537,7 @@ Trả về duy nhất một chuỗi JSON hợp lệ theo cấu trúc sau (không
       throw new Error('Mô hình AI trả về dữ liệu bài học không đúng định dạng JSON.');
     }
     return {
-      title: typeof parsed.title === 'string' ? parsed.title : `Buổi ${orderIndex} - ${lessonType === 'THEORY' ? 'Lý thuyết' : 'Thực hành'}`,
+      title: typeof parsed.title === 'string' ? parsed.title : (onlineLessonData?.realTitle || `Buổi ${orderIndex} - ${lessonType === 'THEORY' ? 'Lý thuyết' : 'Thực hành'}`),
       objectives: stringifyAiField(parsed.objectives),
       preparation: stringifyAiField(parsed.preparation),
       activities: stringifyAiField(parsed.activities),
