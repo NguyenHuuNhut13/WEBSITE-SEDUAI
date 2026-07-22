@@ -437,22 +437,30 @@ export async function generateLessonPlan(
   assessment: string;
 }> {
   const domainContext = getSubjectDomainContext(subjectName);
-  const prompt = `Bạn là SEDUAI, hệ thống thiết kế giáo án chuyên nghiệp bám sát đặc thù từng môn học.
-Hãy biên soạn một giáo án chi tiết và hấp dẫn cho môn học "${subjectName}", buổi thứ ${orderIndex} (${lessonType === 'THEORY' ? 'Lý thuyết' : 'Thực hành'}).
+  const prompt = `Bạn là SEDUAI, hệ thống thiết kế giáo án và tài liệu học tập chuyên nghiệp chuẩn sư phạm.
+Hãy biên soạn một giáo án chi tiết và tài liệu học tập chuẩn hóa cho môn học "${subjectName}", buổi thứ ${orderIndex} (${lessonType === 'THEORY' ? 'Lý thuyết' : 'Thực hành'}).
 
 ${domainContext.guidelines}
 
-Quy tắc biên soạn bắt buộc:
-- Viết bằng Tiếng Việt.
-- Nội dung bài học (content) phải chi tiết, khoa học, thể hiện đúng phong cách chuyên môn của môn "${subjectName}", viết dưới dạng Markdown phong phú (dùng tiêu đề, danh sách, bảng biểu, các khối code block hoặc cấu trúc hội thoại/công thức toán học tương ứng).
-- Thời lượng một buổi học ước tính khoảng 90-120 phút.
-- Trả về duy nhất một chuỗi JSON hợp lệ theo cấu trúc sau (không bao gồm chữ hay định dạng khác ngoài JSON):
+QUY TRÌNH BIÊN SOẠN BẮT BỘC (2 BƯỚC SƯ PHẠM):
+- BƯỚC 1 (Xây dựng sườn cho giáo viên): Xây dựng "Sườn tiến trình hoạt động" (activities) cho giáo viên bao gồm 4 phần:
+  1. Mở đầu / Khởi động (đặt tình huống, tạo động lực)
+  2. Khám phá / Hình thành kiến thức (các mục kiến thức trọng tâm)
+  3. Luyện tập / Thực hành (bài tập tại lớp, thực hành code / mẫu câu / công thức)
+  4. Vận dụng & Dặn dò (ứng dụng thực tế và bài tập mở rộng)
+
+- BƯỚC 2 (Phát triển nội dung bài học chi tiết): Dựa trên chính Sườn tiến trình hoạt động đã lập ở BƯỚC 1, hãy triển khai "Nội dung bài giảng chi tiết" (content) bằng Markdown phong phú cho học sinh đọc học:
+  + Mọi phần trong 'content' phải bám sát và khai triển chi tiết theo từng hoạt động ở 'activities'.
+  + Viết đầy đủ kiến thức chuyên môn, ví dụ minh họa trực quan, mã nguồn code blocks (nếu là môn Lập trình/CNTT), mẫu hội thoại/từ vựng (nếu là môn Tiếng Anh), hoặc công thức & lời giải mẫu (nếu là môn Toán/KHTN).
+  + Tuyệt đối KHÔNG viết chung chung hay nội dung sơ sài.
+
+Trả về duy nhất một chuỗi JSON hợp lệ theo cấu trúc sau (không bao gồm chữ hay định dạng khác ngoài JSON):
 {
   "title": "Tiêu đề cụ thể của buổi học này",
-  "objectives": "Mục tiêu bài học (Kiến thức, Kỹ năng, Thái độ phù hợp môn học)",
-  "preparation": "Chuẩn bị của giáo viên và học sinh",
-  "activities": "Tiến trình hoạt động giảng dạy chi tiết (Mở đầu, hình thành kiến thức, luyện tập, vận dụng)",
-  "content": "Nội dung bài giảng chi tiết bằng markdown (đây là phần tài liệu học tập chính cho học sinh, viết thật đầy đủ và chi tiết kiến thức đặc thù môn học)",
+  "objectives": "Mục tiêu bài học (Kiến thức, Kỹ năng, Thái độ)",
+  "preparation": "Chuẩn bị của giáo viên (Slide, máy tính, học liệu) và học sinh (Máy tính, tài liệu)",
+  "activities": "Sườn tiến trình hoạt động giảng dạy 4 bước chi tiết dành cho giáo viên",
+  "content": "Nội dung bài giảng chi tiết bằng Markdown phong phú dành cho học sinh, được triển khai hoàn chỉnh theo đúng sườn tiến trình ở trên",
   "assessment": "Tiêu chí đánh giá hoàn thành bài học"
 }`;
 

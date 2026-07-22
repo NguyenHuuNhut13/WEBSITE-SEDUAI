@@ -123,9 +123,6 @@ export default function StudentLessonDetail({ params }: { params: Promise<{ less
               )}
             </div>
             {lesson.objectives && <section className="mt-6 rounded-none bg-blue-50 p-4 border border-blue-100"><h3 className="text-sm font-bold text-blue-900">Mục tiêu bài học</h3><p className="mt-2 whitespace-pre-wrap text-sm text-blue-800">{lesson.objectives.includes('[object Object]') ? 'Nội dung mục tiêu đang được cập nhật.' : lesson.objectives}</p></section>}
-            {lesson.preparation && <section className="mt-4 rounded-none bg-amber-50 p-4 border border-amber-100"><h3 className="text-sm font-bold text-amber-900">Chuẩn bị</h3><p className="mt-2 whitespace-pre-wrap text-sm text-amber-800">{lesson.preparation.includes('[object Object]') ? 'Nội dung chuẩn bị đang được cập nhật.' : lesson.preparation}</p></section>}
-            {lesson.activities && <section className="mt-4 rounded-none bg-emerald-50 p-4 border border-emerald-100"><h3 className="text-sm font-bold text-emerald-900">Tiến trình hoạt động</h3><p className="mt-2 whitespace-pre-wrap text-sm text-emerald-800">{lesson.activities.includes('[object Object]') ? 'Nội dung tiến trình hoạt động đang được cập nhật.' : lesson.activities}</p></section>}
-            {lesson.assessment && <section className="mt-4 rounded-none bg-violet-50 p-4 border border-violet-100"><h3 className="text-sm font-bold text-violet-900">Đánh giá</h3><p className="mt-2 whitespace-pre-wrap text-sm text-violet-800">{lesson.assessment.includes('[object Object]') ? 'Nội dung tiêu chí đánh giá đang được cập nhật.' : lesson.assessment}</p></section>}
             <button
               type="button"
               onClick={async () => {
