@@ -42,6 +42,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     if (!subject) {
       return NextResponse.json({ success: false, error: 'Môn học không tồn tại' }, { status: 404 });
     }
+
     if (!(await canAccessClass(actor, subject.classId))) {
       return NextResponse.json({ success: false, error: 'Bạn không có quyền xem môn học này' }, { status: 403 });
     }

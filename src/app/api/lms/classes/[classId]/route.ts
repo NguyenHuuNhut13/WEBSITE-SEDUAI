@@ -13,9 +13,6 @@ export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const { classId } = await context.params;
     const actor = await requireLmsUser(request);
-    if (!(await canAccessClass(actor, classId))) {
-      return NextResponse.json({ success: false, error: 'Bạn không thuộc lớp học này' }, { status: 403 });
-    }
     const classData = await prisma.lmsClass.findUnique({
       where: { id: classId },
       include: {
@@ -45,6 +42,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     if (!classData) {
       return NextResponse.json({ success: false, error: 'Lớp không tồn tại' }, { status: 404 });
+    }
+
+    if (!(await canAccessClass(actor, classId))) {
+      return NextResponse.json({ success: false, error: 'Bạn không thuộc lớp học này' }, { status: 403 });
     }
 
     const examConfigs = classData.examConfigs.map(({ password, ...config }) => ({

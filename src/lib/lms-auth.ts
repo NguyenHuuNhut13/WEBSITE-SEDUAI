@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import prisma from '@/lib/prisma';
 
 const ACCOUNT_API_BASE = 'https://account.nks.vn/api/nks/user';
-const VERIFIED_SESSION_TTL_MS = 5 * 60 * 1000;
+const VERIFIED_SESSION_TTL_MS = 30 * 60 * 1000;
 const verifiedSessionCache = new Map<string, { user: LmsUser; expiresAt: number }>();
 
 function getSessionCacheKey(token: string) {
@@ -86,12 +86,12 @@ export async function requireLmsUser(request: NextRequest, roles?: UserRole[]): 
   const token = request.cookies.get('seduai_access_token')?.value || bearer;
   if (!token) throw new LmsAuthError('Bạn chưa đăng nhập', 401);
   const cachedUser = getCachedSession(token);
-  if (cachedUser) return assertLmsRole(cachedUser, roles);
 
   let response: Response;
   try {
     response = await fetchNksAccount(token);
   } catch {
+    if (cachedUser) return assertLmsRole(cachedUser, roles);
     throw new LmsAuthError('Không thể xác minh phiên đăng nhập NKS. Vui lòng thử lại.', 503);
   }
   if (!response.ok) {

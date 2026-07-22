@@ -97,6 +97,8 @@ model LmsClass {
   subjects    LmsSubject[]
   examConfigs LmsExamConfig[]
 
+  @@index([teacherId])
+  @@index([status])
   @@map("lms_classes")
 }
 
@@ -112,6 +114,8 @@ model LmsClassStudent {
   student LmsUser  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([classId, studentId])
+  @@index([studentId])
+  @@index([classId])
   @@map("lms_class_students")
 }
 
@@ -130,6 +134,7 @@ model LmsSubject {
   lessons     LmsLesson[]
   examConfigs LmsExamConfig[]
 
+  @@index([classId])
   @@map("lms_subjects")
 }
 
@@ -157,6 +162,7 @@ model LmsLesson {
   progress    LmsLessonProgress[]
 
   @@unique([subjectId, type, orderIndex])
+  @@index([subjectId])
   @@map("lms_lessons")
 }
 
@@ -176,6 +182,7 @@ model LmsLessonProgress {
 
   @@unique([lessonId, studentId])
   @@index([studentId, completedAt])
+  @@index([lessonId])
   @@map("lms_lesson_progress")
 }
 
@@ -196,6 +203,7 @@ model LmsAssignment {
   lesson      LmsLesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   submissions LmsSubmission[]
 
+  @@index([lessonId])
   @@map("lms_assignments")
 }
 
@@ -218,6 +226,9 @@ model LmsSubmission {
   student    LmsUser       @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([assignmentId, studentId])
+  @@index([studentId])
+  @@index([assignmentId])
+  @@index([status])
   @@map("lms_submissions")
 }
 
@@ -245,6 +256,9 @@ model LmsExamConfig {
   class   LmsClass      @relation(fields: [classId], references: [id], onDelete: Cascade)
   results LmsExamResult[]
 
+  @@index([classId])
+  @@index([subjectId])
+  @@index([subjectId, examType, lessonOrder])
   @@map("lms_exam_configs")
 }
 
@@ -265,5 +279,7 @@ model LmsExamResult {
   student    LmsUser       @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([examConfigId, studentId])
+  @@index([studentId])
+  @@index([examConfigId, finishedAt])
   @@map("lms_exam_results")
 }
