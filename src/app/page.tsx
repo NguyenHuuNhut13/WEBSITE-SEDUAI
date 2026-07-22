@@ -199,7 +199,7 @@ export default async function Home() {
             {/* Box 1 (Left): Smart Learning */}
             <div className="scroll-reveal bg-[#0077bb] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-center min-h-[240px] lg:min-h-[280px] text-left transition-all duration-300 hover:brightness-[1.03] group shadow-inner">
               <div className="space-y-4">
-                <div className="w-12 h-12 rounded-full border-2 border-white/20 flex items-center justify-center text-white bg-white/10 shadow-sm">
+                <div className="w-12 h-12 rounded-none border-2 border-white/20 flex items-center justify-center text-white bg-white/10 shadow-sm">
                   <GraduationCap className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg sm:text-xl font-black tracking-tight text-white uppercase">
@@ -236,7 +236,7 @@ export default async function Home() {
             {/* Box 3 (Right): Library */}
             <div className="scroll-reveal bg-[#0077bb] text-white p-6 sm:p-8 lg:p-10 flex flex-col justify-center min-h-[240px] lg:min-h-[280px] text-left transition-all duration-300 hover:brightness-[1.03] group shadow-inner">
               <div className="space-y-4">
-                <div className="w-12 h-12 rounded-full border-2 border-white/20 flex items-center justify-center text-white bg-white/10 shadow-sm">
+                <div className="w-12 h-12 rounded-none border-2 border-white/20 flex items-center justify-center text-white bg-white/10 shadow-sm">
                   <Lightbulb className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg sm:text-xl font-black tracking-tight text-white uppercase">

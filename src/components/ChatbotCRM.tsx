@@ -193,10 +193,10 @@ export default function ChatbotCRM() {
       <div className="bg-primary px-6 py-4 flex items-center justify-between text-white shadow-md">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg">
+            <div className="w-10 h-10 rounded-none bg-white/20 flex items-center justify-center text-lg">
               <Bot className="w-6 h-6" />
             </div>
-            <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-400 border-2 border-primary"></span>
+            <span className="absolute bottom-0 right-0 w-3 h-3 rounded-none bg-emerald-400 border-2 border-primary"></span>
           </div>
           <div>
             <h3 className="font-bold text-sm leading-none flex items-center gap-1.5">
@@ -208,14 +208,14 @@ export default function ChatbotCRM() {
         <div className="flex items-center gap-2">
           <button
             onClick={handleReset}
-            className="p-2 rounded-xl hover:bg-white/10 text-white/80 hover:text-white transition cursor-pointer"
+            className="p-2 rounded-none hover:bg-white/10 text-white/80 hover:text-white transition cursor-pointer"
             title="Bắt đầu tư vấn mới"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
           <Link
             href="/ai-assistant"
-            className="bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-xl shadow transition flex items-center gap-1 cursor-pointer transform hover:scale-105"
+            className="bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] sm:text-xs font-black px-3 py-1.5 rounded-none shadow transition flex items-center gap-1 cursor-pointer transform hover:scale-105"
             title="Mở AI Teacher & CRM chuẩn ChatGPT Full Màn Hình"
           >
             <Sparkles className="w-3.5 h-3.5" /> Mở ChatGPT Full Mode
@@ -235,7 +235,7 @@ export default function ChatbotCRM() {
               }`}
             >
               {isAI && (
-                <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex-shrink-0 flex items-center justify-center text-sm font-semibold">
+                <div className="w-8 h-8 rounded-none bg-primary/10 text-primary flex-shrink-0 flex items-center justify-center text-sm font-semibold">
                   <Bot className="w-4 h-4" />
                 </div>
               )}

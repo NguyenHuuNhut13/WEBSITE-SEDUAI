@@ -728,12 +728,12 @@ export default function AiAssistantPage() {
                       <img
                         src={localSync.avatar}
                         alt={localSync.name}
-                        className="w-9 h-9 rounded-full object-cover border-2 border-primary shadow-md flex-shrink-0"
+                        className="w-9 h-9 rounded-none object-cover border-2 border-primary shadow-md flex-shrink-0"
                         loading="eager"
                       />
                     ) : (
                       <div
-                        className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm shadow-md ${
+                        className={`w-9 h-9 rounded-none flex-shrink-0 flex items-center justify-center font-bold text-sm shadow-md ${
                           mode === 'teacher_assistant'
                             ? 'bg-gradient-to-tr from-amber-500 to-orange-500 text-slate-950'
                             : 'bg-gradient-to-tr from-emerald-500 to-teal-500 text-slate-950'
