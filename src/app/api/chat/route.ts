@@ -15,15 +15,17 @@ async function callGemini(messages: any[], systemPrompt: string): Promise<string
   }));
 
   // Try multiple model and version combinations to find one that works for this key/region
+  // Prioritizing highest version models first (gemini-2.5-flash and gemini-2.0-flash)
   const configs = [
+    { model: 'gemini-2.5-flash', version: 'v1beta' },
+    { model: 'gemini-2.0-flash', version: 'v1beta' },
+    { model: 'gemini-2.0-flash', version: 'v1' },
+    { model: 'gemini-2.0-flash-lite', version: 'v1beta' },
     { model: 'gemini-1.5-flash', version: 'v1' },
     { model: 'gemini-1.5-flash', version: 'v1beta' },
     { model: 'gemini-1.5-flash-latest', version: 'v1beta' },
     { model: 'gemini-1.5-pro', version: 'v1' },
-    { model: 'gemini-1.5-pro', version: 'v1beta' },
-    { model: 'gemini-pro', version: 'v1' },
-    { model: 'gemini-pro', version: 'v1beta' },
-    { model: 'gemini-2.0-flash', version: 'v1beta' }
+    { model: 'gemini-1.5-pro', version: 'v1beta' }
   ];
   let lastErr: any = null;
 

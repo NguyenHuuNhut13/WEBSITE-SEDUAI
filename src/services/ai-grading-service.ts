@@ -224,29 +224,37 @@ Trả về duy nhất JSON hợp lệ theo cấu trúc:
 async function callSeduAiJson(prompt: string, maxOutputTokens: number): Promise<string> {
   const providerFailures: string[] = [];
   if (process.env.GEMINI_API_KEY) {
-    try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.1, responseMimeType: 'application/json', maxOutputTokens },
-        }),
-        signal: AbortSignal.timeout(20_000),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) return text;
-        providerFailures.push('Gemini returned an empty response');
-      } else {
-        const details = (await response.text()).slice(0, 300);
-        providerFailures.push(`Gemini HTTP ${response.status}`);
-        console.warn('[AI Provider] Gemini request rejected:', response.status, details);
+    const geminiModels = [
+      { name: 'gemini-2.5-flash', version: 'v1beta' },
+      { name: 'gemini-2.0-flash', version: 'v1beta' },
+      { name: 'gemini-1.5-flash', version: 'v1' },
+      { name: 'gemini-1.5-flash', version: 'v1beta' },
+    ];
+    for (const m of geminiModels) {
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/${m.version}/models/${m.name}:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.1, responseMimeType: 'application/json', maxOutputTokens },
+          }),
+          signal: AbortSignal.timeout(20_000),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) return text;
+          providerFailures.push(`Gemini (${m.name}) returned empty response`);
+        } else {
+          const details = (await response.text()).slice(0, 300);
+          providerFailures.push(`Gemini (${m.name}) HTTP ${response.status}`);
+          console.warn(`[AI Provider] Gemini (${m.name}) request rejected:`, response.status, details);
+        }
+      } catch (e) {
+        providerFailures.push(`Gemini (${m.name}) request failed`);
+        console.warn(`[AI Provider] Gemini (${m.name}) failed, checking next model:`, e);
       }
-    } catch (e) {
-      providerFailures.push('Gemini request failed');
-      console.warn('[AI Provider] Gemini failed, checking fallback:', e);
     }
   }
 

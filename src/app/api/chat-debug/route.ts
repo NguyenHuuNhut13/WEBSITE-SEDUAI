@@ -18,14 +18,15 @@ export async function GET() {
       : 'Định dạng key không hợp lệ';
     
     const configs = [
+      { model: 'gemini-2.5-flash', version: 'v1beta' },
+      { model: 'gemini-2.0-flash', version: 'v1beta' },
+      { model: 'gemini-2.0-flash', version: 'v1' },
+      { model: 'gemini-2.0-flash-lite', version: 'v1beta' },
       { model: 'gemini-1.5-flash', version: 'v1' },
       { model: 'gemini-1.5-flash', version: 'v1beta' },
       { model: 'gemini-1.5-flash-latest', version: 'v1beta' },
       { model: 'gemini-1.5-pro', version: 'v1' },
-      { model: 'gemini-1.5-pro', version: 'v1beta' },
-      { model: 'gemini-pro', version: 'v1' },
-      { model: 'gemini-pro', version: 'v1beta' },
-      { model: 'gemini-2.0-flash', version: 'v1beta' }
+      { model: 'gemini-1.5-pro', version: 'v1beta' }
     ];
     let geminiSuccess = false;
     const geminiErrors: any = {};
