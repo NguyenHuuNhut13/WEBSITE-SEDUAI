@@ -536,12 +536,20 @@ Trả về duy nhất một chuỗi JSON hợp lệ theo cấu trúc sau (không
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
       throw new Error('Mô hình AI trả về dữ liệu bài học không đúng định dạng JSON.');
     }
+    const objectivesText = stringifyAiField(parsed.objectives);
+    const preparationText = stringifyAiField(parsed.preparation);
+    const activitiesText = stringifyAiField(parsed.activities);
+    let contentText = stringifyAiField(parsed.content);
+    if (!contentText.trim()) {
+      contentText = `### 📖 Nội dung bài giảng chi tiết\n${activitiesText}`;
+    }
+
     return {
       title: typeof parsed.title === 'string' ? parsed.title : (onlineLessonData?.realTitle || `Buổi ${orderIndex} - ${lessonType === 'THEORY' ? 'Lý thuyết' : 'Thực hành'}`),
-      objectives: stringifyAiField(parsed.objectives),
-      preparation: stringifyAiField(parsed.preparation),
-      activities: stringifyAiField(parsed.activities),
-      content: stringifyAiField(parsed.content),
+      objectives: objectivesText,
+      preparation: preparationText,
+      activities: activitiesText,
+      content: contentText,
       assessment: stringifyAiField(parsed.assessment)
     };
   } catch (error: any) {

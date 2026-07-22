@@ -213,7 +213,7 @@ export async function generateDraftExamQuestions(config: ExamQuestionSource): Pr
           ? { orderIndex: { lte: 8 } }
           : {}),
     },
-    select: { title: true, objectives: true, content: true },
+    select: { title: true, objectives: true, preparation: true, activities: true, content: true },
     orderBy: [{ type: 'asc' }, { orderIndex: 'asc' }, { id: 'asc' }],
   });
 
@@ -222,9 +222,11 @@ export async function generateDraftExamQuestions(config: ExamQuestionSource): Pr
       const parts = [
         lesson.title ? `### Bài học: ${lesson.title}` : '',
         lesson.objectives ? `Mục tiêu bài học: ${lesson.objectives}` : '',
+        lesson.preparation ? `Chuẩn bị: ${lesson.preparation}` : '',
+        lesson.activities ? `Sườn tiến trình hoạt động: ${lesson.activities}` : '',
         lesson.content?.trim() || '',
       ].filter(Boolean);
-      return parts.join('\n');
+      return parts.join('\n\n');
     })
     .filter((content): content is string => Boolean(content));
 
