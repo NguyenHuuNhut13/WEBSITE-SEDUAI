@@ -457,25 +457,60 @@ export function getSubjectApiSlug(subjectName: string): string {
 }
 
 /**
- * Gọi API Online lấy bài học thật phân bổ vào từng buổi học
+ * Phẳng hóa cây bài học của Khan Academy API (vì Khan Academy trả về mảng children có thể chứa sub-children)
+ */
+function flattenKhanTopicChildren(children: any[]): any[] {
+  const result: any[] = [];
+  for (const item of children) {
+    if (!item || typeof item !== 'object') continue;
+    // Thêm phần tử hiện tại vào danh sách
+    if (item.title || item.translated_title || item.description) {
+      result.push(item);
+    }
+    // Nếu có children con bên trong, đệ quy phẳng hóa
+    if (Array.isArray(item.children) && item.children.length > 0) {
+      result.push(...flattenKhanTopicChildren(item.children));
+    }
+  }
+  return result;
+}
+
+/**
+ * Gọi API Online lấy bài học thật chuẩn format Khan Academy phân bổ vào từng buổi học
  */
 export async function fetchOnlineApiLessonData(subjectName: string, orderIndex: number) {
   const topicSlug = getSubjectApiSlug(subjectName);
   try {
     const response = await fetch(`https://www.khanacademy.org/api/v1/topic/${topicSlug}`, {
-      signal: AbortSignal.timeout(3500)
+      headers: {
+        'User-Agent': 'SeduAiLMS/1.0 (Educational App)',
+        'Accept': 'application/json'
+      },
+      signal: AbortSignal.timeout(4000)
     });
     if (!response.ok) return null;
     const data = await response.json();
     if (!data || !Array.isArray(data.children) || data.children.length === 0) return null;
 
-    const childIndex = (orderIndex - 1) % data.children.length;
-    const lessonItem = data.children[childIndex];
+    // Phẳng hóa cây chủ đề Khan Academy
+    const allModules = flattenKhanTopicChildren(data.children);
+    if (allModules.length === 0) return null;
+
+    // Phân bổ bài học cho Buổi thứ orderIndex
+    const childIndex = (orderIndex - 1) % allModules.length;
+    const lessonItem = allModules[childIndex];
+
+    const title = lessonItem?.translated_title || lessonItem?.title || `Chủ đề ${orderIndex}`;
+    const description = lessonItem?.description || data.description || '';
+    const kind = lessonItem?.kind || 'Topic';
+    const url = lessonItem?.url || (lessonItem?.slug ? `https://www.khanacademy.org/v/${lessonItem.slug}` : '');
+
     return {
-      topicTitle: data.title || subjectName,
-      realTitle: lessonItem?.title || `Chủ đề ${orderIndex}`,
-      realDescription: lessonItem?.description || data.description || '',
-      realUrl: lessonItem?.url || '',
+      topicTitle: data.translated_title || data.title || subjectName,
+      realTitle: title,
+      realDescription: description,
+      realKind: kind,
+      realUrl: url,
     };
   } catch (error) {
     console.warn(`Online API fetch for ${subjectName} timed out or failed, using AI fallback context:`, error);
