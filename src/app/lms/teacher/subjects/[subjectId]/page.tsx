@@ -39,6 +39,27 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
   const [allowResubmission, setAllowResubmission] = useState(false);
   const [assignmentDueDate, setAssignmentDueDate] = useState('');
   const [operationError, setOperationError] = useState('');
+  const [previewQuizConfig, setPreviewQuizConfig] = useState<any | null>(null);
+  const [previewQuestions, setPreviewQuestions] = useState<any[]>([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
+
+  const handlePreviewQuiz = async (config: any) => {
+    setPreviewQuizConfig(config);
+    setLoadingQuestions(true);
+    try {
+      const res = await fetch(`/api/lms/exams/questions?examConfigId=${config.id}`);
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setPreviewQuestions(json.data.questions || []);
+      } else {
+        setPreviewQuestions([]);
+      }
+    } catch {
+      setPreviewQuestions([]);
+    } finally {
+      setLoadingQuestions(false);
+    }
+  };
 
   const handleAiGenerateLesson = async (type: string, order: number) => {
     setSaving(true);
@@ -109,6 +130,9 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
       const json = await response.json();
       if (!response.ok || !json.success) throw new Error(json.error || 'Không thể sinh Quiz bằng AI.');
       await loadSubject();
+      if (json.data) {
+        await handlePreviewQuiz(json.data);
+      }
     } catch (error) {
       setOperationError(error instanceof Error ? error.message : 'Không thể sinh Quiz bằng AI.');
     } finally {
@@ -442,6 +466,14 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handlePreviewQuiz(quizConfig)}
+                            className="font-bold text-blue-600 hover:underline cursor-pointer"
+                          >
+                            👁️ Xem trước đề
+                          </button>
+                          <span className="text-slate-300">|</span>
                           {quizConfig.questionStatus === 'GENERATED' && (
                             <>
                               <button
@@ -551,6 +583,106 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
           {renderLessonList(practicalLessons, 'PRACTICAL', subject.practicalLessons)}
         </div>
       </div>
+
+      {/* Quiz Preview Modal */}
+      {previewQuizConfig && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+          <div className="flex max-h-[90vh] w-full max-w-3xl flex-col bg-white border border-slate-200 shadow-2xl rounded-none">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50">
+              <div>
+                <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" /> Xem trước bộ đề Quiz AI
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {previewQuizConfig.questionCount} câu hỏi · Thời lượng {previewQuizConfig.durationMinutes} phút · {previewQuizConfig.questionStatus === 'GENERATED' ? 'Chờ duyệt công bố' : 'Đã công bố'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewQuizConfig(null)}
+                className="p-1 text-slate-400 hover:text-slate-600 font-bold text-lg cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Content - Questions list */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {loadingQuestions ? (
+                <div className="flex flex-col items-center justify-center py-12 text-slate-500">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
+                  <p className="text-sm font-semibold">Đang tải danh sách câu hỏi đề thi...</p>
+                </div>
+              ) : previewQuestions.length === 0 ? (
+                <div className="text-center py-12 text-slate-400 italic">
+                  Không tìm thấy câu hỏi hoặc chưa sinh đề.
+                </div>
+              ) : (
+                previewQuestions.map((q: any, index: number) => (
+                  <div key={index} className="border border-slate-200 bg-white p-4 space-y-3 rounded-none shadow-sm">
+                    <div className="flex items-start gap-2">
+                      <span className="shrink-0 bg-primary/10 text-primary font-black px-2 py-0.5 text-xs">
+                        Câu {index + 1}
+                      </span>
+                      <h4 className="text-sm font-bold text-slate-900 leading-relaxed">{q.content}</h4>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-7 pt-1">
+                      {q.options?.map((opt: string, optIdx: number) => {
+                        const isCorrect = optIdx === q.correctAnswer;
+                        return (
+                          <div
+                            key={optIdx}
+                            className={`px-3 py-2 text-xs border font-medium ${
+                              isCorrect
+                                ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-bold'
+                                : 'bg-slate-50 border-slate-200 text-slate-700'
+                            }`}
+                          >
+                            <span className="font-bold mr-1.5">{String.fromCharCode(65 + optIdx)}.</span> {opt}
+                            {isCorrect && <span className="ml-2 text-emerald-700 text-[10px]">✓ Đáp án đúng</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {q.explanation && (
+                      <div className="ml-7 p-2.5 bg-blue-50/70 border border-blue-100 text-xs text-blue-800">
+                        <span className="font-bold">💡 Giải thích:</span> {q.explanation}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between border-t border-slate-200 px-6 py-4 bg-slate-50">
+              <button
+                type="button"
+                onClick={() => setPreviewQuizConfig(null)}
+                className="px-4 py-2 bg-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-300 transition cursor-pointer rounded-none"
+              >
+                Đóng xem trước
+              </button>
+              <div className="flex items-center gap-3">
+                {previewQuizConfig.questionStatus === 'GENERATED' && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await handlePublishQuiz(previewQuizConfig.id);
+                      setPreviewQuizConfig(null);
+                    }}
+                    disabled={saving}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition cursor-pointer disabled:opacity-50 rounded-none shadow"
+                  >
+                    ✅ Duyệt & Công bố Quiz ngay
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
