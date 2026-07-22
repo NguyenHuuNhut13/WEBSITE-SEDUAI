@@ -14,18 +14,14 @@ async function callGemini(messages: any[], systemPrompt: string): Promise<string
     parts: [{ text: m.content || '' }]
   }));
 
-  // Try multiple model and version combinations to find one that works for this key/region
-  // Prioritizing highest version models first (gemini-2.5-flash and gemini-2.0-flash)
+  // Try valid active Gemini models (eliminating deprecated/invalid 404 model names)
   const configs = [
-    { model: 'gemini-2.5-flash', version: 'v1beta' },
     { model: 'gemini-2.0-flash', version: 'v1beta' },
-    { model: 'gemini-2.0-flash', version: 'v1' },
     { model: 'gemini-2.0-flash-lite', version: 'v1beta' },
-    { model: 'gemini-1.5-flash', version: 'v1' },
-    { model: 'gemini-1.5-flash', version: 'v1beta' },
-    { model: 'gemini-1.5-flash-latest', version: 'v1beta' },
-    { model: 'gemini-1.5-pro', version: 'v1' },
-    { model: 'gemini-1.5-pro', version: 'v1beta' }
+    { model: 'gemini-2.0-flash-exp', version: 'v1beta' },
+    { model: 'gemini-1.5-flash-8b', version: 'v1beta' },
+    { model: 'gemini-1.5-flash-002', version: 'v1beta' },
+    { model: 'gemini-1.5-pro-002', version: 'v1beta' },
   ];
   let lastErr: any = null;
 

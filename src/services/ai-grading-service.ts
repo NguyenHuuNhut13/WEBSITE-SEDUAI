@@ -225,10 +225,11 @@ async function callSeduAiJson(prompt: string, maxOutputTokens: number): Promise<
   const providerFailures: string[] = [];
   if (process.env.GEMINI_API_KEY) {
     const geminiModels = [
-      { name: 'gemini-2.5-flash', version: 'v1beta' },
       { name: 'gemini-2.0-flash', version: 'v1beta' },
-      { name: 'gemini-1.5-flash', version: 'v1' },
-      { name: 'gemini-1.5-flash', version: 'v1beta' },
+      { name: 'gemini-2.0-flash-lite', version: 'v1beta' },
+      { name: 'gemini-2.0-flash-exp', version: 'v1beta' },
+      { name: 'gemini-1.5-flash-8b', version: 'v1beta' },
+      { name: 'gemini-1.5-flash-002', version: 'v1beta' },
     ];
     for (const m of geminiModels) {
       try {
