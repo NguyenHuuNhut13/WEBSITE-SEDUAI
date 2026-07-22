@@ -224,8 +224,8 @@ export async function syncLmsUser(account: any): Promise<LmsUser> {
 }
 
 export function lmsErrorResponse(error: unknown) {
-  if (error instanceof LmsAuthError || error instanceof LmsRequestError) {
-    return Response.json({ success: false, error: error.message }, { status: error.status });
+  if (error && typeof error === 'object' && 'status' in error && typeof (error as any).status === 'number' && 'message' in error) {
+    return Response.json({ success: false, error: String((error as any).message) }, { status: (error as any).status });
   }
   if (error instanceof SyntaxError) {
     return Response.json({ success: false, error: 'Dữ liệu gửi lên không phải JSON hợp lệ' }, { status: 400 });
@@ -237,7 +237,9 @@ export function lmsErrorResponse(error: unknown) {
   if (code === 'P2025') {
     return Response.json({ success: false, error: 'Không tìm thấy dữ liệu cần xử lý' }, { status: 404 });
   }
-  return Response.json({ success: false, error: 'LMS gặp lỗi khi xử lý yêu cầu. Vui lòng thử lại.' }, { status: 500 });
+  console.error('[LMS Server Error]:', error);
+  const userMsg = error instanceof Error ? error.message : 'LMS gặp lỗi khi xử lý yêu cầu. Vui lòng thử lại.';
+  return Response.json({ success: false, error: userMsg }, { status: 500 });
 }
 
 export async function canAccessClass(user: LmsUser, classId: string) {

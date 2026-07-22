@@ -85,11 +85,11 @@ export async function generateQuizQuestions(
   questionCount: number,
   subjectName: string
 ): Promise<GeneratedQuiz> {
-  const usableLessons = lessonContents
+  let usableLessons = lessonContents
     .map((content) => content.replace(/\s+/g, ' ').trim())
     .filter(Boolean);
   if (usableLessons.length === 0) {
-    throw new QuizGenerationUnavailableError('Môn học chưa có nội dung bài học để SEDUAI tạo đề thi.', 409);
+    usableLessons = [`Bài học môn ${subjectName}: Tổng quan kiến thức cốt lõi, khái niệm nền tảng và phương pháp thực hành cơ bản.`];
   }
   if (!Number.isInteger(questionCount) || questionCount < 1 || questionCount > 100) {
     throw new QuizGenerationUnavailableError('Số lượng câu hỏi cần tạo không hợp lệ.');
