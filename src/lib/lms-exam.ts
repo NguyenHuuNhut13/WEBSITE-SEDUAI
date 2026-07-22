@@ -209,15 +209,25 @@ export async function generateDraftExamQuestions(config: ExamQuestionSource): Pr
       subjectId: config.subjectId,
       ...(config.examType === 'LESSON_QUIZ' && config.lessonOrder !== null
         ? { orderIndex: config.lessonOrder, ...(config.lessonType ? { type: config.lessonType } : {}) }
-        : {}),
+        : config.examType === 'MIDTERM'
+          ? { orderIndex: { lte: 8 } }
+          : {}),
     },
-    select: { content: true },
+    select: { title: true, objectives: true, content: true },
     orderBy: [{ type: 'asc' }, { orderIndex: 'asc' }, { id: 'asc' }],
   });
 
   const lessonContents = lessons
-    .map((lesson) => lesson.content?.trim())
+    .map((lesson) => {
+      const parts = [
+        lesson.title ? `### Bài học: ${lesson.title}` : '',
+        lesson.objectives ? `Mục tiêu bài học: ${lesson.objectives}` : '',
+        lesson.content?.trim() || '',
+      ].filter(Boolean);
+      return parts.join('\n');
+    })
     .filter((content): content is string => Boolean(content));
+
   let generated;
   try {
     generated = await generateQuizQuestions(
