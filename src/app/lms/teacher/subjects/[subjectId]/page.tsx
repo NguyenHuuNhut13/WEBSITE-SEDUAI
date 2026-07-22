@@ -20,6 +20,7 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
   const [subject, setSubject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [editingLesson, setEditingLesson] = useState<string | null>(null);
+  const [lessonStep, setLessonStep] = useState<1 | 2 | 3>(1);
   const [lessonTitle, setLessonTitle] = useState('');
   const [lessonContent, setLessonContent] = useState('');
   const [lessonObjectives, setLessonObjectives] = useState('');
@@ -233,6 +234,7 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
 
   const startEdit = (lesson: any) => {
     setEditingLesson(lesson.id);
+    setLessonStep(1);
     setLessonTitle(lesson.title);
     setLessonContent(lesson.content || '');
     setLessonObjectives(lesson.objectives || '');
@@ -349,55 +351,257 @@ export default function TeacherSubjectPage({ params }: { params: Promise<{ subje
           }`}>
             {lesson ? (
               isEditing ? (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <input type="text" value={lessonTitle} onChange={(e) => setLessonTitle(e.target.value)}
-                      className="w-full px-3 py-2 rounded-none border border-slate-200 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                <div className="bg-slate-50 border-2 border-primary p-4 rounded-none space-y-4">
+                  {/* Step Indicator Header */}
+                  <div className="bg-slate-900 text-white p-3 flex flex-wrap items-center justify-between gap-3 rounded-none">
+                    <div className="flex items-center gap-2">
+                      <span className="bg-primary text-white font-black text-[11px] px-2 py-0.5 rounded-none uppercase">
+                        {type === 'THEORY' ? 'Lý thuyết' : 'Thực hành'} - Buổi {order}
+                      </span>
+                      <h3 className="font-extrabold text-xs text-white">Quy Trình Soạn Bài Học Chi Tiết</h3>
+                    </div>
+                    
                     <button
                       type="button"
                       onClick={() => handleAiGenerateLesson(type, order)}
                       disabled={saving}
-                      className="shrink-0 flex items-center gap-1.5 px-3 py-2 bg-gradient-to-tr from-primary to-blue-600 hover:from-primary-dark hover:to-blue-700 disabled:opacity-50 text-white rounded-none font-bold text-xs shadow transition cursor-pointer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-blue-700 disabled:opacity-50 text-white rounded-none font-bold text-xs shadow cursor-pointer transition"
                     >
-                      {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                      Soạn giáo án AI
+                      {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-amber-300" />}
+                      Tự động sinh giáo án AI
                     </button>
                   </div>
-                  <textarea value={lessonObjectives} onChange={(e) => setLessonObjectives(e.target.value)} rows={2} placeholder="Mục tiêu / yêu cầu cần đạt"
-                    className="w-full px-3 py-2 rounded-none border border-slate-200 text-sm" />
-                  <textarea value={lessonPreparation} onChange={(e) => setLessonPreparation(e.target.value)} rows={2} placeholder="Chuẩn bị"
-                    className="w-full px-3 py-2 rounded-none border border-slate-200 text-sm" />
-                  <textarea value={lessonActivities} onChange={(e) => setLessonActivities(e.target.value)} rows={4} placeholder="Tiến trình: Mở đầu, hình thành kiến thức, luyện tập, vận dụng"
-                    className="w-full px-3 py-2 rounded-none border border-slate-200 text-sm" />
-                  <textarea value={lessonContent} onChange={(e) => setLessonContent(e.target.value)} rows={6}
-                    placeholder="Nhập nội dung bài học..."
-                    className="w-full px-3 py-2 rounded-none border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 resize-y" />
-                  <textarea value={lessonAssessment} onChange={(e) => setLessonAssessment(e.target.value)} rows={2} placeholder="Đánh giá / tiêu chí hoàn thành"
-                    className="w-full px-3 py-2 rounded-none border border-slate-200 text-sm" />
-                  <label className="block rounded-none border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600">
-                    Học liệu đính kèm
-                    <input type="file" multiple className="mt-2 block w-full text-xs" onChange={(event) => setLessonFiles(Array.from(event.target.files || []))} />
-                  </label>
-                  <select value={lessonStatus} onChange={(e) => setLessonStatus(e.target.value)} className="w-full px-3 py-2 rounded-none border border-slate-200 text-sm">
-                    <option value="DRAFT">Bản nháp</option>
-                    <option value="PUBLISHED">Công bố cho học sinh</option>
-                    <option value="ARCHIVED">Lưu trữ</option>
-                  </select>
-                  <div className="flex gap-2">
-                    <button onClick={() => updateLesson(lesson.id)} disabled={saving}
-                      className="flex items-center gap-1.5 px-3 py-2 bg-primary text-white rounded-none text-xs font-bold hover:bg-blue-700 transition cursor-pointer disabled:opacity-50">
-                      {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Lưu
+
+                  {/* Progress Tabs */}
+                  <div className="grid grid-cols-3 border border-slate-300 bg-white text-xs font-bold text-center">
+                    <button
+                      type="button"
+                      onClick={() => setLessonStep(1)}
+                      className={`py-2.5 border-r border-slate-300 flex items-center justify-center gap-1.5 cursor-pointer ${
+                        lessonStep === 1 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      <span className="w-4 h-4 bg-white/20 text-current flex items-center justify-center text-[10px] font-black">1</span>
+                      <span className="hidden sm:inline">1. Sườn Sư Phạm</span>
+                      <span className="sm:hidden">Bước 1</span>
                     </button>
-                    <button onClick={() => setEditingLesson(null)} className="px-3 py-2 bg-slate-100 text-slate-600 rounded-none text-xs font-bold hover:bg-slate-200 transition cursor-pointer">
-                      Hủy
+
+                    <button
+                      type="button"
+                      onClick={() => setLessonStep(2)}
+                      className={`py-2.5 border-r border-slate-300 flex items-center justify-center gap-1.5 cursor-pointer ${
+                        lessonStep === 2 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      <span className="w-4 h-4 bg-white/20 text-current flex items-center justify-center text-[10px] font-black">2</span>
+                      <span className="hidden sm:inline">2. Nội Dung & Học Liệu</span>
+                      <span className="sm:hidden">Bước 2</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setLessonStep(3)}
+                      className={`py-2.5 flex items-center justify-center gap-1.5 cursor-pointer ${
+                        lessonStep === 3 ? 'bg-primary text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      }`}
+                    >
+                      <span className="w-4 h-4 bg-white/20 text-current flex items-center justify-center text-[10px] font-black">3</span>
+                      <span className="hidden sm:inline">3. Lưu & Công Bố</span>
+                      <span className="sm:hidden">Bước 3</span>
                     </button>
                   </div>
+
+                  {/* STEP 1: SƯỜN SƯ PHẠM */}
+                  {lessonStep === 1 && (
+                    <div className="space-y-3 bg-white p-3.5 border border-slate-200">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-black text-slate-800 uppercase tracking-wider block">
+                          Tên bài học
+                        </label>
+                        <input
+                          type="text"
+                          value={lessonTitle}
+                          onChange={(e) => setLessonTitle(e.target.value)}
+                          placeholder="Nhập tên bài học..."
+                          className="w-full px-3 py-2 rounded-none border border-slate-300 text-xs font-bold focus:outline-none focus:border-primary bg-slate-50/50"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-black text-blue-900 uppercase tracking-wider block">
+                            🎯 Mục tiêu bài học (Cần đạt)
+                          </label>
+                          <textarea
+                            value={lessonObjectives}
+                            onChange={(e) => setLessonObjectives(e.target.value)}
+                            rows={3}
+                            placeholder="Mục tiêu về Kiến thức, Kỹ năng, Thái độ..."
+                            className="w-full px-3 py-2 rounded-none border border-slate-300 text-xs focus:outline-none focus:border-primary bg-slate-50/50"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-black text-amber-900 uppercase tracking-wider block">
+                            📦 Chuẩn bị của GV & HS
+                          </label>
+                          <textarea
+                            value={lessonPreparation}
+                            onChange={(e) => setLessonPreparation(e.target.value)}
+                            rows={3}
+                            placeholder="Slide, máy tính, học liệu đính kèm..."
+                            className="w-full px-3 py-2 rounded-none border border-slate-300 text-xs focus:outline-none focus:border-primary bg-slate-50/50"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-black text-emerald-900 uppercase tracking-wider block">
+                          📋 Sườn Tiến Trình Hoạt Động (4 Bước Sư Phạm Cho Giáo Viên)
+                        </label>
+                        <textarea
+                          value={lessonActivities}
+                          onChange={(e) => setLessonActivities(e.target.value)}
+                          rows={4}
+                          placeholder="1. Khởi động ➔ 2. Khám phá kiến thức ➔ 3. Luyện tập thực hành ➔ 4. Vận dụng..."
+                          className="w-full px-3 py-2 rounded-none border border-slate-300 text-xs focus:outline-none focus:border-primary bg-slate-50/50"
+                        />
+                      </div>
+
+                      <div className="flex justify-end pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setLessonStep(2)}
+                          className="px-4 py-2 bg-primary text-white font-bold text-xs rounded-none hover:bg-blue-700 transition flex items-center gap-1 cursor-pointer shadow"
+                        >
+                          Sang Bước 2: Soạn Nội Dung ➔
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* STEP 2: NỘI DUNG BÀI HỌC & HỌC LIỆU */}
+                  {lessonStep === 2 && (
+                    <div className="space-y-3 bg-white p-3.5 border border-slate-200">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-black text-slate-800 uppercase tracking-wider block flex items-center justify-between">
+                          <span>📖 Nội dung bài giảng chi tiết (Dành cho học sinh đọc học)</span>
+                          <span className="text-[10px] text-slate-500 font-normal lowercase">(hỗ trợ Markdown)</span>
+                        </label>
+                        <textarea
+                          value={lessonContent}
+                          onChange={(e) => setLessonContent(e.target.value)}
+                          rows={8}
+                          placeholder="Triển khai chi tiết kiến thức, mã nguồn code blocks, công thức bám sát sườn hoạt độngở Bước 1..."
+                          className="w-full px-3 py-2 rounded-none border border-slate-300 text-xs focus:outline-none focus:border-primary font-mono bg-slate-50/50 resize-y"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-black text-violet-900 uppercase tracking-wider block">
+                          🏆 Tiêu chí đánh giá hoàn thành bài học
+                        </label>
+                        <textarea
+                          value={lessonAssessment}
+                          onChange={(e) => setLessonAssessment(e.target.value)}
+                          rows={2}
+                          placeholder="Yêu cầu học sinh hoàn thành bài tập tự luận hoặc bài kiểm tra trắc nghiệm..."
+                          className="w-full px-3 py-2 rounded-none border border-slate-300 text-xs focus:outline-none focus:border-primary bg-slate-50/50"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block rounded-none border border-dashed border-slate-300 bg-slate-50 px-3 py-2.5 text-xs font-semibold text-slate-700">
+                          📁 Tải học liệu / File đính kèm (.pdf, .zip, .docx...)
+                          <input
+                            type="file"
+                            multiple
+                            className="mt-1.5 block w-full text-xs text-slate-600 cursor-pointer"
+                            onChange={(event) => setLessonFiles(Array.from(event.target.files || []))}
+                          />
+                        </label>
+                      </div>
+
+                      <div className="flex justify-between pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setLessonStep(1)}
+                          className="px-3.5 py-1.5 bg-slate-200 text-slate-700 font-bold text-xs rounded-none hover:bg-slate-300 transition cursor-pointer"
+                        >
+                          ⬅ Quay lại Bước 1
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setLessonStep(3)}
+                          className="px-4 py-2 bg-primary text-white font-bold text-xs rounded-none hover:bg-blue-700 transition flex items-center gap-1 cursor-pointer shadow"
+                        >
+                          Sang Bước 3: Công Bố ➔
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* STEP 3: LƯU & CÔNG BỐ */}
+                  {lessonStep === 3 && (
+                    <div className="space-y-3 bg-white p-3.5 border border-slate-200">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-black text-slate-800 uppercase tracking-wider block">
+                          🚀 Trạng thái công bố bài học
+                        </label>
+                        <select
+                          value={lessonStatus}
+                          onChange={(e) => setLessonStatus(e.target.value)}
+                          className="w-full px-3 py-2 rounded-none border border-slate-300 text-xs font-bold focus:outline-none focus:border-primary bg-slate-50"
+                        >
+                          <option value="DRAFT">📌 Bản nháp (chỉ giáo viên thấy)</option>
+                          <option value="PUBLISHED">✅ Công bố ngay cho học sinh</option>
+                          <option value="ARCHIVED">📦 Lưu trữ</option>
+                        </select>
+                      </div>
+
+                      <div className="p-3 bg-slate-100 border border-slate-200 text-xs space-y-1 text-slate-700">
+                        <p className="font-black text-slate-900 mb-1">Xác nhận thông tin bài học:</p>
+                        <p>• Tiêu đề: <strong>{lessonTitle || '(Chưa đặt)'}</strong></p>
+                        <p>• Nội dung bài học: <strong>{lessonContent ? `${lessonContent.length} ký tự` : 'Chưa có'}</strong></p>
+                        <p>• File đính kèm: <strong>{lessonFiles.length + lessonAttachments.length} file</strong></p>
+                      </div>
+
+                      <div className="flex justify-between pt-2 border-t border-slate-200">
+                        <button
+                          type="button"
+                          onClick={() => setLessonStep(2)}
+                          className="px-3.5 py-1.5 bg-slate-200 text-slate-700 font-bold text-xs rounded-none hover:bg-slate-300 transition cursor-pointer"
+                        >
+                          ⬅ Quay lại Bước 2
+                        </button>
+
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setEditingLesson(null)}
+                            className="px-3.5 py-2 bg-slate-200 text-slate-700 rounded-none text-xs font-bold hover:bg-slate-300 transition cursor-pointer"
+                          >
+                            Hủy
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => updateLesson(lesson.id)}
+                            disabled={saving}
+                            className="flex items-center gap-1.5 px-5 py-2 bg-emerald-600 text-white rounded-none text-xs font-extrabold hover:bg-emerald-700 transition cursor-pointer shadow disabled:opacity-50"
+                          >
+                            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                            Lưu Hoàn Tất Bài Học
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="flex items-start justify-between cursor-pointer" onClick={() => startEdit(lesson)}>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold ${
+                      <span className={`w-6 h-6 rounded-none flex items-center justify-center text-xs font-bold ${
                         type === 'THEORY' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'
                       }`}>{order}</span>
                       <h4 className="text-sm font-bold text-slate-900">{lesson.title}</h4>
