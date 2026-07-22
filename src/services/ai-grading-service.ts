@@ -80,6 +80,80 @@ function normalizeGeneratedQuestion(value: unknown): QuizQuestion {
 }
 
 /** Sinh đề trắc nghiệm từ snapshot nội dung bài học qua nhà cung cấp AI. */
+
+export function getSubjectDomainContext(subjectName: string): {
+  domain: 'ENGLISH' | 'PROGRAMMING' | 'SCIENCE' | 'GENERAL';
+  guidelines: string;
+} {
+  const lower = (subjectName || '').toLowerCase();
+
+  if (
+    lower.includes('anh') ||
+    lower.includes('english') ||
+    lower.includes('ielts') ||
+    lower.includes('toeic') ||
+    lower.includes('giao tiếp') ||
+    lower.includes('ngôn ngữ') ||
+    lower.includes('tiếng')
+  ) {
+    return {
+      domain: 'ENGLISH',
+      guidelines: `ĐÂY LÀ MÔN NGOẠI NGỮ / TIẾNG ANH ("${subjectName}"):
+- Giáo án & bài tập phải tập trung vào 4 kỹ năng: Nghe (Listening), Nói (Speaking), Đọc (Reading), Viết (Writing), Ngữ pháp (Grammar) & Từ vựng (Vocabulary).
+- Nội dung bài học (content) bắt buộc phải bao gồm các đoạn hội thoại thực tế (Dialogue), danh sách từ vựng trọng tâm (Vocab List có từ Tiếng Anh, loại từ, phiên âm, dịch nghĩa), mẫu cấu trúc câu (Sentence Patterns) và các đoạn văn đọc hiểu ngắn.
+- Bài tập & Quiz trắc nghiệm cần xoay quanh chia động từ, tìm lỗi sai ngữ pháp, điền từ vào chỗ trống (Cloze test), chọn câu đồng nghĩa hoặc phản xạ tình huống giao tiếp.`,
+    };
+  }
+
+  if (
+    lower.includes('lập trình') ||
+    lower.includes('tin học') ||
+    lower.includes('python') ||
+    lower.includes('javascript') ||
+    lower.includes('java') ||
+    lower.includes('c++') ||
+    lower.includes('web') ||
+    lower.includes('công nghệ') ||
+    lower.includes('ai') ||
+    lower.includes('data') ||
+    lower.includes('code')
+  ) {
+    return {
+      domain: 'PROGRAMMING',
+      guidelines: `ĐÂY LÀ MÔN LẬP TRÌNH / TỰ ĐỘNG HÓA / CNTT ("${subjectName}"):
+- Giáo án & bài tập phải nhấn mạnh tư duy thuật toán, cú pháp ngôn ngữ, thực hành code trên máy tính và quy trình debug sửa lỗi.
+- Nội dung bài học (content) bắt buộc phải chứa các khối mã nguồn mẫu (Sử dụng chuẩn Markdown code blocks như \`\`\`python, \`\`\`javascript...), giải thích dòng code chi tiết và hướng dẫn chạy chương trình.
+- Bài tập & Quiz trắc nghiệm cần có bài tập viết hàm/chương trình thực tế, trắc nghiệm dự đoán đầu ra (Output) của đoạn code, hoặc phát hiện lỗi cú pháp (Syntax error).`,
+    };
+  }
+
+  if (
+    lower.includes('toán') ||
+    lower.includes('lý') ||
+    lower.includes('vật lý') ||
+    lower.includes('hóa') ||
+    lower.includes('sinh') ||
+    lower.includes('math') ||
+    lower.includes('khoa học')
+  ) {
+    return {
+      domain: 'SCIENCE',
+      guidelines: `ĐÂY LÀ MÔN KHOA HỌC TỰ NHIÊN / TOÁN HỌC ("${subjectName}"):
+- Giáo án & bài tập phải tập trung vào định lý, định luật, công thức tính toán và các bước giải bài mẫu bài bản.
+- Nội dung bài học (content) trình bày hệ thống công thức khoa học, ví dụ minh họa từng bước từ dễ đến khó và ứng dụng thực tế.
+- Bài tập & Quiz trắc nghiệm tính toán số liệu, áp dụng công thức, nhận biết khái niệm và suy luận logic.`,
+    };
+  }
+
+  return {
+    domain: 'GENERAL',
+    guidelines: `ĐÂY LÀ MÔN HỌC CHUYÊN NGHÀNH / KỸ NĂNG ("${subjectName}"):
+- Giáo án & bài tập cần kết hợp giữa lý thuyết nền tảng và các tình huống Case Study ứng dụng thực tiễn.
+- Nội dung bài học (content) trình bày khoa học bằng Markdown phong phú, sử dụng bảng so sánh, sơ đồ tư duy và ví dụ minh họa thực tế.
+- Bài tập & Quiz trắc nghiệm tập trung vào phân tích tình huống thực tế, rèn luyện tư duy phản biện và vận dụng kỹ năng.`,
+  };
+}
+
 export async function generateQuizQuestions(
   lessonContents: string[],
   questionCount: number,
@@ -483,20 +557,23 @@ export async function generateLessonPlan(
   content: string;
   assessment: string;
 }> {
-  const prompt = `Bạn là SEDUAI, hệ thống thiết kế giáo án chuyên nghiệp dành cho giáo viên.
+  const domainContext = getSubjectDomainContext(subjectName);
+  const prompt = `Bạn là SEDUAI, hệ thống thiết kế giáo án chuyên nghiệp bám sát đặc thù từng môn học.
 Hãy biên soạn một giáo án chi tiết và hấp dẫn cho môn học "${subjectName}", buổi thứ ${orderIndex} (${lessonType === 'THEORY' ? 'Lý thuyết' : 'Thực hành'}).
 
-Quy tắc bắt buộc:
+${domainContext.guidelines}
+
+Quy tắc biên soạn bắt buộc:
 - Viết bằng Tiếng Việt.
-- Nội dung bài học (content) phải chi tiết, khoa học, bám sát chuyên môn, viết dưới dạng Markdown phong phú (sử dụng tiêu đề, danh sách, bảng dữ liệu, các khối mã nguồn/code block nếu là môn Tin học/Lập trình).
+- Nội dung bài học (content) phải chi tiết, khoa học, thể hiện đúng phong cách chuyên môn của môn "${subjectName}", viết dưới dạng Markdown phong phú (dùng tiêu đề, danh sách, bảng biểu, các khối code block hoặc cấu trúc hội thoại/công thức toán học tương ứng).
 - Thời lượng một buổi học ước tính khoảng 90-120 phút.
 - Trả về duy nhất một chuỗi JSON hợp lệ theo cấu trúc sau (không bao gồm chữ hay định dạng khác ngoài JSON):
 {
-  "title": "Tiêu đề cụ thể của buổi học này (ví dụ: Buổi 1 - Khái niệm cơ bản...)",
-  "objectives": "Mục tiêu bài học (Kiến thức, Kỹ năng, Thái độ)",
+  "title": "Tiêu đề cụ thể của buổi học này",
+  "objectives": "Mục tiêu bài học (Kiến thức, Kỹ năng, Thái độ phù hợp môn học)",
   "preparation": "Chuẩn bị của giáo viên và học sinh",
   "activities": "Tiến trình hoạt động giảng dạy chi tiết (Mở đầu, hình thành kiến thức, luyện tập, vận dụng)",
-  "content": "Nội dung bài giảng chi tiết bằng markdown (đây là phần bài đọc/tài liệu học tập chính cho học sinh, phải viết thật đầy đủ và chi tiết kiến thức)",
+  "content": "Nội dung bài giảng chi tiết bằng markdown (đây là phần tài liệu học tập chính cho học sinh, viết thật đầy đủ và chi tiết kiến thức đặc thù môn học)",
   "assessment": "Tiêu chí đánh giá hoàn thành bài học"
 }`;
 
