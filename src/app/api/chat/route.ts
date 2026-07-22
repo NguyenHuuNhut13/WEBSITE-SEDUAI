@@ -14,14 +14,10 @@ async function callGemini(messages: any[], systemPrompt: string): Promise<string
     parts: [{ text: m.content || '' }]
   }));
 
-  // Try valid active Gemini models (eliminating deprecated/invalid 404 model names)
+  // Official active Gemini 2.0 models
   const configs = [
     { model: 'gemini-2.0-flash', version: 'v1beta' },
     { model: 'gemini-2.0-flash-lite', version: 'v1beta' },
-    { model: 'gemini-2.0-flash-exp', version: 'v1beta' },
-    { model: 'gemini-1.5-flash-8b', version: 'v1beta' },
-    { model: 'gemini-1.5-flash-002', version: 'v1beta' },
-    { model: 'gemini-1.5-pro-002', version: 'v1beta' },
   ];
   let lastErr: any = null;
 
