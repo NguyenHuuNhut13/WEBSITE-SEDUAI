@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { ArrowLeft, Send, Sparkles, Loader2, Star, FileText, Upload, CheckCircle2 } from 'lucide-react';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import FileAttachmentViewer from '@/components/FileAttachmentViewer';
 
 export default function StudentAssignmentSubmission({ params }: { params: Promise<{ assignmentId: string }> }) {
   const { assignmentId } = use(params);
@@ -210,16 +211,12 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
 
             <label className="flex cursor-pointer items-center gap-2 rounded-none border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-100 transition">
               <Upload className="h-4 w-4 text-primary" />
-              <span>{selectedFiles.length ? `${selectedFiles.length} tệp đã chọn` : 'Đính kèm tệp bài làm (.zip, .pdf, .docx, .png...)'}</span>
+              <span>{selectedFiles.length ? `${selectedFiles.length} tệp đã chọn` : 'Đính kèm tệp bài làm (.mp3, .wav, .m4a, .pdf, .docx, .zip...)'}</span>
               <input type="file" multiple className="hidden" onChange={(event) => setSelectedFiles(Array.from(event.target.files || []))} />
             </label>
 
             {submission?.files && (
-              <div className="space-y-1 text-xs text-slate-600">
-                {(typeof submission.files === 'string' ? JSON.parse(submission.files) : submission.files).map((file: any) => (
-                  <a key={file.url} href={file.url} target="_blank" rel="noreferrer" className="block text-primary font-bold hover:underline">{file.name}</a>
-                ))}
-              </div>
+              <FileAttachmentViewer files={submission.files} title="Tệp đã nộp" />
             )}
 
             {submission?.status === 'AI_GRADED' && (
