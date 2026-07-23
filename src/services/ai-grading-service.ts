@@ -1,4 +1,7 @@
 import { randomInt } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import type { QuizQuestion, GeneratedQuiz, ExamAnswer } from '@/types/lms-types';
 
 export const AI_GRADING_MARKER_PREFIX = '__SEDUAI_GRADING__:';
@@ -22,6 +25,75 @@ export class QuizGenerationUnavailableError extends Error {
     super(message);
     this.name = 'QuizGenerationUnavailableError';
   }
+}
+
+/**
+ * Đọc trực tiếp nội dung văn bản / mã nguồn từ tệp mà học sinh đã nộp trên server để truyền vào AI chấm bài
+ */
+export async function extractSubmissionContentWithFiles(content: string | null, filesJson: string | null): Promise<string> {
+  const text = (content || '').trim();
+  const fileContents: string[] = [];
+
+  if (filesJson) {
+    try {
+      const parsed = typeof filesJson === 'string' ? JSON.parse(filesJson) : filesJson;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        for (const file of parsed) {
+          const fileName = file.name || 'File';
+          const fileUrl = file.url || '';
+          if (!fileUrl) continue;
+
+          // Trích xuất tên file duy nhất từ URL (ví dụ: /api/lms/uploads/uuid-name.py)
+          const baseName = path.basename(fileUrl.split('?')[0]);
+          if (!baseName) continue;
+
+          let fileBuffer: Buffer | null = null;
+          const publicPath = path.join(process.cwd(), 'public', 'uploads', 'lms', baseName);
+          try {
+            fileBuffer = await readFile(publicPath);
+          } catch {
+            const tmpPath = path.join(tmpdir(), 'seduai-uploads', baseName);
+            try {
+              fileBuffer = await readFile(tmpPath);
+            } catch {
+              fileBuffer = null;
+            }
+          }
+
+          if (fileBuffer) {
+            const ext = path.extname(fileName).toLowerCase();
+            const textExts = ['.txt', '.md', '.json', '.js', '.ts', '.jsx', '.tsx', '.py', '.html', '.css', '.c', '.cpp', '.java', '.cs', '.php', '.sql', '.sh', '.xml', '.csv'];
+
+            if (textExts.includes(ext) || ext === '') {
+              const utf8Content = fileBuffer.toString('utf-8').trim();
+              fileContents.push(`--- BẮT ĐẦU NỘI DUNG TỆP BÀI LÀM "${fileName}" ---\n${utf8Content.slice(0, 15_000)}\n--- KẾT THÚC NỘI DUNG TỆP "${fileName}" ---`);
+            } else {
+              // Trích xuất chuỗi ký tự hiển thị được từ tệp văn bản/tài liệu
+              const textOnly = fileBuffer.toString('utf-8').replace(/[^\x20-\x7E\s\u00C0-\u024F\u1EA0-\u1EF9]/g, ' ').replace(/\s+/g, ' ').trim();
+              if (textOnly.length > 50) {
+                fileContents.push(`--- BẮT ĐẦU NỘI DUNG TRÍCH XUẤT TỪ TỆP "${fileName}" ---\n${textOnly.slice(0, 10_000)}\n--- KẾT THÚC TRÍCH XUẤT ---`);
+              } else {
+                fileContents.push(`[Tệp đính kèm: "${fileName}" (Định dạng Âm thanh/Hình ảnh/Nhị phân: ${fileUrl})]`);
+              }
+            }
+          } else {
+            fileContents.push(`[Tệp đính kèm: "${fileName}" (${fileUrl})]`);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to parse submission filesJson:', e);
+    }
+  }
+
+  const combinedFilesText = fileContents.join('\n\n');
+
+  if (text && combinedFilesText) {
+    return `${text}\n\n[NỘI DUNG VÀ TỆP ĐÍNH KÈM HỌC SINH ĐÃ NỘP]:\n${combinedFilesText}`;
+  }
+  if (text) return text;
+  if (combinedFilesText) return combinedFilesText;
+  return '';
 }
 
 function shuffled<T>(items: T[]) {

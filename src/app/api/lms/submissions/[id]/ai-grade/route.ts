@@ -6,33 +6,12 @@ import {
   AiGradingUnavailableError,
   gradeAssignment,
   isAiGradingMarker,
+  extractSubmissionContentWithFiles,
 } from '@/services/ai-grading-service';
 import { LmsRequestError, canManageActiveClass, lmsErrorResponse, requireLmsUser } from '@/lib/lms-auth';
 import { consumeRateLimit } from '@/lib/rate-limit';
 
 type RouteContext = { params: Promise<{ id: string }> };
-
-function buildSubmissionContentForAi(content: string | null, filesJson: string | null): string {
-  const text = (content || '').trim();
-  let fileListText = '';
-
-  if (filesJson) {
-    try {
-      const parsed = typeof filesJson === 'string' ? JSON.parse(filesJson) : filesJson;
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const fileItems = parsed
-          .map((f: any, idx: number) => `- Tệp ${idx + 1}: "${f.name || 'File'}" (${f.url || ''})`)
-          .join('\n');
-        fileListText = `[THÔNG TIN TỆP BÀI LÀM HỌC SINH ĐÃ NỘP]:\n${fileItems}`;
-      }
-    } catch {}
-  }
-
-  if (text && fileListText) return `${text}\n\n${fileListText}`;
-  if (text) return text;
-  if (fileListText) return `[Học sinh đã nộp tệp bài làm đính kèm]\n${fileListText}`;
-  return '';
-}
 
 // POST /api/lms/submissions/[id]/ai-grade — AI chấm bài tự động
 export async function POST(request: NextRequest, context: RouteContext) {
@@ -63,7 +42,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ success: false, error: 'Chỉ bài đang chờ chấm mới được gửi cho SEDUAI' }, { status: 409 });
     }
 
-    const submissionContent = buildSubmissionContentForAi(submission.content, submission.files);
+    const submissionContent = await extractSubmissionContentWithFiles(submission.content, submission.files);
 
     if (!submissionContent) {
       return NextResponse.json({ success: false, error: 'Bài nộp chưa có nội dung hoặc tệp đính kèm' }, { status: 400 });

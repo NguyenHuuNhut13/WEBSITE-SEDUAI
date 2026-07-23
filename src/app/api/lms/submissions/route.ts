@@ -3,30 +3,9 @@ import { Prisma, type SubmissionStatus } from '@prisma/client';
 import prisma from '@/lib/prisma';
 import { LmsRequestError, canManageActiveClass, lmsErrorResponse, requireLmsUser, withClassLock } from '@/lib/lms-auth';
 import { enumValue, normalizeAttachments, optionalDate, optionalLongText, requiredText } from '@/lib/lms-input';
-import { isAiGradingMarker, gradeAssignment, AI_GRADING_MARKER_PREFIX } from '@/services/ai-grading-service';
+import { isAiGradingMarker, gradeAssignment, AI_GRADING_MARKER_PREFIX, extractSubmissionContentWithFiles } from '@/services/ai-grading-service';
 import { randomUUID } from 'node:crypto';
 
-function buildSubmissionContentForAi(content: string | null, filesJson: string | null): string {
-  const text = (content || '').trim();
-  let fileListText = '';
-
-  if (filesJson) {
-    try {
-      const parsed = typeof filesJson === 'string' ? JSON.parse(filesJson) : filesJson;
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        const fileItems = parsed
-          .map((f: any, idx: number) => `- Tệp ${idx + 1}: "${f.name || 'File'}" (${f.url || ''})`)
-          .join('\n');
-        fileListText = `[THÔNG TIN TỆP BÀI LÀM HỌC SINH ĐÃ NỘP]:\n${fileItems}`;
-      }
-    } catch {}
-  }
-
-  if (text && fileListText) return `${text}\n\n${fileListText}`;
-  if (text) return text;
-  if (fileListText) return `[Học sinh đã nộp tệp bài làm đính kèm]\n${fileListText}`;
-  return '';
-}
 
 // Background grading function
 function triggerBackgroundAiGrading(submissionId: string) {
@@ -39,7 +18,7 @@ function triggerBackgroundAiGrading(submissionId: string) {
       });
       if (!sub || sub.status !== 'PENDING') return;
 
-      const submissionContent = buildSubmissionContentForAi(sub.content, sub.files);
+      const submissionContent = await extractSubmissionContentWithFiles(sub.content, sub.files);
       if (!submissionContent) return;
 
       // Set marking tag to prevent race conditions
