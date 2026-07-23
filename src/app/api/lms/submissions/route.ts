@@ -6,6 +6,28 @@ import { enumValue, normalizeAttachments, optionalDate, optionalLongText, requir
 import { isAiGradingMarker, gradeAssignment, AI_GRADING_MARKER_PREFIX } from '@/services/ai-grading-service';
 import { randomUUID } from 'node:crypto';
 
+function buildSubmissionContentForAi(content: string | null, filesJson: string | null): string {
+  const text = (content || '').trim();
+  let fileListText = '';
+
+  if (filesJson) {
+    try {
+      const parsed = typeof filesJson === 'string' ? JSON.parse(filesJson) : filesJson;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const fileItems = parsed
+          .map((f: any, idx: number) => `- Tệp ${idx + 1}: "${f.name || 'File'}" (${f.url || ''})`)
+          .join('\n');
+        fileListText = `[THÔNG TIN TỆP BÀI LÀM HỌC SINH ĐÃ NỘP]:\n${fileItems}`;
+      }
+    } catch {}
+  }
+
+  if (text && fileListText) return `${text}\n\n${fileListText}`;
+  if (text) return text;
+  if (fileListText) return `[Học sinh đã nộp tệp bài làm đính kèm]\n${fileListText}`;
+  return '';
+}
+
 // Background grading function
 function triggerBackgroundAiGrading(submissionId: string) {
   void (async () => {
@@ -15,7 +37,10 @@ function triggerBackgroundAiGrading(submissionId: string) {
         where: { id: submissionId },
         include: { assignment: true },
       });
-      if (!sub || !sub.content || sub.status !== 'PENDING') return;
+      if (!sub || sub.status !== 'PENDING') return;
+
+      const submissionContent = buildSubmissionContentForAi(sub.content, sub.files);
+      if (!submissionContent) return;
 
       // Set marking tag to prevent race conditions
       const gradingMarker = `${AI_GRADING_MARKER_PREFIX}${randomUUID()}`;
@@ -29,7 +54,7 @@ function triggerBackgroundAiGrading(submissionId: string) {
       const grading = await gradeAssignment(
         sub.assignment.title,
         sub.assignment.rubric || sub.assignment.description || '',
-        sub.content
+        submissionContent
       );
 
       // 3. Save grading result
@@ -186,7 +211,7 @@ export async function POST(request: NextRequest) {
       });
     });
 
-    if (submission && submission.id && submission.content) {
+    if (submission && submission.id && (submission.content || submission.files)) {
       triggerBackgroundAiGrading(submission.id);
     }
 

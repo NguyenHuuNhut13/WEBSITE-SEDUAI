@@ -319,15 +319,15 @@ export default function TeacherGradingPage() {
               </div>
 
               {/* AI Actions */}
-              {selectedSub.status === 'PENDING' && selectedSub.content && !selectedSub.aiGrading && (
+              {selectedSub.status === 'PENDING' && (selectedSub.content || selectedSub.files) && !selectedSub.aiGrading && (
                 <button onClick={() => aiGrade(selectedSub.id)} disabled={gradingId === selectedSub.id}
-                  className="w-full flex items-center justify-center gap-2 rounded-lg bg-primary py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark cursor-pointer disabled:opacity-50">
-                  {gradingId === selectedSub.id ? <><Loader2 className="w-4 h-4 animate-spin" /> AI đang chấm...</> : <><Sparkles className="w-4 h-4" /> AI Chấm bài</>}
+                  className="w-full flex items-center justify-center gap-2 rounded-none bg-primary py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 cursor-pointer disabled:opacity-50">
+                  {gradingId === selectedSub.id ? <><Loader2 className="w-4 h-4 animate-spin" /> AI đang chấm bài...</> : <><Sparkles className="w-4 h-4 text-amber-300" /> AI Chấm bài tự động</>}
                 </button>
               )}
 
               {selectedSub.status === 'PENDING' && selectedSub.aiGrading && (
-                <div className="flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm font-semibold text-blue-800">
+                <div className="flex items-center gap-2 rounded-none border border-blue-100 bg-blue-50 p-4 text-sm font-semibold text-blue-800">
                   <Loader2 className="h-4 w-4 animate-spin" /> SEDUAI đang xử lý bài này...
                 </div>
               )}
