@@ -4,7 +4,6 @@ import { useCallback, useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { ArrowLeft, Send, Sparkles, Loader2, Star, FileText, Upload } from 'lucide-react';
-import MarkdownContent from '@/components/MarkdownContent';
 
 export default function StudentAssignmentSubmission({ params }: { params: Promise<{ assignmentId: string }> }) {
   const { assignmentId } = use(params);
@@ -97,7 +96,7 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-none animate-spin" />
       </div>
     );
   }
@@ -115,7 +114,7 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
       <div className="flex items-center gap-3">
         <Link
           href={`/lms/student/lessons/${assignment.lessonId}`}
-          className="p-2 rounded-xl hover:bg-slate-100 transition"
+          className="p-2 rounded-none hover:bg-slate-100 transition border border-slate-200"
         >
           <ArrowLeft className="w-5 h-5 text-slate-600" />
         </Link>
@@ -126,51 +125,39 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
       </div>
 
       {error && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm font-semibold">
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-none text-sm font-semibold">
           {error}
         </div>
       )}
 
       {success && (
-        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl text-sm font-semibold">
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-none text-sm font-semibold">
           {success}
         </div>
       )}
 
       {/* Assignment Description */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900 flex items-center gap-1.5 mb-3 pb-2 border-b border-slate-100">
-          <FileText className="w-4 h-4 text-primary" /> Đề bài & Yêu cầu bài tập
+      <div className="bg-white rounded-none border border-slate-200 p-6 shadow-sm">
+        <h2 className="text-sm font-bold text-slate-900 flex items-center gap-1.5 mb-2">
+          <FileText className="w-4 h-4 text-slate-500" /> Đề bài & Yêu cầu bài tập
         </h2>
-        <div className="text-sm text-slate-700 leading-relaxed">
-          {assignment.description ? (
-            <MarkdownContent content={assignment.description} />
-          ) : (
-            <p className="text-slate-400 italic">Chưa có mô tả bài tập chi tiết.</p>
-          )}
+        <div className="text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">
+          {assignment.description || 'Chưa có mô tả bài tập chi tiết.'}
         </div>
-        {assignment.rubric && (
-          <div className="mt-5 rounded-none bg-amber-50/80 border border-amber-200 p-4 text-sm text-amber-950">
-            <p className="font-extrabold text-xs uppercase tracking-wider text-amber-900 mb-2 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" /> Rubric & Tiêu chí chấm điểm:
-            </p>
-            <MarkdownContent content={assignment.rubric} />
-          </div>
-        )}
       </div>
 
       {/* Submission Panel */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+      <div className="bg-white rounded-none border border-slate-200 p-6 shadow-sm space-y-4">
         <h2 className="text-sm font-bold text-slate-900">Bài làm của bạn</h2>
         
         {submission?.status === 'REVIEWED' ? (
           <div className="space-y-4">
-            <div className="bg-slate-50 rounded-xl p-4 text-sm text-slate-700 whitespace-pre-wrap border border-slate-100">
+            <div className="bg-slate-50 rounded-none p-4 text-sm text-slate-700 whitespace-pre-wrap border border-slate-100 font-mono">
               {submission.content}
             </div>
             
             {submission.grade !== null && (
-              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-5 flex items-center gap-3">
+              <div className="bg-emerald-50 border border-emerald-100 rounded-none p-5 flex items-center gap-3">
                 <Star className="w-5 h-5 text-emerald-600 fill-emerald-600" />
                 <div>
                   <p className="text-sm font-bold text-emerald-900">Đã chấm điểm: {submission.grade}/10</p>
@@ -189,14 +176,15 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
               rows={8}
               disabled={submission?.status === 'AI_GRADED'}
               placeholder="Nhập câu trả lời hoặc chèn mã nguồn bài làm của bạn vào đây..."
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-y"
+              className="w-full px-4 py-3 rounded-none border border-slate-200 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary resize-y font-mono"
             />
 
-            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-100">
+            <label className="flex cursor-pointer items-center gap-2 rounded-none border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-xs font-bold text-slate-600 hover:bg-slate-100">
               <Upload className="h-4 w-4 text-primary" />
               <span>{selectedFiles.length ? `${selectedFiles.length} tệp đã chọn` : 'Đính kèm tệp (tối đa 25 MB/tệp)'}</span>
               <input type="file" multiple className="hidden" onChange={(event) => setSelectedFiles(Array.from(event.target.files || []))} />
             </label>
+
             {submission?.files && (
               <div className="space-y-1 text-xs text-slate-500">
                 {(typeof submission.files === 'string' ? JSON.parse(submission.files) : submission.files).map((file: any) => (
@@ -206,7 +194,7 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
             )}
 
             {submission?.status === 'AI_GRADED' && (
-              <div className="bg-blue-50 border border-blue-100 rounded-xl p-5">
+              <div className="bg-blue-50 border border-blue-100 rounded-none p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles className="w-5 h-5 text-blue-600" />
                   <span className="text-sm font-bold text-blue-900">Đánh giá sơ bộ từ AI</span>
@@ -221,7 +209,7 @@ export default function StudentAssignmentSubmission({ params }: { params: Promis
               <button
                 onClick={handleSub}
                 disabled={submitting}
-                className="w-full flex items-center justify-center gap-2 py-3.5 bg-primary hover:bg-blue-700 disabled:bg-slate-300 text-white font-bold text-sm rounded-xl shadow-lg transition cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-3.5 bg-primary hover:bg-blue-700 disabled:bg-slate-300 text-white font-bold text-sm rounded-none shadow-md transition cursor-pointer"
               >
                 {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-4 h-4" />} Nộp bài tập
               </button>
