@@ -3,6 +3,7 @@
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { Sparkles, Loader2, CheckCircle, Eye, Star, Search, RefreshCw, FileText, Paperclip, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 
 function getSubmissionFiles(value: unknown): Array<{ name: string; url: string }> {
   if (!value) return [];
@@ -342,12 +343,14 @@ export default function TeacherGradingPage() {
               {/* AI Review Result */}
               {selectedSub.aiReview && (
                 <div className="rounded-xl border border-blue-100 bg-blue-50 p-5">
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center gap-2 mb-3 border-b border-blue-200/60 pb-2">
                     <Sparkles className="w-5 h-5 text-blue-600" />
-                    <span className="text-sm font-bold text-blue-900">Nhận xét từ AI</span>
-                    <span className="ml-auto text-lg font-black text-blue-700">{selectedSub.grade}/10</span>
+                    <span className="text-sm font-bold text-blue-900">Nhận xét chi tiết từ AI</span>
+                    <span className="ml-auto text-base font-black text-blue-700">{selectedSub.grade}/10 điểm</span>
                   </div>
-                  <div className="text-sm text-slate-700 whitespace-pre-wrap">{selectedSub.aiReview}</div>
+                  <div className="pt-1">
+                    <MarkdownRenderer content={selectedSub.aiReview} />
+                  </div>
                 </div>
               )}
 
