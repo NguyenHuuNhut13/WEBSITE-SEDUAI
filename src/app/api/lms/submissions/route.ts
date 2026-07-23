@@ -18,8 +18,8 @@ function triggerBackgroundAiGrading(submissionId: string) {
       });
       if (!sub || sub.status !== 'PENDING') return;
 
-      const submissionContent = await extractSubmissionContentWithFiles(sub.content, sub.files);
-      if (!submissionContent) return;
+      const { textContent, audioData } = await extractSubmissionContentWithFiles(sub.content, sub.files);
+      if (!textContent && !audioData) return;
 
       // Set marking tag to prevent race conditions
       const gradingMarker = `${AI_GRADING_MARKER_PREFIX}${randomUUID()}`;
@@ -33,7 +33,8 @@ function triggerBackgroundAiGrading(submissionId: string) {
       const grading = await gradeAssignment(
         sub.assignment.title,
         sub.assignment.rubric || sub.assignment.description || '',
-        submissionContent
+        textContent,
+        audioData
       );
 
       // 3. Save grading result

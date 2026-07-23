@@ -42,12 +42,12 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ success: false, error: 'Chỉ bài đang chờ chấm mới được gửi cho SEDUAI' }, { status: 409 });
     }
 
-    const submissionContent = await extractSubmissionContentWithFiles(submission.content, submission.files);
+    const { textContent, audioData } = await extractSubmissionContentWithFiles(submission.content, submission.files);
 
-    if (!submissionContent) {
+    if (!textContent && !audioData) {
       return NextResponse.json({ success: false, error: 'Bài nộp chưa có nội dung hoặc tệp đính kèm' }, { status: 400 });
     }
-    if (submissionContent.length > 50_000) {
+    if (textContent.length > 50_000) {
       return NextResponse.json({ success: false, error: 'Bài nộp vượt giới hạn nội dung cho phép chấm AI' }, { status: 413 });
     }
 
@@ -88,7 +88,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
       grading = await gradeAssignment(
         submission.assignment.title,
         submission.assignment.rubric || submission.assignment.description || '',
-        submissionContent
+        textContent,
+        audioData
       );
     } catch (error) {
       await prisma.lmsSubmission.updateMany({
